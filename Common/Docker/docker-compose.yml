@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  hive-mysql:
+    image: mysql
+    container_name: hive-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: test1234!
+      MYSQL_DATABASE: HiveDatabase
+    ports:
+      - "10000:3306"
+    volumes:
+      - ./HiveScema/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  hive-redis:
+    image: redis
+    container_name: hive-redis
+    ports:
+      - "10001:6379"
+
+  api-mysql:
+    image: mysql
+    container_name: api-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: test1234!
+      MYSQL_DATABASE: ApiDatabase
+    ports:
+      - "10002:3306"
+    volumes:
+      - ./ApiScema/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  api-redis:
+    image: redis
+    container_name: api-redis
+    ports:
+      - "10003:6379"
