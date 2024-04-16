@@ -16,25 +16,13 @@ public class AuthService : IAuthService
         if (IsExist == true)
         {
             // StatusCode 수정
-            return new RegisterRes()
-            {
-                StatusCode = 400,
-                ErrorCode = ErrorCodes.EMAIL_ALREADY_EXISTS,
-                IsSuccess = false
-            };
+            return FailedRegister(ErrorCodes.EMAIL_ALREADY_EXISTS);
         }
-
-        System.Console.WriteLine("CreateAccountAsync");
 
         string? hashPassword = SHA256Hash.EncodingHash(registerReq.Password);
         if (hashPassword == null)
         {
-            return new RegisterRes()
-            {
-                StatusCode = 400,
-                ErrorCode = ErrorCodes.INTERNAL_SERVER_ERROR,
-                IsSuccess = false
-            };
+            return FailedRegister(ErrorCodes.INTERNAL_SERVER_ERROR);
         }
 
         // 없다면 계정 생성
@@ -48,12 +36,7 @@ public class AuthService : IAuthService
         if (isSuccess == false)
         {
             // StatusCode 수정
-            return new RegisterRes()
-            {
-                StatusCode = 400,
-                ErrorCode = ErrorCodes.INTERNAL_SERVER_ERROR,
-                IsSuccess = false
-            };
+            return FailedRegister(ErrorCodes.INTERNAL_SERVER_ERROR);
         }
 
         // 성공
@@ -74,35 +57,20 @@ public class AuthService : IAuthService
         if (userDB == null)
         {
             // StatusCode 수정
-            return new LoginRes()
-            {
-                StatusCode = 400,
-                ErrorCode = ErrorCodes.EMAIL_DOES_NOT_EXIST,
-                Token = ""
-            };
+            return FailedLogin(ErrorCodes.EMAIL_DOES_NOT_EXIST);
         }
 
         string? hashPassword = SHA256Hash.EncodingHash(loginReq.Password);
         if (hashPassword == null)
         {
-            return new LoginRes()
-            {
-                StatusCode = 400,
-                ErrorCode = ErrorCodes.INTERNAL_SERVER_ERROR,
-                Token = ""
-            };
+            return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
         }
 
         // 비밀번호가 일치하는지 체크
         if (userDB.password != hashPassword)
         {
             // StatusCode 수정
-            return new LoginRes()
-            {
-                StatusCode = 400,
-                ErrorCode = ErrorCodes.PASSWORD_DOES_NOT_MATCH,
-                Token = ""
-            };
+            return FailedLogin(ErrorCodes.PASSWORD_DOES_NOT_MATCH);
         }
 
         string token = $"{userDB.id}{DateTime.Now.Ticks}";
@@ -110,23 +78,13 @@ public class AuthService : IAuthService
 
         if (hashToken == null)
         {
-            return new LoginRes()
-            {
-                StatusCode = 400,
-                ErrorCode = ErrorCodes.INTERNAL_SERVER_ERROR,
-                Token = ""
-            };
+            return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
         }
         
         // 성공
         if (await _memoryRepo.SetAccessToken(userDB.id, hashToken) == false)
         {
-            return new LoginRes()
-            {
-                StatusCode = 400,
-                ErrorCode = ErrorCodes.INTERNAL_SERVER_ERROR,
-                Token = "",
-            };
+            return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
         }
 
         return new LoginRes()
@@ -144,27 +102,49 @@ public class AuthService : IAuthService
         System.Console.WriteLine("LoginCheckAsync " + token);
         if (token == null)
         {
-            return new LoginCheckRes()
-            {
-                StatusCode = 400,
-                ErrorCode = ErrorCodes.NOT_LOGIN,
-                IsSuccess = false
-            };
+            return FailedLoginCheck(ErrorCodes.NOT_LOGIN);
         }
 
         if (token != loginCheckReq.Token)
         {
-            return new LoginCheckRes()
-            {
-                StatusCode = 400,
-                ErrorCode = ErrorCodes.INVALID_TOKEN,
-                IsSuccess = false
-            };
+            return FailedLoginCheck(ErrorCodes.INVALID_TOKEN);
         }
 
         return new LoginCheckRes()
         {
+            StatusCode = 200,
+            ErrorCode = ErrorCodes.NONE,
             IsSuccess = true
+        };
+    }
+
+    private LoginCheckRes FailedLoginCheck(ErrorCodes error)
+    {
+        return new LoginCheckRes()
+        {
+            StatusCode = 400,
+            ErrorCode = error,
+            IsSuccess = false
+        };
+    }
+
+    private LoginRes FailedLogin(ErrorCodes error)
+    {
+        return new LoginRes()
+        {
+            StatusCode = 400,
+            ErrorCode = error,
+            Token = ""
+        };
+    }
+
+    private RegisterRes FailedRegister(ErrorCodes error)
+    {
+        return new RegisterRes()
+        {
+            StatusCode = 400,
+            ErrorCode = error,
+            IsSuccess = false
         };
     }
 }
