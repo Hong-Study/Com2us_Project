@@ -15,7 +15,7 @@ public class RegisterReq
     public string Password { get; set; } = null!;
 }
 
-public class RegisterRes : DefaultResponse
+public class RegisterRes : DefaultRes
 {
     public bool IsSuccess { get; set; }
 }

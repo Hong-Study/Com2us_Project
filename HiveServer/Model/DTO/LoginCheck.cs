@@ -1,10 +1,10 @@
 public class LoginCheckReq
 {
-    public long UserId { get; set; }
+    public int Id { get; set; }
     public string Token { get; set; } = null!;
 }
 
-public class LoginCheckRes : DefaultResponse
-{
-    public bool IsSuccess { get; set; }
-}
+    public class LoginCheckRes : DefaultRes
+    {
+        public bool IsSuccess { get; set; }
+    }

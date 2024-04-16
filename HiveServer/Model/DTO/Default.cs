@@ -1,5 +1,5 @@
-public abstract class DefaultResponse
+public abstract class DefaultRes
 {
-    public int StatusCode = 200;
-    public ErrorCodeEnum? ErrorCode = ErrorCodeEnum.NONE;
+    public int StatusCode { get; set; } = 200;
+    public ErrorCodes ErrorCode { get; set; } = ErrorCodes.NONE;
 }

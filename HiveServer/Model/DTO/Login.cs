@@ -15,7 +15,8 @@ public class LoginReq
     public string Password { get; set; } = null!;
 }
 
-public class LoginRes : DefaultResponse
+public class LoginRes : DefaultRes
 {
+    public int Id { get; set; }
     public string Token { get; set; } = null!;
 }

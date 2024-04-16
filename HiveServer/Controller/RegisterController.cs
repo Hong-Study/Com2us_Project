@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/[controller]")]
 public class RegisterController : ControllerBase
 {
-    IAccountService _service;
-    public RegisterController(IAccountService service)
+    IAuthService _service;
+    public RegisterController(IAuthService service)
     {
         _service = service;
     }
@@ -14,7 +14,7 @@ public class RegisterController : ControllerBase
     public async Task<RegisterRes> Register([FromBody] RegisterReq request)
     {
         System.Console.WriteLine(request.Email + " " + request.Password);
-        return await _service.CreateAccountAsync(request);
+        return await _service.RegisterAsync(request);
     }
 
     [HttpGet]

@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/[controller]")]
 public class LoginController : ControllerBase
 {
-    IAccountService _service;
-    public LoginController(IAccountService service)
+    IAuthService _service;
+    public LoginController(IAuthService service)
     {
         _service = service;
     }
