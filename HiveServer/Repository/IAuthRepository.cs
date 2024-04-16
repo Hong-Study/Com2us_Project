@@ -1,4 +1,4 @@
-public interface IAccountRepository
+public interface IAuthRepository
 {
     public Task<bool> CreateAccountAsync(UserDB accountDB);
     public Task<UserDB?> GetAccountAsync(string email);

@@ -16,7 +16,7 @@ public class MemoryRepository : IMemoryRepository
         _redisConn = new RedisConnection(redisConfig);
     }
 
-    public async Task<bool> DeleteAccessToken(long user_id)
+    public async Task<bool> DeleteAccessToken(int user_id)
     {
         // RedisString<RdbAuthUserData> redis = new(_redisConn, key, LoginTimeSpan());
         string key = user_id.ToString();
@@ -33,7 +33,7 @@ public class MemoryRepository : IMemoryRepository
         }
     }
 
-    public async Task<string?> GetAccessToken(long user_id)
+    public async Task<string?> GetAccessToken(int user_id)
     {
         string key = user_id.ToString();
 
@@ -57,7 +57,7 @@ public class MemoryRepository : IMemoryRepository
 
     }
 
-    public async Task<bool> SetAccessToken(long user_id, string token)
+    public async Task<bool> SetAccessToken(int user_id, string token)
     {
         string key = user_id.ToString();
         try

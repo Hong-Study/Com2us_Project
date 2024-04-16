@@ -2,14 +2,14 @@ using System.Data;
 using MySqlConnector;
 using SqlKata.Execution;
 
-public class AccountRepository : IAccountRepository
+public class AuthRepository : IAuthRepository
 {
     private IDbConnection _dbConn = null!;
     private readonly IConfiguration _config;
     private readonly SqlKata.Compilers.MySqlCompiler _compiler;
     private readonly QueryFactory _queryFactory;
     private readonly string _connectionString;
-    public AccountRepository(IConfiguration config)
+    public AuthRepository(IConfiguration config)
     {
         _config = config;
         _connectionString = _config.GetConnectionString("MySQL") == null ? throw new Exception("MySQL ConnectionString is null") : _config.GetConnectionString("MySQL")!;
@@ -29,7 +29,7 @@ public class AccountRepository : IAccountRepository
     {
         try
         {
-            var userInfo = await _queryFactory.Query("users").Where("email").FirstOrDefaultAsync<UserDB>();
+            var userInfo = await _queryFactory.Query("users").Where("email", email).FirstOrDefaultAsync<UserDB>();
             if (userInfo == null)
             {
                 return false;
@@ -39,7 +39,7 @@ public class AccountRepository : IAccountRepository
         }
         catch (Exception e)
         {
-            System.Console.WriteLine("AccountRepository " + e.Message);
+            System.Console.WriteLine("AuthRepository " + e.Message);
             return false;
         }
     }
@@ -54,7 +54,7 @@ public class AccountRepository : IAccountRepository
         }
         catch (Exception e)
         {
-            System.Console.WriteLine("AccountRepository " + e.Message);
+            System.Console.WriteLine("AuthRepository " + e.Message);
             return false;
         }
     }
@@ -75,7 +75,7 @@ public class AccountRepository : IAccountRepository
         }
         catch (Exception e)
         {
-            System.Console.WriteLine("AccountRepository " + e.Message);
+            System.Console.WriteLine("AuthRepository " + e.Message);
             return null;
         }
     }
