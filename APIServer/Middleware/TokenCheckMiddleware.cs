@@ -24,14 +24,15 @@ public class TokenCheckMiddleware
                 return;
             }
 
-            string? memoryToken = await _memoryRepo.GetAccessToken(token);
-            if(memoryToken == null)
+            string? id = await _memoryRepo.GetAccessToken(token);
+            if(id == null)
             {
                 context.Response.StatusCode = 401;
                 await context.Response.WriteAsync("Token Not Found");
                 return;
             }
 
+            context.Request.Headers["UserId"] = id;
             await _next(context);
         }
         else

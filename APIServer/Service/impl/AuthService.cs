@@ -37,7 +37,7 @@ public class AuthService : IAuthService
 
             if (loginCheckRes == null)
             {
-                return FailedLogin(ErrorCodes.FAILED_LOGIN);
+                return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
             }
 
             if (loginCheckRes.IsSuccess)
@@ -45,13 +45,13 @@ public class AuthService : IAuthService
                 bool IsSuccess = await _memoryRepo.SetAccessToken(request.Id, request.Token);
                 if (!IsSuccess)
                 {
-                    return FailedLogin(ErrorCodes.FAILED_LOGIN);
+                    return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
                 }
 
                 UserGameData? gameData = await GetUserGameData(request.Id);
                 if (gameData == null)
                 {
-                    return FailedLogin(ErrorCodes.FAILED_LOGIN);
+                    return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
                 }
 
                 return new LoginRes
@@ -63,7 +63,7 @@ public class AuthService : IAuthService
             }
             else
             {
-                return FailedLogin(ErrorCodes.FAILED_LOGIN);
+                return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
             }
         }
         catch (Exception e)
