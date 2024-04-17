@@ -1,11 +1,15 @@
 var builder = WebApplication.CreateBuilder(args);
 
+// 서비스 등록
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddScoped<IAttendanceCheckService, AttendanceCheckService>();
+
+// 레포지토리 등록
 builder.Services.AddSingleton<IMemoryRepository, MemoryRepository>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAttendanceCheckRepository, AttendanceCheckRepository>();
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
