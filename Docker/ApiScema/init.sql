@@ -37,6 +37,7 @@ CREATE TABLE mail_data(
     mail_title VARCHAR(255) NOT NULL,
     mail_content TEXT NOT NULL,
     mail_item_id INT,
+    mail_item_count INT, 
     is_read BOOLEAN NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES user_game_data(user_id),

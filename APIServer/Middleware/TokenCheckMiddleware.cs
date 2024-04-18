@@ -16,23 +16,23 @@ public class TokenCheckMiddleware
         }
         else if (context.Request.Headers.ContainsKey("Authorization"))
         {
-            string? token = context.Request.Headers["Authorization"];
-            if(token == null)
-            {
-                context.Response.StatusCode = 401;
-                await context.Response.WriteAsync("Token Not Found");
-                return;
-            }
+            // string? token = context.Request.Headers["Authorization"];
+            // if(token == null)
+            // {
+            //     context.Response.StatusCode = 401;
+            //     await context.Response.WriteAsync("Token Not Found");
+            //     return;
+            // }
 
-            string? id = await _memoryRepo.GetAccessToken(token);
-            if(id == null)
-            {
-                context.Response.StatusCode = 401;
-                await context.Response.WriteAsync("Token Not Found");
-                return;
-            }
+            // string? id = await _memoryRepo.GetAccessToken(token);
+            // if(id == null)
+            // {
+            //     context.Response.StatusCode = 401;
+            //     await context.Response.WriteAsync("Token Not Found");
+            //     return;
+            // }
 
-            context.Request.Headers["UserId"] = id;
+            // context.Request.Headers["UserId"] = id;
             await _next(context);
         }
         else

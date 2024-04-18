@@ -9,3 +9,8 @@ public class UserGameData
     public int lose { get; set; }
     public DateTime? created_at { get; set; }
 }
+
+public class UserIdData
+{
+    public int user_id { get; set; }
+}

@@ -1,7 +1,4 @@
-using System.Text.Json;
-using Microsoft.Extensions.Options;
 using ZLogger;
-using ZLogger.Providers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,25 +10,12 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 SettingLogger();
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 ILoggerFactory loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
 LogManager.SetLoggerFactory(loggerFactory, "Global");
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-// app.UseHttpsRedirection();
 
 app.MapControllers();
 
@@ -67,5 +51,4 @@ void SettingLogger()
     {
         options.UseJsonFormatter(); 
     });
-
 }

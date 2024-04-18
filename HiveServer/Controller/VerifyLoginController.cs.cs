@@ -2,26 +2,26 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
-public class RegisterController : ControllerBase
+public class VerifyLoginController : ControllerBase
 {
     IAuthService _service;
-    ILogger<RegisterController> _logger;
-    public RegisterController(IAuthService service, ILogger<RegisterController> logger)
+    ILogger<VerifyLoginController> _logger;
+    public VerifyLoginController(IAuthService service, ILogger<VerifyLoginController> logger)
     {
         _service = service;
         _logger = logger;
     }
 
     [HttpPost]
-    public async Task<RegisterRes> Register([FromBody] RegisterReq request)
+    public async Task<VerifyLoginRes> CheckLogin(VerifyLoginReq request)
     {
-        AuthService.RegisterResut result = await _service.RegisterAsync(request);
+        AuthService.VerifyLoginResult result = await _service.VerifyLoginAsync(request);
         if (result.ErrorCode != ErrorCodes.NONE)
         {
             _logger.LogError($"Register failed: {result.ErrorCode}");
         }
 
-        return new RegisterRes()
+        return new VerifyLoginRes()
         {
             ErrorCode = result.ErrorCode,
             IsSuccess = result.IsSuccess
