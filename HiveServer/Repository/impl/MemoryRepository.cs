@@ -36,7 +36,7 @@ public class MemoryRepository : IMemoryRepository
     public async Task<string?> GetAccessToken(int user_id)
     {
         string key = user_id.ToString();
-
+        System.Console.WriteLine("GetAccessToken" + key);
         try
         {
             RedisString<string> redis = new(_redisConn, key, TicketKeyTimeSpan());
@@ -72,6 +72,7 @@ public class MemoryRepository : IMemoryRepository
         }
     }
 
+    // 따로 빼는것도 좋음
     public TimeSpan LoginTimeSpan()
     {
         return TimeSpan.FromMinutes(100);

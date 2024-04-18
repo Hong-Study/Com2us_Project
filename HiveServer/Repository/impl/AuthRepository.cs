@@ -9,10 +9,15 @@ public class AuthRepository : IAuthRepository
     private readonly SqlKata.Compilers.MySqlCompiler _compiler;
     private readonly QueryFactory _queryFactory;
     private readonly string _connectionString;
+
     public AuthRepository(IConfiguration config)
     {
         _config = config;
-        _connectionString = _config.GetConnectionString("MySQL") == null ? throw new Exception("MySQL ConnectionString is null") : _config.GetConnectionString("MySQL")!;
+
+        // 코드 심플?
+        _connectionString = _config.GetConnectionString("MySQL") == null ?
+                    throw new Exception("MySQL ConnectionString is null")
+                    : _config.GetConnectionString("MySQL")!;
 
         Open();
 
@@ -29,8 +34,10 @@ public class AuthRepository : IAuthRepository
     {
         try
         {
-            var userInfo = await _queryFactory.Query("user_data").Where("email", email).FirstOrDefaultAsync<UserData>();
-            if (userInfo == null)
+            UserData? userData = await _queryFactory.Query("user_data")
+                                        .Where("email", email)
+                                        .FirstOrDefaultAsync<UserData>();
+            if (userData == null)
             {
                 return false;
             }
@@ -46,11 +53,19 @@ public class AuthRepository : IAuthRepository
 
     public async Task<bool> CreateAccountAsync(UserData accountDB)
     {
+        // 에러 코드로 던지는게 좋을 수도 있다.
+        // 3가지의 경우이기 때문에
         try
         {
             int count = await _queryFactory.Query("user_data").InsertAsync(accountDB);
-
-            return count == 0 ? false : true;
+            if(count == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
         catch (Exception e)
         {
@@ -63,13 +78,9 @@ public class AuthRepository : IAuthRepository
     {
         try
         {
-            UserData? userDB = await _queryFactory.Query("user_data").Where("email", email)
+            UserData? userDB = await _queryFactory.Query("user_data")
+                                        .Where("email", email)
                                         .FirstOrDefaultAsync<UserData>();
-
-            if (userDB == null)
-            {
-                return null;
-            }
 
             return userDB;
         }

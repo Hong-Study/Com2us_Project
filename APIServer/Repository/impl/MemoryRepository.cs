@@ -33,6 +33,8 @@ public class MemoryRepository : IMemoryRepository
         }
     }
 
+    // id : token
+    // id_token : token
     public async Task<string?> GetAccessToken(string token)
     {
         string key = token.ToString();
@@ -54,7 +56,6 @@ public class MemoryRepository : IMemoryRepository
             System.Console.WriteLine(e.Message);
             return null;
         }
-
     }
 
     public async Task<bool> SetAccessToken(int userId, string token)
@@ -72,6 +73,7 @@ public class MemoryRepository : IMemoryRepository
         }
     }
 
+    // TimeSpan을 관리해주는 따른 파일로 만들어주는 것이 좋다
     public TimeSpan LoginTimeSpan()
     {
         return TimeSpan.FromMinutes(100);

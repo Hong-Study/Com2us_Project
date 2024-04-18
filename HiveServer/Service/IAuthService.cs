@@ -1,6 +1,6 @@
 public interface IAuthService
 {
-    public Task<RegisterRes> RegisterAsync(RegisterReq registerReq);
-    public Task<LoginRes> LoginAsync(LoginReq loginReq);
-    public Task<LoginCheckRes> LoginCheckAsync(LoginCheckReq loginCheckReq);
+    public Task<AuthService.RegisterResut> RegisterAsync(RegisterReq registerReq);
+    public Task<AuthService.LoginResult> LoginAsync(LoginReq loginReq);
+    public Task<AuthService.VerifyLoginResult> VerifyLoginAsync(VerifyLoginReq VerifyLoginReq);
 }

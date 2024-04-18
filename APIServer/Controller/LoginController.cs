@@ -5,20 +5,28 @@ using Microsoft.AspNetCore.Mvc;
 public class LoginController : ControllerBase
 {
     IAuthService _authService;
-    public LoginController(IAuthService authService)
+    ILogger<LoginController> _logger;
+    public LoginController(IAuthService authService, ILogger<LoginController> logger)
     {
         _authService = authService;
+        _logger = logger;
     }
 
     [HttpPost]
-    public async Task<LoginRes> Login([FromBody] LoginReq request)
+    public async Task<LoginRes> Post([FromBody] LoginReq request)
     {
-        return await _authService.LoginAsync(request);
-    }
+        _logger.LogInformation($"Login request: {request}");
 
-    [HttpGet]
-    public string Test()
-    {
-        return "Hello World";
+        AuthService.LoginResult result = await _authService.LoginAsync(request);    
+        if(result.errorCode != ErrorCodes.NONE)
+        {
+            _logger.LogError($"Login failed: {result.errorCode.ToString()}");
+        }
+
+        return new LoginRes
+        {
+            ErrorCode = result.errorCode,
+            GameData = result.gameData
+        };
     }
 }

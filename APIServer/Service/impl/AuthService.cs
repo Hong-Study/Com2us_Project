@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -7,14 +9,18 @@ public class AuthService : IAuthService
     IMemoryRepository _memoryRepo;
     IConfiguration _config;
     HttpClient _client = new HttpClient();
-    public AuthService(IConfiguration config, IAuthRepository authRepository, IMemoryRepository memoryRepository)
+
+    public AuthService(IConfiguration config
+                        , IAuthRepository authRepository
+                        , IMemoryRepository memoryRepository)
     {
         _config = config;
         _authRepo = authRepository;
         _memoryRepo = memoryRepository;
     }
 
-    public async Task<LoginRes> LoginAsync(LoginReq request)
+    public record LoginResult(ErrorCodes errorCode, UserGameData? gameData);
+    public async Task<LoginResult> LoginAsync(LoginReq request)
     {
         string? url = _config.GetValue<string>("HiveServerUrl");
         if (url == null)
@@ -23,83 +29,83 @@ public class AuthService : IAuthService
         }
 
         _client.BaseAddress = new Uri(url);
+
         try
         {
-            LoginCheckReq loginCheckReq = new LoginCheckReq
+            VerifyLoginReq VerifyLoginReq = new VerifyLoginReq
             {
-                Id = request.Id,
+                UserId = request.UserId,
                 Token = request.Token
             };
 
-            HttpResponseMessage resopnse = await _client.PostAsJsonAsync("api/loginCheck", loginCheckReq);
-
-            LoginCheckRes? loginCheckRes = await resopnse.Content.ReadFromJsonAsync<LoginCheckRes>();
-
-            if (loginCheckRes == null)
+            HttpResponseMessage resopnse = await _client.PostAsJsonAsync("api/verifylogin", VerifyLoginReq);
+            if (resopnse.StatusCode != HttpStatusCode.OK)
             {
-                return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
+                return FailedLogin(ErrorCodes.FAILED_VERIFY_LOGIN);
             }
 
-            if (loginCheckRes.IsSuccess)
+            VerifyLoginRes? VerifyLoginRes = await resopnse.Content.ReadFromJsonAsync<VerifyLoginRes>();
+            if (VerifyLoginRes == null)
             {
-                bool IsSuccess = await _memoryRepo.SetAccessToken(request.Id, request.Token);
-                if (!IsSuccess)
-                {
-                    return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
-                }
-
-                UserGameData? gameData = await GetUserGameData(request.Id);
-                if (gameData == null)
-                {
-                    return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
-                }
-
-                return new LoginRes
-                {
-                    StatusCode = 200,
-                    IsSuccess = true,
-                    GameData = gameData
-                };
+                return FailedLogin(ErrorCodes.FAILED_VERIFY_LOGIN_PARSING);
             }
-            else
+
+            if (!VerifyLoginRes.IsSuccess)
             {
-                return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
+                return FailedLogin(ErrorCodes.FAILED_VERIFY_LOGIN);
             }
+
+            bool IsSuccess = await _memoryRepo.SetAccessToken(request.UserId, request.Token);
+            if (!IsSuccess)
+            {
+                return FailedLogin(ErrorCodes.FAILED_SET_TOKEN);
+            }
+
+            UserGameData? gameData = await GetOrCreateUserGameData(request.UserId);
+            if (gameData == null)
+            {
+                return FailedLogin(ErrorCodes.ERROR_USER_GAME_DATA);
+            }
+
+            return new LoginResult(ErrorCodes.NONE, gameData);
+
         }
-        catch (Exception e)
+        catch
         {
-            System.Console.WriteLine("AuthService " + e.Message);
-            return FailedLogin(ErrorCodes.FAILED_LOGIN);
+            return FailedLogin(ErrorCodes.FAILED_HIVE_CONNECT);
         }
     }
 
-    private LoginRes FailedLogin(ErrorCodes errorCode)
+    private LoginResult FailedLogin(ErrorCodes errorCode)
     {
-        return new LoginRes
-        {
-            StatusCode = 400,
-            ErrorCode = errorCode,
-            IsSuccess = false
-        };
+        return new LoginResult(errorCode, null);
     }
 
-    private async Task<UserGameData?> GetUserGameData(int id)
+    // 함수는 하나의 일만 하도록 수정하기
+    private async Task<UserGameData?> GetOrCreateUserGameData(int id)
     {
         System.Console.WriteLine("GetUserGameData " + id);
         bool isExist = await _authRepo.CheckUserAsync(id);
         if (!isExist)
         {
-            await _authRepo.CreateUserAsync(new UserGameData
-            {
-                user_id = id,
-                user_name = "user" + id,
-                gold = 0,
-                level = 1,
-                exp = 0,
-                win = 0,
-                lose = 0
-            });
+            await CreateUserGameData(id);
         }
         return await _authRepo.GetUserGameDataAsync(id);
+    }
+
+    private async Task<bool> CreateUserGameData(int id)
+    {
+        await _authRepo.CreateUserAsync(new UserGameData
+        {
+            user_id = id,
+            user_name = "user" + id,
+            gold = 0,
+            level = 1,
+            exp = 0,
+            win = 0,
+            lose = 0
+        });
+
+        return true;
     }
 }

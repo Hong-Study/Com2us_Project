@@ -9,10 +9,4 @@ public class GetMailController : ControllerBase
     {
         _mailService = mailService;
     }
-
-    [HttpGet]
-    public IActionResult Get()
-    {
-        return Ok();
-    }
 }

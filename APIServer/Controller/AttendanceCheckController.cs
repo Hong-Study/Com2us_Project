@@ -4,18 +4,27 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/[controller]")]
 public class AttendanceCheckController : ControllerBase
 {
-    IAttendanceCheckService _attendanceCheckService;
-    public AttendanceCheckController(IAttendanceCheckService attendanceCheckService)
+    IAttendanceService _attendanceCheckService;
+    ILogger<AttendanceCheckController> _logger;
+    public AttendanceCheckController(IAttendanceService attendanceCheckService, ILogger<AttendanceCheckController> logger)
     {
         _attendanceCheckService = attendanceCheckService;
+        _logger = logger;
     }
 
     [HttpPost]
-    public AttendanceCheckRes Post(AttendanceCheckReq attendanceCheck)
+    public async Task<AttendanceCheckRes> Post(AttendanceCheckReq request)
     {
+        AttendanceService.AttendanceResult result = await _attendanceCheckService.AttendanceCheck(request);
+        if (result.errorCode != ErrorCodes.NONE)
+        {
+            _logger.LogError($"Attendance check failed: {result.errorCode.ToString()}");
+        }
+
         return new AttendanceCheckRes
         {
-            IsSuccess = true
+            ErrorCode = result.errorCode,
+            IsSuccess = result.isSuccess
         };
     }
 }

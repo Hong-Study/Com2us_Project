@@ -5,17 +5,12 @@ using SqlKata.Execution;
 
 public class AuthRepository : DefaultDbConnection, IAuthRepository
 {
-    // IDbConnection _dbConn = null!;
-    // readonly IConfiguration _config;
-    // readonly SqlKata.Compilers.MySqlCompiler _compiler;
-    // readonly QueryFactory _queryFactory;
-    // readonly string _connectionString;
-
-    public AuthRepository(IConfiguration config) : base(config)
+    ILogger<AuthRepository> _logger;
+    public AuthRepository(IConfiguration config, ILogger<AuthRepository> logger) : base(config)
     {
-        
+        _logger = logger;
     }
-   
+
     public async Task<bool> CreateUserAsync(UserGameData data)
     {
         try
@@ -25,7 +20,7 @@ public class AuthRepository : DefaultDbConnection, IAuthRepository
         }
         catch (Exception e)
         {
-            System.Console.WriteLine("AuthRepository " + e.Message);
+            _logger.LogInformation("AuthRepository[CreateUseAsync] " + e.Message);
             return false;
         }
     }
@@ -34,7 +29,11 @@ public class AuthRepository : DefaultDbConnection, IAuthRepository
     {
         try
         {
-            UserGameData? result = await _queryFactory.Query("user_game_data").Where("user_id", userId).FirstOrDefaultAsync<UserGameData>();
+            // 값을 다 가져오지 않고 하나만 가져와도 된다.
+            UserIdData? result = await _queryFactory.Query("user_game_data")
+                                        .Select("user_id")
+                                        .Where("user_id", userId)
+                                        .FirstOrDefaultAsync<UserIdData>();
             if (result == null)
             {
                 return false;
@@ -53,7 +52,9 @@ public class AuthRepository : DefaultDbConnection, IAuthRepository
     {
         try
         {
-            UserGameData? result = await _queryFactory.Query("user_game_data").Where("user_id", userId).FirstOrDefaultAsync<UserGameData>();
+            UserGameData? result = await _queryFactory.Query("user_game_data")
+                                            .Where("user_id", userId)
+                                            .FirstOrDefaultAsync<UserGameData>();
             return result;
         }
         catch (Exception e)
