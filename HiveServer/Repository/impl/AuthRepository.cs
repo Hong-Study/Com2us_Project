@@ -29,7 +29,7 @@ public class AuthRepository : IAuthRepository
     {
         try
         {
-            var userInfo = await _queryFactory.Query("users").Where("email", email).FirstOrDefaultAsync<UserDB>();
+            var userInfo = await _queryFactory.Query("user_data").Where("email", email).FirstOrDefaultAsync<UserData>();
             if (userInfo == null)
             {
                 return false;
@@ -44,11 +44,11 @@ public class AuthRepository : IAuthRepository
         }
     }
 
-    public async Task<bool> CreateAccountAsync(UserDB accountDB)
+    public async Task<bool> CreateAccountAsync(UserData accountDB)
     {
         try
         {
-            int count = await _queryFactory.Query("users").InsertAsync(accountDB);
+            int count = await _queryFactory.Query("user_data").InsertAsync(accountDB);
 
             return count == 0 ? false : true;
         }
@@ -59,12 +59,12 @@ public class AuthRepository : IAuthRepository
         }
     }
 
-    public async Task<UserDB?> GetAccountAsync(string email)
+    public async Task<UserData?> GetAccountAsync(string email)
     {
         try
         {
-            UserDB? userDB = await _queryFactory.Query("users").Where("email", email)
-                                        .FirstOrDefaultAsync<UserDB>();
+            UserData? userDB = await _queryFactory.Query("user_data").Where("email", email)
+                                        .FirstOrDefaultAsync<UserData>();
 
             if (userDB == null)
             {
@@ -80,7 +80,7 @@ public class AuthRepository : IAuthRepository
         }
     }
 
-    public Task<bool> UpdateAccountAsync(UserDB accountDB)
+    public Task<bool> UpdateAccountAsync(UserData accountDB)
     {
         throw new NotImplementedException();
     }

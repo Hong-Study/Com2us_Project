@@ -1,6 +1,7 @@
 public class UserGameData
 {
-    public int id { get; set; }
+    public int user_id { get; set; }
+    public string user_name { get; set; } = null!;
     public int level { get; set; }
     public int exp { get; set; }
     public int gold { get; set; }

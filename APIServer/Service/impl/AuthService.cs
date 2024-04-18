@@ -91,7 +91,8 @@ public class AuthService : IAuthService
         {
             await _authRepo.CreateUserAsync(new UserGameData
             {
-                id = id,
+                user_id = id,
+                user_name = "user" + id,
                 gold = 0,
                 level = 1,
                 exp = 0,
