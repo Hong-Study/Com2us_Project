@@ -12,5 +12,6 @@
     <PackageReference Include="SqlKata" Version="3.2.3"/>
     <PackageReference Include="SqlKata.Execution" Version="3.2.3"/>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+    <PackageReference Include="ZLogger" Version="2.4.1"/>
   </ItemGroup>
 </Project>

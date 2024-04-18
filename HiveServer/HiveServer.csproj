@@ -11,5 +11,6 @@
     <PackageReference Include="SqlKata.Execution" Version="3.2.3"/>
     <PackageReference Include="MySqlConnector" Version="2.3.6"/>
     <PackageReference Include="CloudStructures" Version="3.3.0"/>
+    <PackageReference Include="ZLogger" Version="2.4.1"/>
   </ItemGroup>
 </Project>

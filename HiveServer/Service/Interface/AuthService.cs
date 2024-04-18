@@ -26,7 +26,7 @@ public class AuthService : IAuthService
         }
 
         // 없다면 계정 생성
-        bool isSuccess = await _authRepo.CreateAccountAsync(new UserDB
+        bool isSuccess = await _authRepo.CreateAccountAsync(new UserData
         {
             email = registerReq.Email,
             password = hashPassword
@@ -51,10 +51,10 @@ public class AuthService : IAuthService
     public async Task<LoginRes> LoginAsync(LoginReq loginReq)
     {
         // DB에 존재하는지 체크
-        UserDB? userDB = await _authRepo.GetAccountAsync(loginReq.Email);
+        UserData? userData = await _authRepo.GetAccountAsync(loginReq.Email);
 
         // 없다면 실패 처리
-        if (userDB == null)
+        if (userData == null)
         {
             // StatusCode 수정
             return FailedLogin(ErrorCodes.EMAIL_DOES_NOT_EXIST);
@@ -67,13 +67,13 @@ public class AuthService : IAuthService
         }
 
         // 비밀번호가 일치하는지 체크
-        if (userDB.password != hashPassword)
+        if (userData.password != hashPassword)
         {
             // StatusCode 수정
             return FailedLogin(ErrorCodes.PASSWORD_DOES_NOT_MATCH);
         }
 
-        string token = $"{userDB.id}{DateTime.Now.Ticks}";
+        string token = $"{userData.user_id}{DateTime.Now.Ticks}";
         string? hashToken = SHA256Hash.EncodingHash(token);
 
         if (hashToken == null)
@@ -82,7 +82,7 @@ public class AuthService : IAuthService
         }
         
         // 성공
-        if (await _memoryRepo.SetAccessToken(userDB.id, hashToken) == false)
+        if (await _memoryRepo.SetAccessToken(userData.user_id, hashToken) == false)
         {
             return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
         }
@@ -91,7 +91,7 @@ public class AuthService : IAuthService
         {
             StatusCode = 200,
             ErrorCode = ErrorCodes.NONE,
-            Id = userDB.id,
+            Id = userData.user_id,
             Token = hashToken,
         };
     }
