@@ -4,6 +4,7 @@ using CloudStructures.Structures;
 public class MemoryRepository : IMemoryRepository
 {
     public RedisConnection _redisConn;
+    public string _tokenKey = "_token";
     public MemoryRepository(IConfiguration config)
     {
         string? connectionString = config.GetConnectionString("Redis");
@@ -16,10 +17,10 @@ public class MemoryRepository : IMemoryRepository
         _redisConn = new RedisConnection(redisConfig);
     }
 
-    public async Task<bool> DeleteAccessToken(string token)
+    public async Task<bool> DeleteAccessToken(string id)
     {
         // RedisString<RdbAuthUserData> redis = new(_redisConn, key, LoginTimeSpan());
-        string key = token;
+        string key = id + _tokenKey;
         try
         {
             RedisString<string> redis = new(_redisConn, key, LoginTimeSpan());
@@ -35,21 +36,21 @@ public class MemoryRepository : IMemoryRepository
 
     // id : token
     // id_token : token
-    public async Task<string?> GetAccessToken(string token)
+    public async Task<string?> GetAccessToken(string id)
     {
-        string key = token.ToString();
+        string key = id + _tokenKey;
 
         try
         {
             RedisString<string> redis = new(_redisConn, key, TicketKeyTimeSpan());
-            RedisResult<string> id = await redis.GetAsync();
-            if(!id.HasValue)
+            RedisResult<string> token = await redis.GetAsync();
+            if (!token.HasValue)
             {
                 System.Console.WriteLine("Token is null");
                 return null;
             }
 
-            return id.Value;
+            return token.Value;
         }
         catch (Exception e)
         {
@@ -58,13 +59,13 @@ public class MemoryRepository : IMemoryRepository
         }
     }
 
-    public async Task<bool> SetAccessToken(int userId, string token)
+    public async Task<bool> SetAccessToken(string userId, string token)
     {
-        string key = token;
+        string key = userId + _tokenKey;
         try
         {
             RedisString<string> redis = new(_redisConn, key, NxKeyTimeSpan());
-            return await redis.SetAsync(userId.ToString());
+            return await redis.SetAsync(token);
         }
         catch (Exception e)
         {

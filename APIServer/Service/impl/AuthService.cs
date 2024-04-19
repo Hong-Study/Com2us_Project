@@ -55,7 +55,7 @@ public class AuthService : IAuthService
                 return FailedLogin(ErrorCodes.FAILED_VERIFY_LOGIN);
             }
 
-            bool IsSuccess = await _memoryRepo.SetAccessToken(request.UserId, request.Token);
+            bool IsSuccess = await _memoryRepo.SetAccessToken(request.UserId.ToString(), request.Token);
             if (!IsSuccess)
             {
                 return FailedLogin(ErrorCodes.FAILED_SET_TOKEN);
