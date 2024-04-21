@@ -25,7 +25,7 @@ public class AuthRepository : DefaultDbConnection, IAuthRepository
         }
     }
 
-    public async Task<bool> CheckUserAsync(int userId)
+    public async Task<bool> CheckUserAsync(Int64 userId)
     {
         try
         {
@@ -48,7 +48,7 @@ public class AuthRepository : DefaultDbConnection, IAuthRepository
         }
     }
 
-    public async Task<UserGameData?> GetUserGameDataAsync(int userId)
+    public async Task<UserGameData?> GetUserGameDataAsync(Int64 userId)
     {
         try
         {

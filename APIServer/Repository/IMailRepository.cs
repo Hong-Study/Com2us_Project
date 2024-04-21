@@ -1,5 +1,5 @@
 public interface IMailRepository
 {
-    public void SendMail(string to, string title, string content);
-    public void ReadMailToAll(int userId);
+    public Task<IEnumerable<MailData>?> ReadMailToAll(string userName);
+    public Task<bool> SendMail(MailData mailData);
 }

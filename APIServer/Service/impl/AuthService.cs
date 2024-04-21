@@ -20,7 +20,7 @@ public class AuthService : IAuthService
     }
 
     public record LoginResult(ErrorCodes errorCode, UserGameData? gameData);
-    public async Task<LoginResult> LoginAsync(LoginReq request)
+    public async Task<LoginResult> LoginAsync(Int64 id, string token)
     {
         string? url = _config.GetValue<string>("HiveServerUrl");
         if (url == null)
@@ -32,13 +32,13 @@ public class AuthService : IAuthService
 
         try
         {
-            VerifyLoginReq VerifyLoginReq = new VerifyLoginReq
+            VerifyLoginReq verifyLoginReq = new VerifyLoginReq
             {
-                UserId = request.UserId,
-                Token = request.Token
+                UserId = id,
+                Token = token
             };
 
-            HttpResponseMessage resopnse = await _client.PostAsJsonAsync("api/verifylogin", VerifyLoginReq);
+            HttpResponseMessage resopnse = await _client.PostAsJsonAsync("api/verifylogin", verifyLoginReq);
             if (resopnse.StatusCode != HttpStatusCode.OK)
             {
                 return FailedLogin(ErrorCodes.FAILED_VERIFY_LOGIN);
@@ -55,23 +55,25 @@ public class AuthService : IAuthService
                 return FailedLogin(ErrorCodes.FAILED_VERIFY_LOGIN);
             }
 
-            bool IsSuccess = await _memoryRepo.SetAccessToken(request.UserId.ToString(), request.Token);
+            bool IsSuccess = await _memoryRepo.SetAccessToken(id.ToString(), token);
             if (!IsSuccess)
             {
                 return FailedLogin(ErrorCodes.FAILED_SET_TOKEN);
             }
 
-            UserGameData? gameData = await GetOrCreateUserGameData(request.UserId);
+            UserGameData? gameData = await GetOrCreateUserGameData(id);
             if (gameData == null)
             {
+                await _memoryRepo.DeleteAccessToken(id.ToString());
                 return FailedLogin(ErrorCodes.ERROR_USER_GAME_DATA);
             }
 
             return new LoginResult(ErrorCodes.NONE, gameData);
 
         }
-        catch
+        catch(Exception e)
         {
+            System.Console.WriteLine($"Failed Hive Connect {e.Message}");
             return FailedLogin(ErrorCodes.FAILED_HIVE_CONNECT);
         }
     }
@@ -82,9 +84,8 @@ public class AuthService : IAuthService
     }
 
     // 함수는 하나의 일만 하도록 수정하기
-    private async Task<UserGameData?> GetOrCreateUserGameData(int id)
+    private async Task<UserGameData?> GetOrCreateUserGameData(Int64 id)
     {
-        System.Console.WriteLine("GetUserGameData " + id);
         bool isExist = await _authRepo.CheckUserAsync(id);
         if (!isExist)
         {
@@ -93,12 +94,12 @@ public class AuthService : IAuthService
         return await _authRepo.GetUserGameDataAsync(id);
     }
 
-    private async Task<bool> CreateUserGameData(int id)
+    private async Task<bool> CreateUserGameData(Int64 id)
     {
         await _authRepo.CreateUserAsync(new UserGameData
         {
             user_id = id,
-            user_name = "user" + id,
+            user_name = "user_" + id,
             gold = 0,
             level = 1,
             exp = 0,

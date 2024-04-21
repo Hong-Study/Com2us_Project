@@ -13,9 +13,10 @@ public class AttendanceCheckController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<AttendanceCheckRes> Post(AttendanceCheckReq request)
+    public async Task<AttendanceCheckRes> Post([FromHeader(Name ="UserId")] int userId,
+                                                [FromBody] AttendanceCheckReq request)
     {
-        AttendanceService.AttendanceResult result = await _attendanceCheckService.AttendanceCheck(request);
+        AttendanceService.AttendanceResult result = await _attendanceCheckService.AttendanceCheck(userId, request.NowTime);
         if (result.errorCode != ErrorCodes.NONE)
         {
             _logger.LogError($"Attendance check failed: {result.errorCode.ToString()}");

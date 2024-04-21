@@ -13,6 +13,7 @@ public class TokenCheckMiddleware
         if (context.Request.Path.Value == "/api/login")
         {
             await _next(context);
+            return;
         }
         else if (!context.Request.Headers.ContainsKey("Authorization") ||
                 !context.Request.Headers.ContainsKey("UserId"))
