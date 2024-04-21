@@ -7,7 +7,7 @@ public class LoginReq
     [StringLength(50, ErrorMessage = "EMAIL IS TOO LONG")]
     // [RegularExpression("^[a-zA-Z0-9_\\.-]+@([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$", ErrorMessage = "E-mail is not valid")]
     [EmailAddress(ErrorMessage = "E-mail is not valid")]
-    
+
     public string Email { get; set; } = null!;
 
     [Required]
@@ -19,6 +19,6 @@ public class LoginReq
 
 public class LoginRes : DefaultRes
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public string Token { get; set; } = null!;
 }

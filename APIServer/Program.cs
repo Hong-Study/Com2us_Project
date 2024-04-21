@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+builder.Services.AddScoped<IMailService, MailService>();
 
 SettingLogger();
 
@@ -13,6 +14,7 @@ SettingLogger();
 builder.Services.AddSingleton<IMemoryRepository, MemoryRepository>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAttendanceCheckRepository, AttendanceCheckRepository>();
+builder.Services.AddScoped<IMailRepository, MailRepository>();
 
 builder.Services.AddControllers();
 
@@ -34,7 +36,7 @@ void SettingLogger()
     _ = logging.ClearProviders();
 
     string? fileDir = config["LogDir"];
-    if(fileDir == null)
+    if (fileDir == null)
         return;
 
     bool exists = Directory.Exists(fileDir);
@@ -51,10 +53,10 @@ void SettingLogger()
             options.FilePathSelector = (timestamp, sequenceNumber) => $"{fileDir}{timestamp.ToLocalTime():yyyy-MM-dd}_{sequenceNumber:000}.log";
             options.RollingInterval = ZLogger.Providers.RollingInterval.Day;
             options.RollingSizeKB = 1024;
-        }); 
+        });
 
     _ = logging.AddZLoggerConsole(options =>
     {
-        options.UseJsonFormatter(); 
+        options.UseJsonFormatter();
     });
 }

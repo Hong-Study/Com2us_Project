@@ -1,21 +1,19 @@
 public class AttendanceService : IAttendanceService
 {
     IAttendanceCheckRepository _attendanceRepo;
-    ILogger<AttendanceService> _logger;
 
-    public AttendanceService(IAttendanceCheckRepository repo, ILogger<AttendanceService> logger)
+    public AttendanceService(IAttendanceCheckRepository repo)
     {
         _attendanceRepo = repo;
-        _logger = logger;
     }
 
     public record AttendanceResult(ErrorCodes errorCode, bool isSuccess);
-    public async Task<AttendanceResult> AttendanceCheck(AttendanceCheckReq request)
+    public async Task<AttendanceResult> AttendanceCheck(int userId, DateTime nowTime)
     {
         // 서버와의 시간을 체크
         try
         {
-            DateTime clientDate = GetYearMonthDay(request.NowTime);
+            DateTime clientDate = GetYearMonthDay(nowTime);
             DateTime serverDate = GetYearMonthDay(DateTime.Now);
 
             if (clientDate != serverDate)
@@ -24,7 +22,7 @@ public class AttendanceService : IAttendanceService
             }
 
             // 출석 여부를 체크한다.
-            bool isAttendance = await _attendanceRepo.IsAttendanceCheck(request.UserId, clientDate);
+            bool isAttendance = await _attendanceRepo.IsAttendanceCheck(userId, serverDate);
             if (isAttendance == true)
             {
                 return FailedAttendance(ErrorCodes.ALREADY_ATTENDANCE);
@@ -32,8 +30,8 @@ public class AttendanceService : IAttendanceService
 
             bool isSuccess = await _attendanceRepo.SetAttendanceCheck(new UserAttendanceData
             {
-                user_id = request.UserId,
-                attendance_date = clientDate,
+                user_id = userId,
+                attendance_date = serverDate,
                 is_success = true,
             });
 

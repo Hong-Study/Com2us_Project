@@ -16,13 +16,13 @@ public class MemoryRepository : IMemoryRepository
         _redisConn = new RedisConnection(redisConfig);
     }
 
-    public async Task<bool> DeleteAccessToken(int user_id)
+    public async Task<bool> DeleteAccessToken(long user_id)
     {
         // RedisString<RdbAuthUserData> redis = new(_redisConn, key, LoginTimeSpan());
         string key = user_id.ToString();
         try
         {
-            RedisString<string> redis = new(_redisConn, key, LoginTimeSpan());
+            RedisString<string> redis = new(_redisConn, key, TimeSpanUtils.LoginTimeSpan());
             bool IsSuccess = await redis.DeleteAsync();
             return IsSuccess;
         }
@@ -33,13 +33,13 @@ public class MemoryRepository : IMemoryRepository
         }
     }
 
-    public async Task<string?> GetAccessToken(int user_id)
+    public async Task<string?> GetAccessToken(long user_id)
     {
         string key = user_id.ToString();
         System.Console.WriteLine("GetAccessToken" + key);
         try
         {
-            RedisString<string> redis = new(_redisConn, key, TicketKeyTimeSpan());
+            RedisString<string> redis = new(_redisConn, key, TimeSpanUtils.TicketKeyTimeSpan());
             RedisResult<string> token = await redis.GetAsync();
             if(!token.HasValue)
             {
@@ -57,12 +57,12 @@ public class MemoryRepository : IMemoryRepository
 
     }
 
-    public async Task<bool> SetAccessToken(int user_id, string token)
+    public async Task<bool> SetAccessToken(long user_id, string token)
     {
         string key = user_id.ToString();
         try
         {
-            RedisString<string> redis = new(_redisConn, key, NxKeyTimeSpan());
+            RedisString<string> redis = new(_redisConn, key, TimeSpanUtils.NxKeyTimeSpan());
             return await redis.SetAsync(token);
         }
         catch (Exception e)
@@ -73,20 +73,5 @@ public class MemoryRepository : IMemoryRepository
     }
 
     // 따로 빼는것도 좋음
-    public TimeSpan LoginTimeSpan()
-    {
-        return TimeSpan.FromMinutes(100);
-    }
-
-    public TimeSpan TicketKeyTimeSpan()
-    {
-        return TimeSpan.FromMinutes(100);
-        // return TimeSpan.FromSeconds(RediskeyExpireTime.TicketKeyExpireSecond);
-    }
-
-    public TimeSpan NxKeyTimeSpan()
-    {
-        return TimeSpan.FromMinutes(100);
-        // return TimeSpan.FromSeconds(RediskeyExpireTime.NxKeyExpireSecond);
-    }
+    
 }

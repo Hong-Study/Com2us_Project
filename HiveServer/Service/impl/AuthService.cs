@@ -39,11 +39,10 @@ public class AuthService : IAuthService
         return new RegisterResut(ErrorCodes.NONE, true);
     }
 
-    public record LoginResult(ErrorCodes ErrorCode, int Id, string Token);
+    public record LoginResult(ErrorCodes ErrorCode, long Id, string Token);
     public async Task<LoginResult> LoginAsync(LoginReq loginReq)
     {
         UserData? userData = await _authRepo.GetAccountAsync(loginReq.Email);
-
         if (userData == null)
         {
             return FailedLogin(ErrorCodes.EMAIL_DOES_NOT_EXIST);

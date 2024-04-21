@@ -58,7 +58,7 @@ public class AuthRepository : IAuthRepository
         try
         {
             int count = await _queryFactory.Query("user_data").InsertAsync(accountDB);
-            if(count == 0)
+            if (count == 0)
             {
                 return false;
             }
@@ -78,11 +78,11 @@ public class AuthRepository : IAuthRepository
     {
         try
         {
-            UserData? userDB = await _queryFactory.Query("user_data")
+            UserData? userData = await _queryFactory.Query("user_data")
                                         .Where("email", email)
                                         .FirstOrDefaultAsync<UserData>();
 
-            return userDB;
+            return userData;
         }
         catch (Exception e)
         {
