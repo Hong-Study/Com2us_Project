@@ -8,7 +8,30 @@ public class AttendanceCheckRepository : DefaultDbConnection, IAttendanceCheckRe
         _logger = logger;
     }
 
-    public async Task<bool> IsAttendanceCheck(int userId, DateTime date)
+    public async Task<bool> DeleteAttendanceChcek(long userId, DateTime data)
+    {
+        try
+        {
+            int result = await _queryFactory.Query("user_attendance_data")
+                .Where("user_id", userId)
+                .Where("attendance_date", data)
+                .DeleteAsync();
+
+            if (result == 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("AttendanceCheckRepository DeleteAttendanceCheck " + e.Message);
+            return false;
+        }
+    }
+
+    public async Task<bool> IsAttendanceCheck(long userId, DateTime date)
     {
         try
         {

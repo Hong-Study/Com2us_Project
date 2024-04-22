@@ -63,4 +63,21 @@ public class AuthRepository : DefaultDbConnection, IAuthRepository
             return null;
         }
     }
+
+    public async Task<UserNameData?> GetUserNameDataAsync(Int64 userId)
+    {
+        try
+        {
+            UserNameData? result = await _queryFactory.Query("user_name_data")
+                                        .Select("user_name")
+                                        .Where("user_id", userId)
+                                        .FirstOrDefaultAsync<UserNameData>();
+            return result;
+        }
+        catch (Exception e)
+        {
+            System.Console.WriteLine("AuthRepository " + e.Message);
+            return null;
+        }
+    }
 }

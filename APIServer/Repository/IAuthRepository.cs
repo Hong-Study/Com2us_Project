@@ -4,4 +4,5 @@ public interface IAuthRepository
     Task<bool> CreateUserAsync(UserGameData data);
     Task<bool> CheckUserAsync(Int64 userId);
     Task<UserGameData?> GetUserGameDataAsync(Int64 userId);
+    Task<UserNameData?> GetUserNameDataAsync(Int64 userId);
 }

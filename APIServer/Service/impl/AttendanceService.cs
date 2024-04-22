@@ -1,10 +1,11 @@
 public class AttendanceService : IAttendanceService
 {
     IAttendanceCheckRepository _attendanceRepo;
-
-    public AttendanceService(IAttendanceCheckRepository repo)
+    IMailService _mailService;
+    public AttendanceService(IAttendanceCheckRepository repo, IMailService mailService)
     {
         _attendanceRepo = repo;
+        _mailService = mailService;
     }
 
     public record AttendanceResult(ErrorCodes errorCode, bool isSuccess);
@@ -40,7 +41,12 @@ public class AttendanceService : IAttendanceService
                 return FailedAttendance(ErrorCodes.FAILED_ATTENDANCE);
             }
 
-            // 이후에는 해당 유저의 출석 여부를 반환한다.
+            MailService.SendMailResult result = await _mailService.SendMail(userId, "GM", "출석 완료", "출석이 완료되었습니다.");
+            if (result.isSuccess == false)
+            {
+                return FailedAttendance(ErrorCodes.FAILED_SEND_MAIL);
+            }
+
             return new AttendanceResult(ErrorCodes.NONE, true);
         }
         catch
