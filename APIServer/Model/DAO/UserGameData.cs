@@ -14,3 +14,8 @@ public class UserIdData
 {
     public Int64 user_id { get; set; }
 }
+
+public class UserNameData
+{
+    public string user_name { get; set; } = null!;
+}

@@ -3,9 +3,11 @@
 public class MailService : IMailService
 {
     IMailRepository _mailRepo;
-    public MailService(IMailRepository repo)
+    IAuthRepository _authRepo;
+    public MailService(IMailRepository repo, IAuthRepository authRepo)
     {
         _mailRepo = repo;
+        _authRepo = authRepo;
     }
 
     public record ReadMailAllResult(ErrorCodes errorCode, List<Mail>? mails);
@@ -34,7 +36,7 @@ public class MailService : IMailService
     }
 
     public record SendMailResult(ErrorCodes errorCode, bool isSuccess);
-    public async Task<SendMailResult> SendMail(string sendUserName, string recvUserName, string title, string content)
+    public async Task<SendMailResult> SendMail(string sendUserName, string recvUserName, string title, string content, int itemId = 0, int itemCount = 0)
     {
         MailData mailData = new MailData()
         {
@@ -42,6 +44,8 @@ public class MailService : IMailService
             recv_user_name = recvUserName,
             mail_title = title,
             mail_content = content,
+            item_id = itemId,
+            item_count = itemCount,
             is_read = false,
         };
 
@@ -52,6 +56,17 @@ public class MailService : IMailService
         }
 
         return new SendMailResult(ErrorCodes.NONE, true);
+    }
+
+    public async Task<SendMailResult> SendMail(long userId, string recvUserName, string title, string content, int itemId = 0, int itemCount = 0)
+    {
+        UserNameData? data = await _authRepo.GetUserNameDataAsync(userId);
+        if(data == null)
+        {
+            return FailedSendMail(ErrorCodes.NOT_FOUND_USER_NAME);
+        }
+
+        return await SendMail(data.user_name, recvUserName, title, content, itemId, itemCount);
     }
 
     public ReadMailAllResult FailedReadMailAll(ErrorCodes errorCode)
