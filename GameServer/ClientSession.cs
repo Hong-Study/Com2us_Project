@@ -1,6 +1,6 @@
 using SuperSocket.SocketBase;
 
-namespace ChattingServer;
+namespace GameServer;
 
 public class ClientSession : AppSession<ClientSession, EFRequestInfo>
 {

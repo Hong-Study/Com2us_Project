@@ -1,6 +1,6 @@
-using ChattingServer;
+using GameServer;
 
-namespace ChattingServer;
+namespace GameServer;
 
 public class PacketHandler
 {

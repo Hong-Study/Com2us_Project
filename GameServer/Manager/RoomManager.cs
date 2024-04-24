@@ -1,4 +1,4 @@
-namespace ChattingServer;
+namespace GameServer;
 
 public class RoomManager
 {

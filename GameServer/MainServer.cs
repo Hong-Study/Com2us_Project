@@ -1,29 +1,25 @@
 using SuperSocket.SocketBase;
+using SuperSocket.SocketBase.Config;
 using SuperSocket.SocketBase.Protocol;
 
-namespace ChattingServer;
+namespace GameServer;
 public class MainServer : AppServer<ClientSession, EFRequestInfo>
 {
     SuperSocket.SocketBase.Config.IServerConfig config = null!;
-
-    UserManager _userManager = new UserManager();
-    RoomManager _roomManager = new RoomManager();
-
+    public static bool IsRunning { get; private set; }
     public MainServer()
         : base(new DefaultReceiveFilterFactory<ReceiveFilter, EFRequestInfo>())
     {
-        InitConfig();
+        IsRunning = false;
     }
 
-    public void InitConfig()
+    public void InitConfig(string IP, int port)
     {
         config = new SuperSocket.SocketBase.Config.ServerConfig
         {
-            Name = "ChattingServer",
-            Port = 7777,
-            Ip = "Any",
-            MaxConnectionNumber = 100,
-            Mode = SuperSocket.SocketBase.SocketMode.Tcp,
+            Name = "GameServer",
+            Port = port,
+            Ip = IP,
         };
     }
 
@@ -31,7 +27,20 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>
     {
         try
         {
-            bool bResult = Setup(new SuperSocket.SocketBase.Config.RootConfig(), config);
+            // 서버 팩토리 없는 버전
+            bool bResult = Setup(config);
+
+            if (bResult == false)
+            {
+                Console.WriteLine("Server Setup Fail");
+                return;
+            }
+
+            CreateComponent();
+
+            Start();
+
+            IsRunning = true;
         }
         catch (Exception ex)
         {
@@ -39,9 +48,21 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>
         }
     }
 
+    public void StopServer()
+    {
+        Stop();
+        IsRunning = false;
+    }
+
+    private void CreateComponent()
+    {
+
+    }
+
     public void OnConnected(ClientSession session)
     {
         // 연결 처리
+        System.Console.WriteLine("On Connected");
     }
 
     public void OnDisconnected(ClientSession session, CloseReason reason)
@@ -49,6 +70,7 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>
         if (reason == CloseReason.ClientClosing)
         {
             // Disconnect 처리
+            System.Console.WriteLine("On Connected");
         }
     }
 
@@ -56,6 +78,11 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>
     {
         // 로그인 처리 이후에 User 객체를 생성하고 UserManager에 추가
         // _userManager.AddUser(session, )
-        PacketManager.Instance.ParsingPacket(session, requestInfo.Body, (Int16)requestInfo.PacketType);
+        ServerPacketData data = new ServerPacketData(session, requestInfo.Body, (Int16)requestInfo.PacketType);
+        data.Session = session;
+        data.Body = requestInfo.Body;
+        data.PacketType = requestInfo.PacketType;
+
+        PacketManager.Instance.Distribute(data);
     }
 }

@@ -1,15 +1,18 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading.Tasks.Dataflow;
 using MemoryPack;
 
-namespace ChattingServer;
+namespace GameServer;
 
 public class PacketManager
 {
     // 패킷 전체 형태까지??
     public static PacketManager Instance { get; set; } = new PacketManager();
+    public BufferBlock<ServerPacketData> _msgBuffer = new BufferBlock<ServerPacketData>();
+    public List<System.Threading.Thread> _logicThreads = new List<System.Threading.Thread>();
 
     Dictionary<Int16, Action<ClientSession, byte[], Int16>> _onRecv = new Dictionary<Int16, Action<ClientSession, byte[], Int16>>();
     Dictionary<Int16, Action<ClientSession, IMessage>> _onHandler = new Dictionary<Int16, Action<ClientSession, IMessage>>();
+
     public PacketManager()
     {
         _onRecv.Add((Int16)PacketType.LOGIN, Make<LoginReq>);
@@ -31,8 +34,42 @@ public class PacketManager
         _onHandler.Add((Int16)PacketType.ROOM_CHAT, PacketHandler.Handle_C_RoomChat);
     }
 
-    public void ParsingPacket(ClientSession session, byte[] buffer, Int16 type)
+    public void Distribute(ServerPacketData data)
     {
+        _msgBuffer.Post(data);
+    }
+
+    public void Start(int threadCount = 1)
+    {
+        for (int i = 0; i < threadCount; i++)
+        {
+            System.Threading.Thread thread = new System.Threading.Thread(this.Process);
+            thread.Start();
+            _logicThreads.Add(thread);
+        }
+    }
+    public void Stop()
+    {
+        foreach (var thread in _logicThreads)
+        {
+            thread.Join();
+        }
+    }
+
+    public void Process()
+    {
+        while (MainServer.IsRunning)
+        {
+            // 멈출 때, Blocking 처리를 어떻게 할 지 고민해야 함.
+            ServerPacketData data = _msgBuffer.Receive();
+            ParsingPacket(data.Session, data.Body, data.PacketType);
+        }
+    }
+
+
+    void ParsingPacket(ClientSession session, byte[] buffer, Int16 type)
+    {
+        // 패킷 만들어서 Queue에 넣어주기
         Action<ClientSession, byte[], Int16>? action = null;
         if (_onRecv.TryGetValue(type, out action))
         {

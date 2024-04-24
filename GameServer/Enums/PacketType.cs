@@ -1,3 +1,5 @@
+namespace GameServer;
+
 public enum PacketType : Int16
 {
     LOGIN = 0,
