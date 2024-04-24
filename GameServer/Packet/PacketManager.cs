@@ -10,7 +10,7 @@ public class PacketManager
     public BufferBlock<ServerPacketData> _msgBuffer = new BufferBlock<ServerPacketData>();
     public List<System.Threading.Thread> _logicThreads = new List<System.Threading.Thread>();
 
-    Dictionary<Int16, Action<ClientSession, byte[], Int16>> _onRecv = new Dictionary<Int16, Action<ClientSession, byte[], Int16>>();
+    Dictionary<Int16, Action<ServerPacketData>> _onRecv = new Dictionary<Int16, Action<ServerPacketData>>();
     Dictionary<Int16, Action<ClientSession, IMessage>> _onHandler = new Dictionary<Int16, Action<ClientSession, IMessage>>();
 
     public PacketManager()
@@ -62,27 +62,22 @@ public class PacketManager
         {
             // 멈출 때, Blocking 처리를 어떻게 할 지 고민해야 함.
             ServerPacketData data = _msgBuffer.Receive();
-            ParsingPacket(data.Session, data.Body, data.PacketType);
+
+            Action<ServerPacketData>? action = null;
+            if (_onRecv.TryGetValue(data.PacketType, out action))
+            {
+                action(data);
+            }
         }
     }
 
-
-    void ParsingPacket(ClientSession session, byte[] buffer, Int16 type)
+    void Make<T>(ServerPacketData data) where T : IMessage, new()
     {
-        // 패킷 만들어서 Queue에 넣어주기
-        Action<ClientSession, byte[], Int16>? action = null;
-        if (_onRecv.TryGetValue(type, out action))
+        T packet = PacketDeserialize<T>(data.Body);
+        Action<ClientSession, IMessage>? action = null;
+        if (_onHandler.TryGetValue(data.PacketType, out action))
         {
-            action(session, buffer, type);
-        }
-    }
-
-    void Make<T>(ClientSession session, byte[] bytes, Int16 type) where T : IMessage, new()
-    {
-        T data = PacketDeserialize<T>(bytes);
-        if (_onHandler != null)
-        {
-            _onHandler[type](session, data);
+            action(data.Session, packet);
         }
     }
 
