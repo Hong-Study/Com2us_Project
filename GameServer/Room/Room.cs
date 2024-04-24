@@ -1,6 +1,6 @@
 using MemoryPack;
 
-namespace ChattingServer;
+namespace GameServer;
 
 public class Room
 {

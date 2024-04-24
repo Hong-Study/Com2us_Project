@@ -2,7 +2,7 @@ using SuperSocket.Common;
 using SuperSocket.SocketBase.Protocol;
 using SuperSocket.SocketEngine.Protocol;
 
-namespace ChattingServer;
+namespace GameServer;
 
 public class EFRequestInfo : BinaryRequestInfo
 {

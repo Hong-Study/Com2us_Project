@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace ChattingServer;
+namespace GameServer;
 
 public class UserManager
 {
