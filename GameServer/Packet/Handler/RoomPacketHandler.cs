@@ -24,12 +24,10 @@ public partial class PacketHandler
         if (room == null)
         {
             return;
-        }
 
-        if (room.EnterRoom(user))
-        {
-            // 방 입장 성공
         }
+        
+        room.Push(() => room.EnterRoom(user));
     }
 
     public void Handle_C_RoomLeave(string sessionID, IMessage message)
@@ -58,7 +56,7 @@ public partial class PacketHandler
             return;
         }
 
-        room.LeaveRoom(sessionID);
+        room.Push(() => room.LeaveRoom(sessionID));
     }
 
     public void Handle_C_RoomChat(string sessionID, IMessage message)
@@ -83,6 +81,6 @@ public partial class PacketHandler
         }
 
         // 채팅 메시지 전파
-        room.SendChat(sessionID, packet.Message);
+        room.Push(() => room.SendChat(sessionID, packet.Message));
     }
 }
