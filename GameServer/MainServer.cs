@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SuperSocket.SocketBase;
 using SuperSocket.SocketBase.Config;
+using SuperSocket.SocketBase.Logging;
 using SuperSocket.SocketBase.Protocol;
 
 namespace GameServer;
@@ -17,13 +19,17 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
     IServerConfig _networkConfig = null!;
     public static bool IsRunning { get; private set; }
 
+    public static ILog MainLogger = null!;
+    private readonly ILogger<MainServer> _logger;
     private readonly IHostApplicationLifetime _lifeTime;
 
-    public MainServer(IHostApplicationLifetime lifeTime, IOptions<ServerOption> options)
+    public MainServer(IHostApplicationLifetime lifeTime, IOptions<ServerOption> serverConfig, ILogger<MainServer> logger)
         : base(new DefaultReceiveFilterFactory<ReceiveFilter, EFRequestInfo>())
     {
-        _serverOption = options.Value;
+        _serverOption = serverConfig.Value;
         _lifeTime = lifeTime;
+        _logger = logger;
+
         IsRunning = false;
 
         NewSessionConnected += new SessionHandler<ClientSession>(OnConnected);
@@ -50,21 +56,23 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
         };
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         _lifeTime.ApplicationStarted.Register(AppOnStarted);
         _lifeTime.ApplicationStopping.Register(AppOnStopped);
 
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     private void AppOnStarted()
     {
+        _logger.LogInformation("Server OnStart");
+
         InitConfig(_serverOption);
 
         CreateStartServer(_serverOption);
@@ -72,19 +80,26 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
         var IsResult = base.Start();
         if (IsResult == false)
         {
-            Console.WriteLine("Server Start Fail");
+            _logger.LogError("Server Start Fail");
         }
         else
         {
-            Console.WriteLine("Server Start Success");
+            _logger.LogInformation("Server Start Success");
         }
     }
 
     private void AppOnStopped()
     {
+        MainLogger.Info("OnStopped - begin");
+
         base.Stop();
+        IsRunning = false;
+
+        MainLogger.Info("OnStopped - end");
     }
 
+    // 데이터를 모아서 한번에 보내는 방식?
+    // 현재는 하나씩 보내는 형식
     public bool SendData(string sessionID, byte[] bytes)
     {
         var session = GetSessionByID(sessionID);
@@ -110,24 +125,26 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
         }
     }
 
-    public void CreateStartServer(ServerOption option)
+    public void CreateStartServer(ServerOption config)
     {
         try
         {
-            // 서버 팩토리 없는 버전
-            bool bResult = Setup(_networkConfig);
+            bool bResult = Setup(new RootConfig(), _networkConfig, logFactory: new NLogLogFactory());
 
             if (bResult == false)
             {
-                Console.WriteLine("Server Setup Fail");
+                MainLogger.Error("[ERROR] 서버 네트워크 설정 실패 ㅠㅠ");
                 return;
             }
-
+            else
+            {
+                MainLogger = base.Logger;
+            }
             IsRunning = true;
 
-            CreateComponent(option);
+            CreateComponent(config);
 
-            Start();
+            MainLogger.Info("서버 생성 성공");
         }
         catch (Exception ex)
         {
@@ -135,18 +152,12 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
         }
     }
 
-    public void StopServer()
-    {
-        Stop();
-        IsRunning = false;
-    }
-
     private void CreateComponent(ServerOption option)
     {
-        _packetManager.Start(1);
-
         _packetManager.InitUserDelegate(_userManager);
         _packetManager.InitRoomDelegate(_roomManager);
+
+        _packetManager.Start(1);
     }
 
     public void OnConnected(ClientSession session)

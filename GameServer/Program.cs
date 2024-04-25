@@ -1,23 +1,22 @@
-﻿// See https://aka.ms/new-console-template for more information
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace GameServer;
-
-
 class Program
 {
     static async Task Main(string[] args)
     {
         var host = new HostBuilder()
-            .ConfigureAppConfiguration((hostringContext, config) =>
+            .ConfigureAppConfiguration((hostingContext, config) =>
             {
-                var env = hostringContext.HostingEnvironment;
+                var env = hostingContext.HostingEnvironment;
+                //config.SetBasePath(Directory.GetCurrentDirectory());
                 config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             })
-            .ConfigureLogging(logging =>{
+            .ConfigureLogging(logging =>
+            {
                 logging.SetMinimumLevel(LogLevel.Debug);
                 logging.AddConsole();
             })
@@ -31,6 +30,7 @@ class Program
         await host.RunAsync();
     }
 }
+ 
 
 
 // MainServer server = new MainServer();

@@ -71,13 +71,20 @@ public class PacketManager
         while (MainServer.IsRunning)
         {
             // 멈출 때, Blocking 처리를 어떻게 할 지 고민해야 함.
-            TimeSpan timeOut = TimeSpan.FromMilliseconds(1000);
-            ServerPacketData data = _msgBuffer.Receive(timeOut);
-
-            Action<ServerPacketData>? action = null;
-            if (_onRecv.TryGetValue(data.PacketType, out action))
+            try
             {
-                action(data);
+                TimeSpan timeOut = TimeSpan.FromMilliseconds(1000);
+                ServerPacketData data = _msgBuffer.Receive(timeOut);
+
+                Action<ServerPacketData>? action = null;
+                if (_onRecv.TryGetValue(data.PacketType, out action))
+                {
+                    action(data);
+                }
+            }
+            catch 
+            {
+
             }
         }
     }

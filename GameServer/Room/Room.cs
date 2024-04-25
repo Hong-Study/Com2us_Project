@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 namespace GameServer;
 
-public class Room
+public class Room : JobQueue
 {
     ConcurrentDictionary<string, RoomUser> _users = new ConcurrentDictionary<string, RoomUser>();
 
