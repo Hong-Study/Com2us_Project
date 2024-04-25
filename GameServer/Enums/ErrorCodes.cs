@@ -1,6 +1,6 @@
 namespace GameServer;
 
-public enum ErrorCode
+public enum ErrorCode : short
 {
     NONE = 0,
 
