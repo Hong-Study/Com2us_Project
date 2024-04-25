@@ -8,5 +8,6 @@
   <ItemGroup>
     <PackageReference Include="SuperSocketLite" Version="0.17.0"/>
     <PackageReference Include="MemoryPack" Version="1.21.1"/>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
   </ItemGroup>
 </Project>

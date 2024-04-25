@@ -2,14 +2,14 @@ namespace GameServer;
 
 public class ServerPacketData
 {
-    public ClientSession Session {get; set;}
+    public string SessionID { get; set; }
     public byte[] Body {get; set;}
     public Int16 PacketType {get; set;}
 
-    public ServerPacketData(ClientSession session, byte[] body, Int16 type)
+    public ServerPacketData(string SessionID, byte[] Body, Int16 PacketType)
     {
-        Session = session;
-        Body = body;
-        PacketType = type;
+        this.SessionID = SessionID;
+        this.Body = Body;
+        this.PacketType = PacketType;
     }
 }
