@@ -104,7 +104,7 @@
             this.textBoxPort.Name = "textBoxPort";
             this.textBoxPort.Size = new System.Drawing.Size(51, 21);
             this.textBoxPort.TabIndex = 18;
-            this.textBoxPort.Text = "32451";
+            this.textBoxPort.Text = "7777";
             this.textBoxPort.WordWrap = false;
             // 
             // label10
@@ -182,7 +182,7 @@
             this.textBoxUserID.Name = "textBoxUserID";
             this.textBoxUserID.Size = new System.Drawing.Size(87, 21);
             this.textBoxUserID.TabIndex = 43;
-            this.textBoxUserID.Text = "test1";
+            this.textBoxUserID.Text = "1";
             this.textBoxUserID.WordWrap = false;
             // 
             // textBoxUserPW
@@ -240,6 +240,7 @@
             // 
             // button3
             // 
+
             this.button3.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.button3.Location = new System.Drawing.Point(391, 18);
             this.button3.Name = "button3";
@@ -342,7 +343,7 @@
             this.textBoxRoomNumber.Name = "textBoxRoomNumber";
             this.textBoxRoomNumber.Size = new System.Drawing.Size(38, 21);
             this.textBoxRoomNumber.TabIndex = 44;
-            this.textBoxRoomNumber.Text = "0";
+            this.textBoxRoomNumber.Text = "1";
             this.textBoxRoomNumber.WordWrap = false;
             // 
             // label3

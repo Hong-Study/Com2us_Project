@@ -40,7 +40,6 @@ public partial class mainForm
     void ParsingPacket(byte[] bytes)
     {
         ClientPacketData data = new ClientPacketData(bytes);
-        System.Console.WriteLine($"ParsingPacket : {data.PacketType}");
         
         Action<ClientPacketData> action = null;
         if (_onRecv.TryGetValue(data.PacketType, out action))
@@ -112,7 +111,7 @@ public partial class mainForm
 
     public void Handle_S_RoomEnter(IMessage message)
     {
-
+        
     }
 
     public void Handle_S_RoomLeave(IMessage message)
@@ -137,7 +136,18 @@ public partial class mainForm
 
     public void Handle_S_GameReady(IMessage message)
     {
+        SGamePutRes res = message as SGamePutRes;
+        if (res == null)
+        {
+            return;
+        }
 
+        if(res.ErrorCode != (Int16)ErrorCode.NONE)
+        {
+            MessageBox.Show("에러 발생");
+        }
+
+        플레이어_돌두기(true, res.X, res.Y);
     }
 
     public void Handle_S_GameStart(IMessage message)
@@ -147,7 +157,7 @@ public partial class mainForm
 
     public void Handle_S_GameEnd(IMessage message)
     {
-
+        
     }
 
     public void Handle_S_GamePut(IMessage message)
