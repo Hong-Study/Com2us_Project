@@ -10,7 +10,7 @@ public class MailService : IMailService
         _authRepo = authRepo;
     }
 
-    public record ReadMailAllResult(ErrorCodes errorCode, List<Mail>? mails);
+    public record ReadMailAllResult(ErrorCodes errorCode, IEnumerable<MailData>? mails);
     public async Task<ReadMailAllResult> ReadMailToAll(string userName)
     {
         var result = await _mailRepo.ReadMailToAll(userName);
@@ -19,20 +19,7 @@ public class MailService : IMailService
             return FailedReadMailAll(ErrorCodes.FAILED_READ_MAIL);
         }
 
-        List<Mail> mails = new List<Mail>();
-        foreach (MailData mail in result)
-        {
-            mails.Add(new Mail()
-            {
-                SendUserName = mail.send_user_name,
-                RecvUserName = mail.recv_user_name,
-                MailTitle = mail.mail_title,
-                MailContent = mail.mail_content,
-                isRead = mail.is_read
-            });
-        }
-
-        return new ReadMailAllResult(ErrorCodes.NONE, mails);
+        return new ReadMailAllResult(ErrorCodes.NONE, result);
     }
 
     public record SendMailResult(ErrorCodes errorCode, bool isSuccess);

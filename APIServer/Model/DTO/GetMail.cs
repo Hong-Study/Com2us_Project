@@ -5,14 +5,5 @@ public class GetMailReq
 
 public class GetMailRes : DefaultRes
 {
-    public List<Mail>? Mails { get; set; } = null!;
-}
-
-public class Mail
-{
-    public string SendUserName { get; set; } = null!;
-    public string RecvUserName { get; set; } = null!;
-    public string MailTitle { get; set; } = null!;
-    public string MailContent { get; set; } = null!;
-    public bool isRead { get; set; }
+    public IEnumerable<MailData>? Mails { get; set; } = null!;
 }
