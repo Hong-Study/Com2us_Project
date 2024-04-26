@@ -4,6 +4,8 @@ public partial class PacketHandler
 {
     public Func<string, UserGameData, ErrorCode> AddUserFunc = null!;
     public Func<string, ErrorCode> RemoveUserFunc = null!;
+    public Func<string, User?> GetUserFunc = null!;
+    public Func<int, Room?> GetRoomFunc = null!;
 
     public void Handle_C_Login(string sessionID, IMessage message)
     {

@@ -157,6 +157,8 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
         _packetManager.InitUserDelegate(_userManager);
         _packetManager.InitRoomDelegate(_roomManager);
 
+        _roomManager.Init(SendData);
+
         _packetManager.Start(1);
     }
 

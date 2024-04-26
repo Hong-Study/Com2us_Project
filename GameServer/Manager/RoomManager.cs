@@ -19,13 +19,21 @@ public class RoomManager
 
     public Room? GetRoom(int roomNumber)
     {
-        if(roomNumber < 1 || roomNumber > MaxRoomCount)
+        if (roomNumber < 1 || roomNumber > MaxRoomCount)
         {
             return null;
         }
-        
+
         _roomPool.TryGetValue(roomNumber, out Room? room);
 
         return room;
+    }
+
+    public void Init(Func<string, byte[], bool> sendFunc)
+    {
+        foreach (var room in _roomPool)
+        {
+            room.Value.Init(sendFunc);
+        }
     }
 }
