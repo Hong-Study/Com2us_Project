@@ -101,24 +101,17 @@ public class PacketManager
 
     void Make<T>(ServerPacketData data) where T : IMessage, new()
     {
-        T packet = PacketDeserialize<T>(data.Body);
+        var packet = MemoryPackSerializer.Deserialize<T>(data.Body);
+        if (packet == null)
+        {
+            return;
+        }
 
         Action<string, IMessage>? action = null;
         if (_onHandler.TryGetValue(data.PacketType, out action))
         {
             action(data.SessionID, packet);
         }
-    }
-
-    public T PacketDeserialize<T>(byte[] bytes) where T : IMessage, new()
-    {
-        T? data = MemoryPackSerializer.Deserialize<T>(bytes);
-        if (data == null)
-        {
-            return new T();
-        }
-
-        return data;
     }
 
     public static byte[] PacketSerialized<T>(T packet, PacketType type) where T : IMessage
