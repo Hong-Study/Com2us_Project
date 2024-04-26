@@ -29,7 +29,7 @@ namespace GameClient
         private SolidBrush 흰색 = new SolidBrush(Color.White);
 
         private SoundPlayer 시작효과음;
-        private SoundPlayer 종료효과음;
+        // private SoundPlayer 종료효과음;
         private SoundPlayer 승리효과음;
         private SoundPlayer 바둑돌소리;
         private SoundPlayer 무르기요청;
@@ -41,7 +41,7 @@ namespace GameClient
         bool IsMyTurn = false;
         
         private bool AI모드 = true;
-        private CSCommon.OmokRule.돌종류 컴퓨터돌;
+        // private CSCommon.OmokRule.돌종류 컴퓨터돌;
 
         string MyPlayerName = "";        
         string 흑돌플레이어Name = "";
@@ -336,8 +336,7 @@ namespace GameClient
 
             돌그리기(x, y);
             현재돌표시();
-            OmokLogic.오목확인(x, y);
-                        
+            OmokLogic.오목확인(x, y);               
             
             if (isNotify == false)
             {

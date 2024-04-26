@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Windows.Devices.SmartCards;
 
 #pragma warning disable CA1416
 
@@ -127,13 +128,19 @@ namespace GameClient
 
         private void btn_RoomEnter_Click(object sender, EventArgs e)
         {
-            // PostSendPacket(PacketID.ReqRoomEnter, null);
+            var roomEnterReq = new CRoomEnterReq();
+            roomEnterReq.RoomNumber = Convert.ToInt32(textBoxRoomNumber.Text);
+
+            PostSendPacket(PacketType.REQ_C_ROOM_ENTER, roomEnterReq);
             DevLog.Write($"방 입장 요청:  {textBoxRoomNumber.Text} 번");
         }
 
         private void btn_RoomLeave_Click(object sender, EventArgs e)
         {
-            //PostSendPacket(PACKET_ID.ROOM_LEAVE_REQ,  null);
+            var roomLeaveReq = new CRoomLeaveReq();
+            roomLeaveReq.RoomNumber = Convert.ToInt32(textBoxRoomNumber.Text);
+
+            PostSendPacket(PacketType.REQ_C_ROOM_LEAVE, roomLeaveReq);
             DevLog.Write($"방 입장 요청:  {textBoxRoomNumber.Text} 번");
         }
 
@@ -144,11 +151,11 @@ namespace GameClient
                 MessageBox.Show("채팅 메시지를 입력하세요");
                 return;
             }
+            
+            var roomChatReq = new CRoomChatReq();
+            roomChatReq.Message = textBoxRoomSendMsg.Text;
 
-            //var requestPkt = new RoomChatReqPacket();
-            //requestPkt.SetValue(textBoxRoomSendMsg.Text);
-
-            //PostSendPacket(PACKET_ID.ROOM_CHAT_REQ, requestPkt.ToBytes());
+            PostSendPacket(PacketType.REQ_C_ROOM_CHAT, roomChatReq);
             DevLog.Write($"방 채팅 요청");
         }
 
@@ -172,21 +179,26 @@ namespace GameClient
 
         void SendPacketOmokPut(int x, int y)
         {
-            // var requestPkt = new PKTReqPutMok
-            // {
-            //     PosX = x,
-            //     PosY = y
-            // };
+            var gamePutReq = new CGamePutReq
+            {
+                RoomNumber = 1,
+                X = x,
+                Y = y
+            };
 
-            // var packet = MessagePackSerializer.Serialize(requestPkt);
-            // // PostSendPacket(PacketID.ReqPutMok, packet);
-
-            // DevLog.Write($"put stone 요청 : x  [ {x} ], y: [ {y} ] ");
+            PostSendPacket(PacketType.REQ_C_GAME_PUT, gamePutReq);
+            DevLog.Write($"put stone 요청 : x  [ {x} ], y: [ {y} ] ");
         }
 
         private void btn_GameStartClick(object sender, EventArgs e)
         {
-            //PostSendPacket(PACKET_ID.GAME_START_REQ, null);
+            var gameReadyReq = new CGameReadyReq
+            {
+                RoomNumber = 1,
+                IsReady = true
+            };
+
+            PostSendPacket(PacketType.REQ_C_GAME_READY, gameReadyReq);
             StartGame(true, "My", "Other");
         }
 
@@ -204,8 +216,13 @@ namespace GameClient
         // 게임 시작 요청
         private void button3_Click(object sender, EventArgs e)
         {
-            // PostSendPacket(PacketID.ReqReadyOmok, null);
+            var gameReadyReq = new CGameReadyReq
+            {
+                RoomNumber = 1,
+                IsReady = true
+            };
 
+            PostSendPacket(PacketType.REQ_C_GAME_READY, gameReadyReq);
             DevLog.Write($"게임 준비 완료 요청");
         }
     }
