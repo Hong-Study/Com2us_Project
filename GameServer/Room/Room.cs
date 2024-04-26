@@ -2,7 +2,8 @@ using System.Collections.Concurrent;
 
 namespace GameServer;
 
-public class Room : JobQueue
+// 방 관련 기능
+public partial class Room : JobQueue
 {
     ConcurrentDictionary<string, RoomUser> _users = new ConcurrentDictionary<string, RoomUser>();
 
@@ -50,11 +51,11 @@ public class Room : JobQueue
             return;
         }
 
-        RoomChatRes res = new RoomChatRes();
+        SRoomChatRes res = new SRoomChatRes();
         res.UserName = user.SessionID;
         res.Message = message;
 
-        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.ROOM_CHAT);
+        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_ROOM_CHAT);
         BroadCast(bytes);
     }
 
@@ -76,4 +77,5 @@ public class RoomUser
 {
     public string SessionID { get; set; } = null!;
     public Int64 UserID { get; set; }
+    public bool IsReady { get; set; } = false;
 }

@@ -170,11 +170,11 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
 
     public void OnDisconnected(ClientSession session, CloseReason reason)
     {
-        if (reason == CloseReason.ClientClosing)
-        {
-            // Disconnect 처리
-            System.Console.WriteLine($"On Disconnected {session.SessionID} : {reason}");
-        }
+        System.Console.WriteLine($"On Disconnected {session.SessionID} : {reason}");
+        // if (reason == CloseReason.ClientClosing)
+        // {
+        //     // Disconnect 처리
+        // }
     }
 
     public void OnReceived(ClientSession session, EFRequestInfo requestInfo)

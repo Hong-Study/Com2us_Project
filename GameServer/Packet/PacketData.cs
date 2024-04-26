@@ -13,64 +13,139 @@ public class PacketDef
 public interface IMessage { }
 
 [MemoryPackable]
-public partial class LoginReq : IMessage
+public partial class CLoginReq : IMessage
 {
     public Int64 UserID { get; set; }
     public string AuthToken { get; set; } = null!;
 }
-
 [MemoryPackable]
-public partial class LoginRes : IMessage
+public partial class SLoginRes : IMessage
 {
     public short ErrorCode { get; set; }
 }
 
 [MemoryPackable]
-public partial class LogOutReq : IMessage
+public partial class CLogOutReq : IMessage
+{
+    public int Index { get; set; }
+}
+[MemoryPackable]
+public partial class SLogOutRes : IMessage
 {
     public int Index { get; set; }
 }
 
 [MemoryPackable]
-public partial class LogOutRes : IMessage
-{
-    public int Index { get; set; }
-}
-
-[MemoryPackable]
-public partial class RoomEnterReq : IMessage
+public partial class CRoomEnterReq : IMessage
 {
     public int RoomNumber { get; set; }
 }
-
 [MemoryPackable]
-public partial class RoomEnterRes : IMessage
+public partial class SRoomEnterRes : IMessage
 {
     public short ErrorCode { get; set; }
 }
 
 [MemoryPackable]
-public partial class RoomLeaveReq : IMessage
+public partial class CRoomLeaveReq : IMessage
 {
     public int RoomNumber { get; set; }
 }
-
 [MemoryPackable]
-public partial class RoomLeaveRes : IMessage
+public partial class SRoomLeaveRes : IMessage
 {
     public short ErrorCode { get; set; }
 }
 
 
 [MemoryPackable]
-public partial class RoomChatReq : IMessage
+public partial class CRoomChatReq : IMessage
 {
     public string Message { get; set; } = null!;
 }
-
 [MemoryPackable]
-public partial class RoomChatRes : IMessage
+public partial class SRoomChatRes : IMessage
 {
     public string UserName { get; set; } = null!;
     public string Message { get; set; } = null!;
+}
+
+[MemoryPackable]
+public partial class CGameReadyReq : IMessage
+{
+    public int RoomNumber { get; set; }
+    public bool IsReady { get; set; }
+}
+[MemoryPackable]
+public partial class SGameReadyRes : IMessage
+{
+    public short ErrorCode { get; set; }
+    public Int64 UserID { get; set; }
+    public bool IsReady { get; set; }
+}
+
+[MemoryPackable]
+public partial class SGameStartReq : IMessage
+{
+    public int RoomNumber { get; set; }
+    public bool IsStart { get; set; }
+    // 유저 리스트까지?
+}
+[MemoryPackable]
+public partial class CGameStartRes : IMessage
+{
+    public short ErrorCode { get; set; }
+}
+
+[MemoryPackable]
+public partial class CGamePutReq : IMessage
+{
+    public int RoomNumber { get; set; }
+    public int X { get; set; }
+    public int Y { get; set; }
+}
+[MemoryPackable]
+public partial class SGamePutRes : IMessage
+{
+    public short ErrorCode { get; set; }
+    public Int64 UserID { get; set; }
+    public int X { get; set; }
+    public int Y { get; set; }
+}
+
+[MemoryPackable]
+public partial class CGameEndRes : IMessage
+{
+    public int RoomNumber { get; set; }
+}
+[MemoryPackable]
+public partial class SGameEndReq : IMessage
+{
+    public short ErrorCode { get; set; }
+    public Int64 UserID { get; set; }
+}
+
+[MemoryPackable]
+public partial class STurnChangeReq : IMessage
+{
+    public int RoomNumber { get; set; }
+    public Int64 UserID { get; set; }
+}
+
+[MemoryPackable]
+public partial class CTurnChangeRes : IMessage
+{
+    public int RoomNumber { get; set; }
+}
+
+[MemoryPackable]
+public partial class CGameCancleRes : IMessage
+{
+    public int RoomNumber { get; set; }
+}
+[MemoryPackable]
+public partial class SGameCancleReq : IMessage
+{
+    public short ErrorCode { get; set; }
+    public int RoomID { get; set; }
 }

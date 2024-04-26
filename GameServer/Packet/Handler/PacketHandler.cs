@@ -7,7 +7,7 @@ public partial class PacketHandler
 
     public void Handle_C_Login(string sessionID, IMessage message)
     {
-        LoginReq? packet = message as LoginReq;
+        CLoginReq? packet = message as CLoginReq;
         if (packet == null)
         {
             return;
@@ -19,7 +19,7 @@ public partial class PacketHandler
 
     public void Handle_C_Logout(string sessionID, IMessage message)
     {
-        LogOutReq? packet = message as LogOutReq;
+        CLogOutReq? packet = message as CLogOutReq;
         if (packet == null)
         {
             return;

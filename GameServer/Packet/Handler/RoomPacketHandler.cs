@@ -7,7 +7,7 @@ public partial class PacketHandler
 
     public void Handle_C_RoomEnter(string sessionID, IMessage message)
     {
-        RoomEnterReq? packet = message as RoomEnterReq;
+        CRoomEnterReq? packet = message as CRoomEnterReq;
         if (packet == null)
         {
             return;
@@ -32,7 +32,7 @@ public partial class PacketHandler
 
     public void Handle_C_RoomLeave(string sessionID, IMessage message)
     {
-        RoomLeaveReq? packet = message as RoomLeaveReq;
+        CRoomLeaveReq? packet = message as CRoomLeaveReq;
         if (packet == null)
         {
             return;
@@ -61,7 +61,7 @@ public partial class PacketHandler
 
     public void Handle_C_RoomChat(string sessionID, IMessage message)
     {
-        RoomChatReq? packet = message as RoomChatReq;
+        CRoomChatReq? packet = message as CRoomChatReq;
         if (packet == null)
         {
             return;
