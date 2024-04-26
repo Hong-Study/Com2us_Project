@@ -54,6 +54,11 @@ public class PacketManager
         _handler.GetRoomFunc = roomManager.GetRoom;
     }
 
+    public void InitSendFunc(Func<string, byte[], bool> sendFunc)
+    {
+        _handler.SendFunc = sendFunc;
+    }
+
     public void Distribute(ServerPacketData data)
     {
         _msgBuffer.Post(data);
@@ -122,6 +127,7 @@ public class PacketManager
         {
             bodyDataSize = (Int16)bodyData.Length;
         }
+
         var packetSize = (Int16)(bodyDataSize + PacketDef.PACKET_HEADER_SIZE);
 
         var dataSource = new byte[packetSize];

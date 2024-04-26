@@ -121,6 +121,7 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
 
             session.SendEndWhenSendingTimeOut();
             session.Close();
+
             return false;
         }
     }
@@ -156,8 +157,9 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
     {
         _packetManager.InitUserDelegate(_userManager);
         _packetManager.InitRoomDelegate(_roomManager);
-
-        _roomManager.Init(SendData);
+        _packetManager.InitSendFunc(SendData);
+        
+        _roomManager.InitSendDelegate(SendData);
 
         _packetManager.Start(1);
     }
