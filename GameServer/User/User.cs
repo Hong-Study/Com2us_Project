@@ -1,3 +1,5 @@
+using MemoryPack;
+
 namespace GameServer;
 
 public class User

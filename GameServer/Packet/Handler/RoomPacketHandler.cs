@@ -2,9 +2,6 @@ namespace GameServer;
 
 public partial class PacketHandler
 {
-    public Func<string, User?> GetUserFunc = null!;
-    public Func<int, Room?> GetRoomFunc = null!;
-
     public void Handle_C_RoomEnter(string sessionID, IMessage message)
     {
         CRoomEnterReq? packet = message as CRoomEnterReq;

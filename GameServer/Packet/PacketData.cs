@@ -21,7 +21,7 @@ public partial class CLoginReq : IMessage
 [MemoryPackable]
 public partial class SLoginRes : IMessage
 {
-    public short ErrorCode { get; set; }
+    public Int16 ErrorCode { get; set; }
 }
 
 [MemoryPackable]
@@ -43,7 +43,16 @@ public partial class CRoomEnterReq : IMessage
 [MemoryPackable]
 public partial class SRoomEnterRes : IMessage
 {
-    public short ErrorCode { get; set; }
+    public Int16 ErrorCode { get; set; }
+    [MemoryPackAllowSerialize]
+    public List<UserData>? UserList { get; set; }
+}
+
+[MemoryPackable]
+public partial class SNewUserEnterReq : IMessage
+{
+    [MemoryPackAllowSerialize]
+    public UserData User { get; set; } = null!;
 }
 
 [MemoryPackable]
@@ -54,9 +63,13 @@ public partial class CRoomLeaveReq : IMessage
 [MemoryPackable]
 public partial class SRoomLeaveRes : IMessage
 {
-    public short ErrorCode { get; set; }
+    public Int16 ErrorCode { get; set; }
 }
-
+[MemoryPackable]
+public partial class SUserLeaveReq: IMessage
+{
+    public Int64 UserID { get; set; }
+}
 
 [MemoryPackable]
 public partial class CRoomChatReq : IMessage
@@ -79,7 +92,7 @@ public partial class CGameReadyReq : IMessage
 [MemoryPackable]
 public partial class SGameReadyRes : IMessage
 {
-    public short ErrorCode { get; set; }
+    public Int16 ErrorCode { get; set; }
     public Int64 UserID { get; set; }
     public bool IsReady { get; set; }
 }
@@ -89,12 +102,12 @@ public partial class SGameStartReq : IMessage
 {
     public int RoomNumber { get; set; }
     public bool IsStart { get; set; }
-    // 유저 리스트까지?
+    public Int64 StartPlayerID { get; set; }
 }
 [MemoryPackable]
 public partial class CGameStartRes : IMessage
 {
-    public short ErrorCode { get; set; }
+    public Int16 ErrorCode { get; set; }
 }
 
 [MemoryPackable]
@@ -107,45 +120,55 @@ public partial class CGamePutReq : IMessage
 [MemoryPackable]
 public partial class SGamePutRes : IMessage
 {
-    public short ErrorCode { get; set; }
+    public Int16 ErrorCode { get; set; }
     public Int64 UserID { get; set; }
     public int X { get; set; }
     public int Y { get; set; }
 }
 
 [MemoryPackable]
-public partial class CGameEndRes : IMessage
-{
-    public int RoomNumber { get; set; }
-}
-[MemoryPackable]
 public partial class SGameEndReq : IMessage
 {
-    public short ErrorCode { get; set; }
-    public Int64 UserID { get; set; }
+    public Int64 WinUserID { get; set; }
+}
+[MemoryPackable]
+public partial class CGameEndRes : IMessage
+{
+    public Int16 ErrorCode { get; set; }
 }
 
 [MemoryPackable]
 public partial class STurnChangeReq : IMessage
 {
     public int RoomNumber { get; set; }
-    public Int64 UserID { get; set; }
+    public Int64 NextTurnUserID { get; set; }
 }
 
 [MemoryPackable]
 public partial class CTurnChangeRes : IMessage
 {
-    public int RoomNumber { get; set; }
+    public ErrorCode ErrorCode { get; set; }
 }
 
 [MemoryPackable]
-public partial class CGameCancleRes : IMessage
-{
-    public int RoomNumber { get; set; }
-}
-[MemoryPackable]
 public partial class SGameCancleReq : IMessage
 {
-    public short ErrorCode { get; set; }
     public int RoomID { get; set; }
+    public bool IsCancle { get; set; }
+}
+[MemoryPackable]
+public partial class CGameCancleRes : IMessage
+{
+    public ErrorCode ErrorCode { get; set; }
+}
+
+[MemoryPackable]
+public partial class UserData
+{
+    public Int64 UserID { get; set; }
+    public Int16 PlayerColor { get; set; }
+    public string NickName { get; set; } = null!;
+    public int Level { get; set; }
+    public int Win { get; set; }
+    public int Lose { get; set; }
 }
