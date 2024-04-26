@@ -16,20 +16,28 @@ public class PacketManager
 
     public PacketManager()
     {
-        _onRecv.Add((Int16)PacketType.LOGIN, Make<LoginReq>);
-        _onHandler.Add((Int16)PacketType.LOGIN, _handler.Handle_C_Login);
+        _onRecv.Add((Int16)PacketType.REQ_C_LOGIN, Make<CLoginReq>);
+        _onHandler.Add((Int16)PacketType.REQ_C_LOGIN, _handler.Handle_C_Login);
+        _onRecv.Add((Int16)PacketType.REQ_C_LOGOUT, Make<CLogOutReq>);
+        _onHandler.Add((Int16)PacketType.REQ_C_LOGOUT, _handler.Handle_C_Logout);
 
-        _onRecv.Add((Int16)PacketType.LOGOUT, Make<LogOutReq>);
-        _onHandler.Add((Int16)PacketType.LOGOUT, _handler.Handle_C_Logout);
+        _onRecv.Add((Int16)PacketType.REQ_C_ROOM_ENTER, Make<CRoomEnterReq>);
+        _onHandler.Add((Int16)PacketType.REQ_C_ROOM_ENTER, _handler.Handle_C_RoomEnter);
+        _onRecv.Add((Int16)PacketType.REQ_C_ROOM_LEAVE, Make<CRoomLeaveReq>);
+        _onHandler.Add((Int16)PacketType.REQ_C_ROOM_LEAVE, _handler.Handle_C_RoomLeave);
+        _onRecv.Add((Int16)PacketType.REQ_C_ROOM_CHAT, Make<CRoomChatReq>);
+        _onHandler.Add((Int16)PacketType.REQ_C_ROOM_CHAT, _handler.Handle_C_RoomChat);
 
-        _onRecv.Add((Int16)PacketType.ROOM_ENTER, Make<RoomEnterReq>);
-        _onHandler.Add((Int16)PacketType.ROOM_ENTER, _handler.Handle_C_RoomEnter);
-
-        _onRecv.Add((Int16)PacketType.ROOM_LEAVE, Make<RoomLeaveReq>);
-        _onHandler.Add((Int16)PacketType.ROOM_LEAVE, _handler.Handle_C_RoomLeave);
-
-        _onRecv.Add((Int16)PacketType.ROOM_CHAT, Make<RoomChatReq>);
-        _onHandler.Add((Int16)PacketType.ROOM_CHAT, _handler.Handle_C_RoomChat);
+        _onRecv.Add((Int16)PacketType.REQ_C_GAME_READY, Make<CGameReadyReq>);
+        _onHandler.Add((Int16)PacketType.REQ_C_GAME_READY, _handler.Handle_C_GameReady);
+        _onRecv.Add((Int16)PacketType.REQ_C_GAME_PUT, Make<CGamePutReq>);
+        _onHandler.Add((Int16)PacketType.REQ_C_GAME_PUT, _handler.Handle_C_GamePut);
+        _onRecv.Add((Int16)PacketType.RES_C_TURN_CHANGE, Make<CTurnChangeRes>);
+        _onHandler.Add((Int16)PacketType.RES_C_TURN_CHANGE, _handler.Handle_C_TurnChange);
+        _onRecv.Add((Int16)PacketType.RES_C_GAME_END, Make<CGameEndRes>);
+        _onHandler.Add((Int16)PacketType.RES_C_GAME_END, _handler.Handle_C_GameEnd);
+        _onRecv.Add((Int16)PacketType.RES_C_GAME_CANCLE, Make<CGameCancleRes>);
+        _onHandler.Add((Int16)PacketType.RES_C_GAME_CANCLE, _handler.Handle_C_GameCancle);
     }
 
     public void InitUserDelegate(UserManager userManager)
@@ -82,7 +90,7 @@ public class PacketManager
                     action(data);
                 }
             }
-            catch 
+            catch
             {
 
             }

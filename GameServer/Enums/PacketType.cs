@@ -2,9 +2,37 @@ namespace GameServer;
 
 public enum PacketType : Int16
 {
-    LOGIN = 0,
-    LOGOUT = 1,
-    ROOM_ENTER = 2,
-    ROOM_LEAVE = 3,
-    ROOM_CHAT = 4,
+    REQ_C_LOGIN = 1001,
+    RES_S_LOGIN = 1002,
+
+    REQ_C_LOGOUT = 1003,
+    RES_S_LOGOUT = 1004,
+
+    REQ_C_ROOM_ENTER = 1005,
+    RES_S_ROOM_ENTER = 1006,
+
+    REQ_C_ROOM_LEAVE = 1007,
+    RES_S_ROOM_LEAVE = 1008,
+
+    REQ_C_ROOM_CHAT = 1009,
+    RES_S_ROOM_CHAT = 1010,
+
+    REQ_C_GAME_READY = 1011,
+    RES_S_GAME_READY = 1012,
+
+    RES_S_GAME_START = 1013,
+
+    RES_C_GAME_END = 1014,
+    REQ_S_GAME_END = 1015,
+
+    REQ_C_GAME_PUT = 1016,
+    RES_S_GAME_PUT = 1017,
+
+    REQ_S_TURN_CHANGE = 1018,
+    RES_C_TURN_CHANGE = 1019,
+
+    RES_C_GAME_CANCLE = 1020,
+    REQ_S_GAME_CANCLE = 1021,
+
+    N_GAME_TIMER = 1022,
 }
