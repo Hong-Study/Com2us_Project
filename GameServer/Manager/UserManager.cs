@@ -6,7 +6,6 @@ public class UserManager
 {
     int MaxUserCount = 1000;
     ConcurrentDictionary<string, User> _users = new ConcurrentDictionary<string, User>();
-
     public UserManager(int maxUserCount)
     {
         MaxUserCount = maxUserCount;
@@ -30,9 +29,13 @@ public class UserManager
         }
 
         User user = new User(sessionId);
-        _users.TryAdd(sessionId, user);
+        if (_users.TryAdd(sessionId, user))
+        {
+            return ErrorCode.NONE;
+        }
 
         return ErrorCode.NONE;
+
     }
 
     public ErrorCode RemoveUser(string sessionId)

@@ -29,7 +29,7 @@ public class RoomManager
         return room;
     }
 
-    public void Init(Func<string, byte[], bool> sendFunc)
+    public void InitSendDelegate(Func<string, byte[], bool> sendFunc)
     {
         foreach (var room in _roomPool)
         {

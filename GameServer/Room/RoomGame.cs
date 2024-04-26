@@ -5,8 +5,6 @@ public partial class Room
 {
     public const int BoardSize = 19;
     BoardType[,] _gameBoard;
-    int _turn = 0;
-    int _nextTurn = 0;
 
     public void GameReady(string sessionID, bool isReady)
     {

@@ -32,7 +32,7 @@ public partial class CLogOutReq : IMessage
 [MemoryPackable]
 public partial class SLogOutRes : IMessage
 {
-    public int Index { get; set; }
+    public Int16 ErrorCode { get; set; }
 }
 
 [MemoryPackable]
