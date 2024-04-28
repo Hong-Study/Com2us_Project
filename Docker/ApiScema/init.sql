@@ -36,8 +36,5 @@ CREATE TABLE mail_data(
     -- mail_item_id INT,
     -- mail_item_count INT, 
     is_read BOOLEAN NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (send_user_name) REFERENCES user_game_data(user_name),
-    FOREIGN KEY (recv_user_name) REFERENCES user_game_data(user_name)
-    -- FOREIGN KEY (mail_item_id) REFERENCES user_item_data(item_id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

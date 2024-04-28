@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+using Common;
 
 namespace GameServer;
 
@@ -117,6 +117,7 @@ public partial class Room : JobQueue
         }
 
         SRoomChatRes res = new SRoomChatRes();
+        res.ErrorCode = ErrorCode.NONE;
         res.UserName = user.SessionID;
         res.Message = message;
 

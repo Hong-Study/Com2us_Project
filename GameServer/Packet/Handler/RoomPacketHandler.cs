@@ -1,3 +1,5 @@
+using Common;
+
 namespace GameServer;
 
 public partial class PacketHandler

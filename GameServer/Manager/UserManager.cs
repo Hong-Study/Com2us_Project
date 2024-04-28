@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-
+using Common;
 namespace GameServer;
 
 public class UserManager
@@ -11,31 +11,31 @@ public class UserManager
         MaxUserCount = maxUserCount;
     }
 
-    public ErrorCode AddUser(string sessionId, UserGameData data)
+    public record AddUserResult(ErrorCode ErrorCode, UserGameData? data);
+    public AddUserResult AddUser(string sessionId, UserGameData data)
     {
         if (IsFullUserCount())
         {
-            return ErrorCode.NONE;
+            return MakeUserResult(ErrorCode.NONE);
         }
 
         if (IsExistUser(sessionId))
         {
-            return ErrorCode.NONE;
+            return MakeUserResult(ErrorCode.NONE);
         }
 
         if (IsExistUser(data.user_id))
         {
-            return ErrorCode.NONE;
+            return MakeUserResult(ErrorCode.NONE);
         }
 
         User user = new User(sessionId);
         if (_users.TryAdd(sessionId, user))
         {
-            return ErrorCode.NONE;
+            return MakeUserResult(ErrorCode.NONE, data);
         }
 
-        return ErrorCode.NONE;
-
+        return MakeUserResult(ErrorCode.NONE);
     }
 
     public ErrorCode RemoveUser(string sessionId)
@@ -76,5 +76,10 @@ public class UserManager
     bool IsExistUser(Int64 userId)
     {
         return _users.Values.Any(user => user.UserID == userId);
+    }
+
+    AddUserResult MakeUserResult(ErrorCode errorCode, UserGameData? data = null)
+    {
+        return new AddUserResult(errorCode, data);
     }
 }
