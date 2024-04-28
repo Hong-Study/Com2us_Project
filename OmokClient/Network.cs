@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Windows.Forms;
-using CSCommon;
+using Common;
 
 namespace GameClient;
 

@@ -1,8 +1,10 @@
+using Common;
+
 namespace GameServer;
 
 public partial class PacketHandler
 {
-    public Func<string, UserGameData, ErrorCode> AddUserFunc = null!;
+    public Func<string, UserGameData, UserManager.AddUserResult> AddUserFunc = null!;
     public Func<string, ErrorCode> RemoveUserFunc = null!;
     public Func<string, User?> GetUserFunc = null!;
     public Func<int, Room?> GetRoomFunc = null!;
@@ -17,9 +19,24 @@ public partial class PacketHandler
         }
 
         // 로그인 처리
-        ErrorCode result = AddUserFunc(sessionID, new UserGameData());
+        UserManager.AddUserResult result = AddUserFunc(sessionID, new UserGameData());
         SLoginRes res = new SLoginRes();
-        res.ErrorCode = (Int16)result;
+        res.ErrorCode = result.ErrorCode;
+
+        if (result.data == null)
+        {
+            return;
+        }
+
+        res.UserData = new UserData()
+        {
+            UserID = result.data.user_id,
+            PlayerColor = (Int16)BoardType.None,
+            NickName = result.data.user_name,
+            Win = result.data.win,
+            Lose = result.data.lose,
+            Level = result.data.level,
+        };
 
         byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
         SendFunc(sessionID, bytes);
@@ -36,7 +53,7 @@ public partial class PacketHandler
         // 로그아웃 처리
         ErrorCode result = RemoveUserFunc(sessionID);
         SLogOutRes res = new SLogOutRes();
-        res.ErrorCode = (Int16)result;
+        res.ErrorCode = result;
 
         byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGOUT);
         SendFunc(sessionID, bytes);

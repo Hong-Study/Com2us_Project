@@ -299,7 +299,6 @@ namespace GameClient
                 return;
             }
 
-
             int x, y;
 
             // 왼쪽클릭만 허용
@@ -340,12 +339,7 @@ namespace GameClient
             
             if (isNotify == false)
             {
-                IsMyTurn = false;
                 SendPacketOmokPut(x, y);
-            }
-            else
-            {
-                IsMyTurn = true;
             }
 
             Rectangle r = new Rectangle(시작위치, 590, 시작위치 + 돌크기 + 350, 돌크기 + 10);

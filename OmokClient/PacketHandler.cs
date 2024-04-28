@@ -3,11 +3,16 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using MemoryPack;
 
+using Common;
+
 namespace GameClient;
 public partial class mainForm
 {
     Dictionary<Int16, Action<ClientPacketData>> _onRecv = new Dictionary<Int16, Action<ClientPacketData>>();
     Dictionary<Int16, Action<IMessage>> _onHandler = new Dictionary<Int16, Action<IMessage>>();
+
+    UserData _myUserData = new UserData();
+    Dictionary<Int64, UserData> _userList = new Dictionary<Int64, UserData>();
 
     void InitPacketHandler()
     {
@@ -40,7 +45,7 @@ public partial class mainForm
     void ParsingPacket(byte[] bytes)
     {
         ClientPacketData data = new ClientPacketData(bytes);
-        
+
         Action<ClientPacketData> action = null;
         if (_onRecv.TryGetValue(data.PacketType, out action))
         {
@@ -88,15 +93,16 @@ public partial class mainForm
 
     public void Handle_S_Login(IMessage message)
     {
-        SLoginRes res = message as SLoginRes;
-        if (res == null)
+        SLoginRes packet = message as SLoginRes;
+        if (packet == null)
         {
             return;
         }
 
-        if (res.ErrorCode == (Int16)ErrorCode.NONE)
+        if (packet.ErrorCode == (Int16)ErrorCode.NONE)
         {
             MessageBox.Show("로그인 성공");
+            _myUserData = packet.UserData;
         }
         else
         {
@@ -111,7 +117,26 @@ public partial class mainForm
 
     public void Handle_S_RoomEnter(IMessage message)
     {
-        
+        SRoomEnterRes packet = message as SRoomEnterRes;
+        if (packet == null)
+        {
+            return;
+        }
+
+        if (packet.ErrorCode != (Int16)ErrorCode.NONE)
+        {
+            MessageBox.Show("에러 발생");
+            return;
+        }
+
+        List<string> userList = new List<string>();
+        foreach (var user in packet.UserList)
+        {
+            _userList.Add(user.UserID, user);
+            userList.Add(user.NickName);
+        }
+
+        listBoxRoomUserList.Items.Add(userList);
     }
 
     public void Handle_S_RoomLeave(IMessage message)
@@ -121,33 +146,51 @@ public partial class mainForm
 
     public void Handle_S_RoomUserLeave(IMessage message)
     {
+        SUserLeaveReq packet = message as SUserLeaveReq;
+        if (packet == null)
+        {
+            return;
+        }
+        // packet.
 
+        if (_userList.TryGetValue(packet.UserID, out UserData user))
+        {
+            _userList.Remove(packet.UserID);
+            listBoxRoomUserList.Items.Remove(user.NickName);
+        }
+        else
+        {
+            // TODO
+        }
     }
 
     public void Handle_S_RoomNewUser(IMessage message)
     {
-
-    }
-
-    public void Handle_S_RoomChat(IMessage message)
-    {
-
-    }
-
-    public void Handle_S_GameReady(IMessage message)
-    {
-        SGamePutRes res = message as SGamePutRes;
-        if (res == null)
+        SNewUserEnterReq packet = message as SNewUserEnterReq;
+        if (packet == null)
         {
             return;
         }
 
-        if(res.ErrorCode != (Int16)ErrorCode.NONE)
+        _userList.Add(packet.User.UserID, packet.User);
+        listBoxRoomUserList.Items.Add(packet.User.NickName);
+    }
+
+    public void Handle_S_RoomChat(IMessage message)
+    {
+        SRoomChatRes packet = message as SRoomChatRes;
+        if (packet == null)
         {
-            MessageBox.Show("에러 발생");
+            return;
         }
 
-        플레이어_돌두기(true, res.X, res.Y);
+        string msg = $"{packet.UserName} : {packet.Message}";
+        listBoxRoomChatMsg.Items.Add(msg);
+    }
+
+    public void Handle_S_GameReady(IMessage message)
+    {
+        // TODO
     }
 
     public void Handle_S_GameStart(IMessage message)
@@ -157,17 +200,44 @@ public partial class mainForm
 
     public void Handle_S_GameEnd(IMessage message)
     {
-        
+
     }
 
     public void Handle_S_GamePut(IMessage message)
     {
+        SGamePutRes packet = message as SGamePutRes;
+        if (packet == null)
+        {
+            return;
+        }
 
+        if (packet.ErrorCode != (Int16)ErrorCode.NONE)
+        {
+            MessageBox.Show("에러 발생");
+        }
+
+        플레이어_돌두기(true, packet.PosX, packet.PosY);
     }
 
     public void Handle_S_TurnChange(IMessage message)
     {
+        // IsMyTurn
+        STurnChangeReq packet = message as STurnChangeReq;
+        if (packet == null)
+        {
+            return;
+        }
 
+        if (packet.NextTurnUserID == _myUserData.UserID)
+        {
+            MessageBox.Show("당신의 차례입니다.");
+            IsMyTurn = true;
+        }
+        else
+        {
+            MessageBox.Show("상대방의 차례입니다.");
+            IsMyTurn = false;
+        }
     }
 
     public void Handle_S_GameCancle(IMessage message)

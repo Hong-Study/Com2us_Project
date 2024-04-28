@@ -1,13 +1,7 @@
-﻿using CSCommon;
-using MessagePack;
+﻿using Common;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Runtime.Versioning;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Windows.Devices.SmartCards;
 
 #pragma warning disable CA1416
 

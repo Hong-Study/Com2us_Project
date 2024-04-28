@@ -1,6 +1,7 @@
 using SuperSocket.Common;
 using SuperSocket.SocketBase.Protocol;
 using SuperSocket.SocketEngine.Protocol;
+using Common;
 
 namespace GameServer;
 

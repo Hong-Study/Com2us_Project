@@ -1,3 +1,5 @@
+using Common;
+
 namespace GameServer;
 
 // 게임 관련 기능
