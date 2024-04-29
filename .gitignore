@@ -412,4 +412,6 @@ FodyWeavers.xsd
 .history
 .ionide
 
+00_bin_omok_client
+
 # End of https://www.toptal.com/developers/gitignore/api/csharp,visualstudiocode

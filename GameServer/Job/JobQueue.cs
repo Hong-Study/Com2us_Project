@@ -26,16 +26,17 @@ public class JobQueue
     // 고로 Lock을 사용
     void Run()
     {
-        long tick = DateTime.Now.Ticks;
-
+        // job == null인 코드를 처리하는 과정에서 누군가가 Push를 한다면? 처리가 안되고 좀비 패킷으로 남아있을 수도 있다.
+        // 따라서 해당 처리를 제대로 해 줘야함.
         while (_jobQueue.TryDequeue(out IJob? job))
         {
             if (job == null)
+            {
+                _lock.Unlock();
                 break;
+            }
 
             job.Execute();
         }
-
-        _lock.Unlock();
     }
 }

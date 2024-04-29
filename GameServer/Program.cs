@@ -30,12 +30,3 @@ class Program
         await host.RunAsync();
     }
 }
- 
-
-
-// MainServer server = new MainServer();
-// server.InitConfig("Any", 7777);
-
-// server.CreateStartServer();
-
-// while(true) { }

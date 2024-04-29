@@ -12,34 +12,36 @@ public partial class mainForm
     Dictionary<Int16, Action<IMessage>> _onHandler = new Dictionary<Int16, Action<IMessage>>();
 
     UserData _myUserData = new UserData();
+    UserData _anotherUserData = new UserData();
+    
     Dictionary<Int64, UserData> _userList = new Dictionary<Int64, UserData>();
 
     void InitPacketHandler()
     {
         _onRecv.Add((Int16)PacketType.RES_S_LOGIN, Make<SLoginRes>);
         _onHandler.Add((Int16)PacketType.RES_S_LOGIN, Handle_S_Login);
-        _onRecv.Add((Int16)PacketType.REQ_C_LOGOUT, Make<SLogOutRes>);
-        _onHandler.Add((Int16)PacketType.REQ_C_LOGOUT, Handle_S_Logout);
+        _onRecv.Add((Int16)PacketType.RES_S_LOGOUT, Make<SLogOutRes>);
+        _onHandler.Add((Int16)PacketType.RES_S_LOGOUT, Handle_S_Logout);
 
-        _onRecv.Add((Int16)PacketType.REQ_C_ROOM_ENTER, Make<SRoomEnterRes>);
-        _onHandler.Add((Int16)PacketType.REQ_C_ROOM_ENTER, Handle_S_RoomEnter);
-        _onRecv.Add((Int16)PacketType.REQ_C_ROOM_LEAVE, Make<SRoomLeaveRes>);
-        _onHandler.Add((Int16)PacketType.REQ_C_ROOM_LEAVE, Handle_S_RoomLeave);
-        _onRecv.Add((Int16)PacketType.REQ_C_ROOM_CHAT, Make<SRoomChatRes>);
-        _onHandler.Add((Int16)PacketType.REQ_C_ROOM_CHAT, Handle_S_RoomChat);
+        _onRecv.Add((Int16)PacketType.RES_S_ROOM_ENTER, Make<SRoomEnterRes>);
+        _onHandler.Add((Int16)PacketType.RES_S_ROOM_ENTER, Handle_S_RoomEnter);
+        _onRecv.Add((Int16)PacketType.RES_S_ROOM_LEAVE, Make<SRoomLeaveRes>);
+        _onHandler.Add((Int16)PacketType.RES_S_ROOM_LEAVE, Handle_S_RoomLeave);
+        _onRecv.Add((Int16)PacketType.RES_S_ROOM_CHAT, Make<SRoomChatRes>);
+        _onHandler.Add((Int16)PacketType.RES_S_ROOM_CHAT, Handle_S_RoomChat);
 
-        _onRecv.Add((Int16)PacketType.REQ_C_GAME_READY, Make<SGameReadyRes>);
-        _onHandler.Add((Int16)PacketType.REQ_C_GAME_READY, Handle_S_GameReady);
-        _onRecv.Add((Int16)PacketType.RES_C_GAME_START, Make<SGameStartReq>);
-        _onHandler.Add((Int16)PacketType.RES_S_GAME_READY, Handle_S_GameStart);
-        _onRecv.Add((Int16)PacketType.REQ_C_GAME_PUT, Make<SGamePutRes>);
-        _onHandler.Add((Int16)PacketType.REQ_C_GAME_PUT, Handle_S_GamePut);
-        _onRecv.Add((Int16)PacketType.RES_C_TURN_CHANGE, Make<STurnChangeReq>);
-        _onHandler.Add((Int16)PacketType.RES_C_TURN_CHANGE, Handle_S_TurnChange);
-        _onRecv.Add((Int16)PacketType.RES_C_GAME_END, Make<SGameEndReq>);
-        _onHandler.Add((Int16)PacketType.RES_C_GAME_END, Handle_S_GameEnd);
-        _onRecv.Add((Int16)PacketType.RES_C_GAME_CANCLE, Make<SGameCancleReq>);
-        _onHandler.Add((Int16)PacketType.RES_C_GAME_CANCLE, Handle_S_GameCancle);
+        _onRecv.Add((Int16)PacketType.RES_S_GAME_READY, Make<SGameReadyRes>);
+        _onHandler.Add((Int16)PacketType.RES_S_GAME_READY, Handle_S_GameReady);
+        _onRecv.Add((Int16)PacketType.REQ_S_GAME_START, Make<SGameStartReq>);
+        _onHandler.Add((Int16)PacketType.REQ_S_GAME_START, Handle_S_GameStart);
+        _onRecv.Add((Int16)PacketType.RES_S_GAME_PUT, Make<SGamePutRes>);
+        _onHandler.Add((Int16)PacketType.RES_S_GAME_PUT, Handle_S_GamePut);
+        _onRecv.Add((Int16)PacketType.REQ_S_TURN_CHANGE, Make<STurnChangeReq>);
+        _onHandler.Add((Int16)PacketType.REQ_S_TURN_CHANGE, Handle_S_TurnChange);
+        _onRecv.Add((Int16)PacketType.REQ_S_GAME_END, Make<SGameEndReq>);
+        _onHandler.Add((Int16)PacketType.REQ_S_GAME_END, Handle_S_GameEnd);
+        _onRecv.Add((Int16)PacketType.REQ_S_GAME_CANCLE, Make<SGameCancleReq>);
+        _onHandler.Add((Int16)PacketType.REQ_S_GAME_CANCLE, Handle_S_GameCancle);
     }
 
     void ParsingPacket(byte[] bytes)
@@ -117,6 +119,7 @@ public partial class mainForm
 
     public void Handle_S_RoomEnter(IMessage message)
     {
+        DevLog.Write("방 입장 패킷 도착");
         SRoomEnterRes packet = message as SRoomEnterRes;
         if (packet == null)
         {
@@ -129,14 +132,15 @@ public partial class mainForm
             return;
         }
 
-        List<string> userList = new List<string>();
         foreach (var user in packet.UserList)
         {
+            _anotherUserData = user;
+
             _userList.Add(user.UserID, user);
-            userList.Add(user.NickName);
+            listBoxRoomUserList.Items.Add(user.NickName);
         }
 
-        listBoxRoomUserList.Items.Add(userList);
+        DevLog.Write($"방 입장 성공: {packet.UserList.Count}");
     }
 
     public void Handle_S_RoomLeave(IMessage message)
@@ -172,8 +176,11 @@ public partial class mainForm
             return;
         }
 
+        DevLog.Write($"새로운 유저 입장: {packet.User.NickName}");
         _userList.Add(packet.User.UserID, packet.User);
         listBoxRoomUserList.Items.Add(packet.User.NickName);
+
+        _anotherUserData = packet.User;
     }
 
     public void Handle_S_RoomChat(IMessage message)
@@ -195,12 +202,48 @@ public partial class mainForm
 
     public void Handle_S_GameStart(IMessage message)
     {
+        SGameStartReq packet = message as SGameStartReq;
+        if (packet == null)
+        {
+            return;
+        }
 
+        if (packet.IsStart == true)
+        {
+            MessageBox.Show("게임 시작");
+            bool isMyTurn = false;
+            if (packet.StartPlayerID == _myUserData.UserID)
+            {
+                isMyTurn = true;
+            }
+            else
+            {
+                isMyTurn = false;
+            }
+
+            DevLog.Write($"게임 시작: {isMyTurn} {_myUserData.NickName} {_anotherUserData.NickName}");
+            StartGame(isMyTurn, _myUserData.NickName, _anotherUserData.NickName);
+        }
     }
 
     public void Handle_S_GameEnd(IMessage message)
     {
+        SGameEndReq packet = message as SGameEndReq;
+        if (packet == null)
+        {
+            return;
+        }
 
+        if (packet.WinUserID == _myUserData.UserID)
+        {
+            MessageBox.Show("당신이 승리하였습니다.");
+        }
+        else
+        {
+            MessageBox.Show("당신이 패배하였습니다.");
+        }
+
+        EndGame();
     }
 
     public void Handle_S_GamePut(IMessage message)

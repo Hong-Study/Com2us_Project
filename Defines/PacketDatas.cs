@@ -90,7 +90,6 @@ public partial class SRoomChatRes : IMessage
 [MemoryPackable]
 public partial class CGameReadyReq : IMessage
 {
-    public int RoomNumber { get; set; }
     public bool IsReady { get; set; }
 }
 [MemoryPackable]
@@ -104,7 +103,6 @@ public partial class SGameReadyRes : IMessage
 [MemoryPackable]
 public partial class SGameStartReq : IMessage
 {
-    public int RoomNumber { get; set; }
     public bool IsStart { get; set; }
     public Int64 StartPlayerID { get; set; }
 }
@@ -117,7 +115,6 @@ public partial class CGameStartRes : IMessage
 [MemoryPackable]
 public partial class CGamePutReq : IMessage
 {
-    public int RoomNumber { get; set; }
     public int X { get; set; }
     public int Y { get; set; }
 }
@@ -144,7 +141,6 @@ public partial class CGameEndRes : IMessage
 [MemoryPackable]
 public partial class STurnChangeReq : IMessage
 {
-    public int RoomNumber { get; set; }
     public Int64 NextTurnUserID { get; set; }
 }
 
@@ -157,7 +153,6 @@ public partial class CTurnChangeRes : IMessage
 [MemoryPackable]
 public partial class SGameCancleReq : IMessage
 {
-    public int RoomID { get; set; }
     public bool IsCancle { get; set; }
 }
 [MemoryPackable]

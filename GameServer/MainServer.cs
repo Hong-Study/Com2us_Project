@@ -7,12 +7,14 @@ using SuperSocket.SocketBase.Logging;
 using SuperSocket.SocketBase.Protocol;
 
 namespace GameServer;
-public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedService
+public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedService
 {
     #region Managers
     RoomManager _roomManager;
     UserManager _userManager;
     PacketManager _packetManager;
+    DatabaseManager _databaseManager;
+    MemoryManager _memoryManager;
     #endregion
 
     ServerOption _serverOption;
@@ -24,7 +26,7 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
     private readonly IHostApplicationLifetime _lifeTime;
 
     public MainServer(IHostApplicationLifetime lifeTime, IOptions<ServerOption> serverConfig, ILogger<MainServer> logger)
-        : base(new DefaultReceiveFilterFactory<ReceiveFilter, EFRequestInfo>())
+        : base(new DefaultReceiveFilterFactory<ReceiveFilter, PacketRequestInfo>())
     {
         _serverOption = serverConfig.Value;
         _lifeTime = lifeTime;
@@ -34,10 +36,12 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
 
         NewSessionConnected += new SessionHandler<ClientSession>(OnConnected);
         SessionClosed += new SessionHandler<ClientSession, CloseReason>(OnDisconnected);
-        NewRequestReceived += new RequestHandler<ClientSession, EFRequestInfo>(OnReceived);
+        NewRequestReceived += new RequestHandler<ClientSession, PacketRequestInfo>(OnReceived);
 
         _roomManager = new RoomManager(_serverOption.RoomMaxCount);
         _userManager = new UserManager(_serverOption.MaxConnectionNumber);
+        _databaseManager = new DatabaseManager(_serverOption.DatabaseConnectionString);
+        _memoryManager = new MemoryManager(_serverOption.MemoryConnectionString);
         _packetManager = new PacketManager();
     }
 
@@ -134,7 +138,7 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
 
             if (bResult == false)
             {
-                MainLogger.Error("[ERROR] 서버 네트워크 설정 실패 ㅠㅠ");
+                _logger.LogError("서버 생성 실패");
                 return;
             }
             else
@@ -155,10 +159,10 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
 
     private void CreateComponent(ServerOption option)
     {
-        _packetManager.InitUserDelegate(_userManager);
-        _packetManager.InitRoomDelegate(_roomManager);
-        _packetManager.InitSendFunc(SendData);
-        
+        _packetManager.SetUserDelegate(_userManager);
+        _packetManager.SetRoomDelegate(_roomManager);
+        _packetManager.SetSendDelegate(SendData);
+
         _roomManager.InitSendDelegate(SendData);
 
         _packetManager.Start(1);
@@ -167,28 +171,58 @@ public class MainServer : AppServer<ClientSession, EFRequestInfo>, IHostedServic
     public void OnConnected(ClientSession session)
     {
         // 연결 처리
-        System.Console.WriteLine($"On Connected {session.SessionID} : {session.RemoteEndPoint}");
+        MainLogger.Debug($"On Connected {session.SessionID} : {session.RemoteEndPoint}");
 
         // Connect 받았다는 요청 처리
+        // 세션이 로그인 안하는지도 체크해야함.
     }
 
     public void OnDisconnected(ClientSession session, CloseReason reason)
     {
-        System.Console.WriteLine($"On Disconnected {session.SessionID} : {reason}");
-        // if (reason == CloseReason.ClientClosing)
-        // {
-        //     // Disconnect 처리
-        // }
+        MainLogger.Debug($"On Disconnected {session.SessionID} : {reason}");
+
+        var user = _userManager.GetUserInfo(session.SessionID);
+        if (user == null)
+        {
+            return;
+        }
+        _userManager.RemoveUser(session.SessionID);
+        if (user.RoomID != 0)
+        {
+            var room = _roomManager.GetRoom(user.RoomID);
+            if (room == null)
+            {
+                return;
+            }
+
+            room.LeaveRoom(session.SessionID);
+        }
     }
 
-    public void OnReceived(ClientSession session, EFRequestInfo requestInfo)
+    public void OnReceived(ClientSession session, PacketRequestInfo requestInfo)
     {
         // 로그인 처리 이후에 User 객체를 생성하고 UserManager에 추가
         // _userManager.AddUser(session, )
-        System.Console.WriteLine($"On Received {session.SessionID} : {requestInfo.Body.Length}");
+        
+        MainLogger.Debug($"On Received {session.SessionID} : {requestInfo.Body.Length}");
 
         ServerPacketData data = new ServerPacketData(session.SessionID, requestInfo.Body, (Int16)requestInfo.PacketType);
 
         _packetManager.Distribute(data);
+    }
+
+    public void PacketInnerSend(ServerPacketData data)
+    {
+        _packetManager.Distribute(data);
+    }
+
+    public void DatabaseInnerSend(ServerPacketData data)
+    {
+        _databaseManager.Distribute(data);
+    }
+
+    public void MemoryInnerSend(ServerPacketData data)
+    {
+        _memoryManager.Distribute(data);
     }
 }

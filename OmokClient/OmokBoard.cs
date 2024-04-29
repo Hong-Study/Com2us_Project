@@ -27,13 +27,6 @@ namespace GameClient
         private SolidBrush 빨간색 = new SolidBrush(Color.Red);
         private SolidBrush 검은색 = new SolidBrush(Color.Black);
         private SolidBrush 흰색 = new SolidBrush(Color.White);
-
-        private SoundPlayer 시작효과음;
-        // private SoundPlayer 종료효과음;
-        private SoundPlayer 승리효과음;
-        private SoundPlayer 바둑돌소리;
-        private SoundPlayer 무르기요청;
-        private SoundPlayer 오류효과음;
         #endregion
                 
         private int 전x좌표 = -1, 전y좌표 = -1;
@@ -47,21 +40,13 @@ namespace GameClient
         string 흑돌플레이어Name = "";
         string 백돌플레이어Name = "";
 
-
-
         AI OmokAI = new AI();
-
 
         void Omok_Init()
         {
             DoubleBuffered = true;
 
             var curDir = System.Windows.Forms.Application.StartupPath;
-            시작효과음 = new SoundPlayer($"{curDir}\\sound\\대국시작.wav");
-            승리효과음 = new SoundPlayer($"{curDir}\\sound\\대국승리.wav");
-            바둑돌소리 = new SoundPlayer($"{curDir}\\sound\\바둑돌소리.wav");
-            무르기요청 = new SoundPlayer($"{curDir}\\sound\\무르기.wav");
-            오류효과음 = new SoundPlayer($"{curDir}\\sound\\오류.wav");
 
             //ai = new AI(바둑판);
             //컴퓨터돌 = 돌종류.백돌;
@@ -86,7 +71,7 @@ namespace GameClient
             IsMyTurn = isMyTurn;
 
             전x좌표 = 전y좌표 = -1;
-            시작효과음.Play();
+            // 시작효과음.Play();
 
             OmokLogic.StartGame();
             
@@ -178,8 +163,6 @@ namespace GameClient
                 AI모드 = false;
             }
         }
-
-
 
         #region omok UI
         void panel1_Paint(object sender, PaintEventArgs e)
