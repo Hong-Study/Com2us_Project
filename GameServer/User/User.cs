@@ -4,7 +4,7 @@ namespace GameServer;
 
 public class User
 {
-    public string SessionID { get; set; }
+    public string SessionID { get; set; } = null!;
     public Int64 UserID { get; set; }
     public int RoomID { get; set; }
     public int Level { get; set; }
@@ -13,11 +13,6 @@ public class User
     public int Gold { get; set; }
     public int Win { get; set; }
     public int Lose { get; set; }
-
-    public User(string sessionId)
-    {
-        this.SessionID = sessionId;
-    }
 
     public void Clear()
     {
