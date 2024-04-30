@@ -11,23 +11,26 @@ public class Room
     public Int32 RoomID { get; private set; }
     public bool IsStart { get; private set; } = false;
 
-    OmokGame _game;
+    public OmokGame _game;
 
     public Room(Int32 roomId)
     {
         RoomID = roomId;
-        _game = new OmokGame(SendFunc);
+        _game = new OmokGame();
     }
 
-    public void Init(Func<string, byte[], bool> SendFunc)
+    public void SetDelegate(Func<string, byte[], bool> SendFunc)
     {
         this.SendFunc = SendFunc;
+
+        _game.SetDelegate(SendFunc, GameEnd);
     }
 
     public void EnterRoom(User user)
     {
         if (_users.Count >= 2)
         {
+            SendFailedResponse<SRoomEnterRes>(user.SessionID, ErrorCode.FULL_ROOM_COUNT);
             return;
         }
 
@@ -49,7 +52,6 @@ public class Room
             _users.Add(roomUser);
             MainServer.MainLogger.Debug($"EnterRoom : {user.UserID} : {_users.Count}");
 
-            // 기존의 유저들에게 새로운 유저 정보를
             {
                 var req = new SNewUserEnterReq();
                 req.User = roomUser.UserData;
@@ -58,7 +60,6 @@ public class Room
                 BroadCast(bytes, user.SessionID);
             }
 
-            // 나에게 들어온 유저의 정보를
             {
                 var userList = new List<UserData>();
                 foreach (var u in _users)
@@ -67,7 +68,7 @@ public class Room
                 }
 
                 var res = new SRoomEnterRes();
-                res.ErrorCode = (Int16)ErrorCode.NONE;
+                res.ErrorCode = ErrorCode.NONE;
                 res.UserList = userList;
 
                 var bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_ROOM_ENTER);
@@ -79,6 +80,7 @@ public class Room
         catch (Exception e)
         {
             MainServer.MainLogger.Error($"EnterRoom : {e.Message}");
+            SendFailedResponse<SRoomEnterRes>(user.SessionID, ErrorCode.ADD_USER_EXCEPTION);
         }
     }
 
@@ -87,21 +89,20 @@ public class Room
         var user = _users.Find(u => u.SessionID == sessionID);
         if (user == null)
         {
+            SendFailedResponse<SRoomLeaveRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_LEAVE_USER_DATA);
             return;
         }
 
         _users.Remove(user);
 
-        // 나간 유저에게 나간 것을 알림
         {
             var res = new SRoomLeaveRes();
-            res.ErrorCode = (Int16)ErrorCode.NONE;
+            res.ErrorCode = ErrorCode.NONE;
 
             byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_ROOM_LEAVE);
             SendFunc(sessionID, bytes);
         }
 
-        // 남은 유저에게 나간 유저를 알림
         {
             var req = new SUserLeaveReq();
             req.UserID = user.UserID;
@@ -117,12 +118,13 @@ public class Room
         var user = _users.Find(u => u.SessionID == sessionID);
         if (user == null)
         {
+            SendFailedResponse<SRoomChatRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_CHAT_USER_DATA);
             return;
         }
 
         var res = new SRoomChatRes();
         res.ErrorCode = ErrorCode.NONE;
-        res.UserName = user.SessionID;
+        res.UserName = user.UserData.NickName;
         res.Message = message;
 
         byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_ROOM_CHAT);
@@ -134,13 +136,14 @@ public class Room
         var user = _users.Find(u => u.SessionID == sessionID);
         if (user == null)
         {
+            SendFailedResponse<SGameReadyRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_READY_USER_DATA);
             return;
         }
 
         user.IsReady = isReady;
 
         var res = new SGameReadyRes();
-        res.ErrorCode = (Int16)ErrorCode.NONE;
+        res.ErrorCode = ErrorCode.NONE;
         res.IsReady = isReady;
 
         byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_GAME_READY);
@@ -161,20 +164,22 @@ public class Room
             GameStart();
         }
     }
-    
+
     public void GamePut(string sessionID, int x, int y)
     {
+        if(IsStart == false)
+        {
+            SendFailedResponse<SGamePutRes>(sessionID, ErrorCode.NOT_START_GAME);
+            return;
+        }
+        
         _game.GamePut(sessionID, x, y);
     }
 
-    public void GameEnd()
+    public void GameEnd(string winnerSessionID)
     {
-
-    }
-
-    public void GameCancle()
-    {
-
+        IsStart = false;
+        _game.GameClear();
     }
 
     void GameStart()
@@ -186,15 +191,17 @@ public class Room
         _users[currentPlayer].PlayerColor = BoardType.Black;
         _users[(currentPlayer + 1) % 2].PlayerColor = BoardType.White;
 
-        var req = new SGameStartReq();
-        req.StartPlayerID = _users[currentPlayer].UserID;
-        req.IsStart = true;
+        {
+            var req = new SGameStartReq();
+            req.StartPlayerID = _users[currentPlayer].UserID;
+            req.IsStart = true;
 
-        byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_GAME_START);
-        BroadCast(bytes);
-        
+            byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_GAME_START);
+            BroadCast(bytes);
+        }
+
         _game.GameStart(_users, currentPlayer);
-        
+
         IsStart = true;
     }
 
@@ -217,5 +224,16 @@ public class Room
         IsStart = false;
 
         // 복사로 초기화해버리기
+    }
+
+    void SendFailedResponse<T>(string sessionID, ErrorCode errorCode) where T : IResMessage, new()
+    {
+        MainServer.MainLogger.Error($"Failed Room Action : {errorCode}");
+
+        var res = new T();
+        res.ErrorCode = errorCode;
+
+        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
+        SendFunc(sessionID, bytes);
     }
 }

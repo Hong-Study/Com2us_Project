@@ -28,7 +28,7 @@ public partial class PacketHandler
             return;
         }
 
-        var room = GetRoomFunc(user.RoomID);
+        var room = GetRoomFunc(packet.RoomNumber);
         if (room == null)
         {
             MainServer.MainLogger.Error($"GetRoom : Room({user.UserID}) is not exist");

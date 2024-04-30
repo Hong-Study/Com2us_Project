@@ -23,5 +23,5 @@ public class ServerOption
     public int RoomStartNumber { get; set; } = 0;     
     public string DatabaseConnectionString { get; set; } = null!;
     public string MemoryConnectionString { get; set; } = null!; 
-
+    public int SessionTimeoutMilliSeconds { get; set; }
 }    

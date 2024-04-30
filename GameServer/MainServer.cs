@@ -13,8 +13,8 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     RoomManager _roomManager;
     UserManager _userManager;
     PacketManager _packetManager;
-    DatabaseManager _databaseManager;
-    MemoryManager _memoryManager;
+    // DatabaseManager _databaseManager;
+    // MemoryManager _memoryManager;
     #endregion
 
     ServerOption _serverOption;
@@ -40,8 +40,8 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
         _roomManager = new RoomManager(_serverOption.RoomMaxCount);
         _userManager = new UserManager(_serverOption.MaxConnectionNumber);
-        _databaseManager = new DatabaseManager(_serverOption.DatabaseConnectionString);
-        _memoryManager = new MemoryManager(_serverOption.MemoryConnectionString);
+        // _databaseManager = new DatabaseManager(_serverOption.DatabaseConnectionString);
+        // _memoryManager = new MemoryManager(_serverOption.MemoryConnectionString);
         _packetManager = new PacketManager();
     }
 
@@ -163,7 +163,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _packetManager.SetRoomDelegate(_roomManager);
         _packetManager.SetSendDelegate(SendData);
 
-        _roomManager.InitSendDelegate(SendData);
+        _roomManager.SetSendDelegate(SendData);
 
         _packetManager.Start(1);
     }
@@ -175,6 +175,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
         // Connect 받았다는 요청 처리
         // 세션이 로그인 안하는지도 체크해야함.
+        session.ConnectionTime = DateTime.Now;
     }
 
     public void OnDisconnected(ClientSession session, CloseReason reason)
@@ -202,8 +203,6 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     public void OnReceived(ClientSession session, PacketRequestInfo requestInfo)
     {
         // 로그인 처리 이후에 User 객체를 생성하고 UserManager에 추가
-        // _userManager.AddUser(session, )
-        
         MainLogger.Debug($"On Received {session.SessionID} : {requestInfo.Body.Length}");
 
         ServerPacketData data = new ServerPacketData(session.SessionID, requestInfo.Body, (Int16)requestInfo.PacketType);
@@ -216,13 +215,35 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _packetManager.Distribute(data);
     }
 
-    public void DatabaseInnerSend(ServerPacketData data)
+    public void SessionTimeoutChecked()
     {
-        _databaseManager.Distribute(data);
+        // 다 체크를 할거냐?
+        DateTime now = DateTime.Now;
+        foreach (var session in GetAllSessions())
+        {
+            if (session.IsLogin)
+            {
+                continue;
+            }
+
+            TimeSpan span = now - session.ConnectionTime;
+            if (span.TotalMilliseconds < _serverOption.SessionTimeoutMilliSeconds)
+            {
+                continue;
+            }
+
+            session.SendEndWhenSendingTimeOut();
+            session.Close();
+        }
     }
 
-    public void MemoryInnerSend(ServerPacketData data)
-    {
-        _memoryManager.Distribute(data);
-    }
+    // public void DatabaseInnerSend(ServerPacketData data)
+    // {
+    //     _databaseManager.Distribute(data);
+    // }
+
+    // public void MemoryInnerSend(ServerPacketData data)
+    // {
+    //     _memoryManager.Distribute(data);
+    // }
 }

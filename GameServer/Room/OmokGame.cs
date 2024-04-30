@@ -1,5 +1,5 @@
+using System.Timers;
 using Common;
-using SqlKata;
 
 namespace GameServer;
 
@@ -10,14 +10,23 @@ public class OmokGame
 
     BoardType[,] _gameBoard;
 
-    Func<string, byte[], bool> SendFunc;
+    Func<string, byte[], bool> SendFunc = null!;
+    Action<string> EndGameFunc = null!;
+
     List<RoomUser> _users = null!;
     public int CurrentPlayer { get; private set; } = 0;
 
-    public OmokGame(Func<string, byte[], bool> sendFunc)
+    System.Timers.Timer _putTimer = new System.Timers.Timer();
+    
+    public OmokGame()
     {
         _gameBoard = new BoardType[BoardSize, BoardSize];
+    }
+
+    public void SetDelegate(Func<string, byte[], bool> sendFunc, Action<string> endGameFunc)
+    {
         SendFunc = sendFunc;
+        EndGameFunc = endGameFunc;
     }
 
     public void GameStart(List<RoomUser> users, int currentPlayer)
@@ -61,6 +70,7 @@ public class OmokGame
         var user = _users.Find(u => u.SessionID == sessionID);
         if (user == null)
         {
+            SendFailedResponse<SGamePutRes>(sessionID, ErrorCode.NOT_EXIST_USER);
             return;
         }
 
@@ -70,6 +80,16 @@ public class OmokGame
         }
 
         _gameBoard[x, y] = user.PlayerColor;
+
+        var res = new SGamePutRes();
+        res.PosX = x;
+        res.PosY = y;
+        res.ErrorCode = ErrorCode.NONE;
+        res.UserID = user.UserID;
+        
+        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_GAME_PUT);
+        BroadCast(bytes, sessionID);
+
         if (CheckWin(x, y, user.PlayerColor))
         {
             GameEnd(sessionID);
@@ -167,8 +187,22 @@ public class OmokGame
         }
     }
 
-    void GameClear()
+    public void GameClear()
     {
         Array.Clear(_gameBoard, 0, _gameBoard.Length);
+    }
+
+    private void OnTimedEvent(object? sender, ElapsedEventArgs e)
+    {
+        
+    }
+
+    void SendFailedResponse<T>(string sessionID, ErrorCode errorCode) where T : IResMessage, new()
+    {
+        var res = new T();
+        res.ErrorCode = errorCode;
+
+        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
+        SendFunc(sessionID, bytes);
     }
 }

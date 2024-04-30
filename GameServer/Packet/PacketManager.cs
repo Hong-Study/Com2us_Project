@@ -76,6 +76,16 @@ public class PacketManager : DataManager
 
     public static byte[] PacketSerialized<T>(T packet, PacketType type) where T : IMessage
     {
+        return PacketSerialized(packet, (Int16)type);
+    }
+
+    public static byte[] PacketSerialized<T>(T packet, InnerPacketType type) where T : IMessage
+    {
+        return PacketSerialized(packet, (Int16)type);
+    }
+
+    public static byte[] PacketSerialized<T>(T packet, Int16 type) where T : IMessage
+    {
         byte[]? bodyData = MemoryPackSerializer.Serialize(packet);
         Int16 bodyDataSize = 0;
         if (bodyData != null)
@@ -87,7 +97,7 @@ public class PacketManager : DataManager
 
         var dataSource = new byte[packetSize];
         Buffer.BlockCopy(BitConverter.GetBytes(packetSize), 0, dataSource, 0, 2);
-        Buffer.BlockCopy(BitConverter.GetBytes((Int16)type), 0, dataSource, 2, 2);
+        Buffer.BlockCopy(BitConverter.GetBytes(type), 0, dataSource, 2, 2);
         dataSource[4] = 0;
 
         if (bodyData != null)

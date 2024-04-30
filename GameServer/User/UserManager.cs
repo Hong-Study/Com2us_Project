@@ -17,12 +17,12 @@ public class UserManager
     {
         if (IsFullUserCount())
         {
-            SendFailedLoginResult(sessionId, ErrorCode.FULL_USER_COUNT);
+            SendResponse<SLoginRes>(sessionId, ErrorCode.FULL_USER_COUNT);
             return;
         }
         else if (IsExistUser(sessionId) || IsExistUser(data.user_id))
         {
-            SendFailedLoginResult(sessionId, ErrorCode.ALREADY_EXIST_USER);
+            SendResponse<SLoginRes>(sessionId, ErrorCode.ALREADY_EXIST_USER);
             return;
         }
 
@@ -47,7 +47,7 @@ public class UserManager
         }
         catch
         {
-            SendFailedLoginResult(sessionId, ErrorCode.ADD_USER_EXCEPTION);
+            SendResponse<SLoginRes>(sessionId, ErrorCode.ADD_USER_EXCEPTION);
         }
     }
 
@@ -57,11 +57,11 @@ public class UserManager
         {
             user.Clear();
 
-            SendFailedLoginResult(sessionId, ErrorCode.NONE);
+            SendResponse<SLogOutRes>(sessionId, ErrorCode.NONE);
         }
         else
         {
-            SendFailedLoginResult(sessionId, ErrorCode.NOT_EXIST_USER);
+            SendResponse<SLogOutRes>(sessionId, ErrorCode.NOT_EXIST_USER);
         }
     }
 
@@ -92,21 +92,12 @@ public class UserManager
         return _users.Values.Any(user => user.UserID == userId);
     }
 
-    void SendFailedLoginResult(string sessionId, ErrorCode errorCode)
+    void SendResponse<T>(string sessionID, ErrorCode errorCode) where T : IResMessage, new()
     {
-        var res = new SLoginRes();
+        var res = new T();
         res.ErrorCode = errorCode;
 
         byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
-        SendFunc(sessionId, bytes);
-    }
-
-    void SendFailedLoginResult(string sessionId, ErrorCode errorCode, string message)
-    {
-        var res = new SLoginRes();
-        res.ErrorCode = errorCode;
-
-        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
-        SendFunc(sessionId, bytes);
+        SendFunc(sessionID, bytes);
     }
 }
