@@ -13,7 +13,7 @@ public partial class mainForm
 
     UserData _myUserData = new UserData();
     UserData _anotherUserData = new UserData();
-    
+
     Dictionary<Int64, UserData> _userList = new Dictionary<Int64, UserData>();
 
     void InitPacketHandler()
@@ -224,7 +224,7 @@ public partial class mainForm
             DevLog.Write($"게임 시작: {isMyTurn} {_myUserData.NickName} {_anotherUserData.NickName}");
             StartGame(isMyTurn, _myUserData.NickName, _anotherUserData.NickName);
         }
-    }
+    }   
 
     public void Handle_S_GameEnd(IMessage message)
     {

@@ -4,8 +4,8 @@ namespace GameServer;
 
 public partial class PacketHandler
 {
-    public Func<string, UserGameData, UserManager.AddUserResult> AddUserFunc = null!;
-    public Func<string, ErrorCode> RemoveUserFunc = null!;
+    public Action<string, UserGameData> AddUserFunc = null!;
+    public Action<string> RemoveUserFunc = null!;
     public Func<string, User?> GetUserFunc = null!;
     public Func<int, Room?> GetRoomFunc = null!;
     public Func<string, byte[], bool> SendFunc = null!;
@@ -27,30 +27,7 @@ public partial class PacketHandler
             level = 1,
         };
 
-        // 로그인 처리
-        UserManager.AddUserResult result = AddUserFunc(sessionID, data);
-        SLoginRes res = new SLoginRes();
-        res.ErrorCode = result.ErrorCode;
-
-        if (result.data == null)
-        {
-            return;
-        }
-
-        MainServer.MainLogger.Debug($"User Login : {result.data.user_id}");
-
-        res.UserData = new UserData()
-        {
-            UserID = result.data.user_id,
-            PlayerColor = (Int16)BoardType.None,
-            NickName = result.data.user_name,
-            Win = result.data.win,
-            Lose = result.data.lose,
-            Level = result.data.level,
-        };
-
-        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
-        SendFunc(sessionID, bytes);
+        AddUserFunc(sessionID, data);
     }
 
     public void Handle_C_Logout(string sessionID, IMessage message)
@@ -62,22 +39,39 @@ public partial class PacketHandler
         }
 
         // 로그아웃 처리
-        ErrorCode result = RemoveUserFunc(sessionID);
-        SLogOutRes res = new SLogOutRes();
-        res.ErrorCode = result;
-
-        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGOUT);
-        SendFunc(sessionID, bytes);
+        RemoveUserFunc(sessionID);
     }
 
-    Room? GetRoom(string sessionID)
+    Room? GetRoom<T>(string sessionID) where T : IResMessage, new()
     {
         var user = GetUserFunc(sessionID);
         if (user == null)
-        {
+        {   
+            MainServer.MainLogger.Error($"GetUser : User{sessionID} is not exist");
+            
+            T pkt = new T();
+            pkt.ErrorCode = ErrorCode.NOT_EXIST_USER;
+
+            byte[] bytes = PacketManager.PacketSerialized(pkt, PacketType.RES_S_ROOM_ENTER);
+            SendFunc(sessionID, bytes);
+
             return null;
         }
 
-        return GetRoomFunc(user.RoomID);
+        var room = GetRoomFunc(user.RoomID);
+        if (room == null)
+        {
+            MainServer.MainLogger.Error($"GetRoom : Room({user.UserID}) is not exist");
+
+            T pkt = new T();
+            pkt.ErrorCode = ErrorCode.NOT_EXIST_ROOM;
+
+            byte[] bytes = PacketManager.PacketSerialized(pkt, PacketType.RES_S_ROOM_ENTER);
+            SendFunc(sessionID, bytes);
+            
+            return null;
+        }
+
+        return room;
     }
 }

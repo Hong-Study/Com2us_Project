@@ -6,30 +6,28 @@ public class UserManager
 {
     int MaxUserCount = 1000;
     ConcurrentDictionary<string, User> _users = new ConcurrentDictionary<string, User>();
+    Func<string, byte[], bool> SendFunc = null!;
+
     public UserManager(int maxUserCount)
     {
         MaxUserCount = maxUserCount;
     }
 
-    public record AddUserResult(ErrorCode ErrorCode, UserGameData? data);
-    public AddUserResult AddUser(string sessionId, UserGameData data)
+    public void AddUser(string sessionId, UserGameData data)
     {
         if (IsFullUserCount())
         {
-            return MakeUserResult(ErrorCode.NONE);
+            SendFailedLoginResult(sessionId, ErrorCode.FULL_USER_COUNT);
+            return;
         }
-
-        if (IsExistUser(sessionId))
+        else if (IsExistUser(sessionId) || IsExistUser(data.user_id))
         {
-            return MakeUserResult(ErrorCode.NONE);
+            SendFailedLoginResult(sessionId, ErrorCode.ALREADY_EXIST_USER);
+            return;
         }
 
-        if (IsExistUser(data.user_id))
+        User user = new User()
         {
-            return MakeUserResult(ErrorCode.NONE);
-        }
-
-        User user = new User(){
             SessionID = sessionId,
             UserID = data.user_id,
             NickName = data.user_name,
@@ -37,25 +35,33 @@ public class UserManager
             Win = data.win,
             Lose = data.lose,
         };
-        
-        if (_users.TryAdd(sessionId, user))
-        {
-            return MakeUserResult(ErrorCode.NONE, data);
-        }
 
-        return MakeUserResult(ErrorCode.NONE);
+        try
+        {
+            _users.TryAdd(sessionId, user);
+            var res = new SLoginRes();
+            res.ErrorCode = ErrorCode.NONE;
+
+            byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
+            SendFunc(sessionId, bytes);
+        }
+        catch
+        {
+            SendFailedLoginResult(sessionId, ErrorCode.ADD_USER_EXCEPTION);
+        }
     }
 
-    public ErrorCode RemoveUser(string sessionId)
+    public void RemoveUser(string sessionId)
     {
         if (_users.TryRemove(sessionId, out User? user))
         {
             user.Clear();
-            return ErrorCode.NONE;
+
+            SendFailedLoginResult(sessionId, ErrorCode.NONE);
         }
         else
         {
-            return ErrorCode.NONE;
+            SendFailedLoginResult(sessionId, ErrorCode.NOT_EXIST_USER);
         }
     }
 
@@ -86,8 +92,21 @@ public class UserManager
         return _users.Values.Any(user => user.UserID == userId);
     }
 
-    AddUserResult MakeUserResult(ErrorCode errorCode, UserGameData? data = null)
+    void SendFailedLoginResult(string sessionId, ErrorCode errorCode)
     {
-        return new AddUserResult(errorCode, data);
+        var res = new SLoginRes();
+        res.ErrorCode = errorCode;
+
+        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
+        SendFunc(sessionId, bytes);
+    }
+
+    void SendFailedLoginResult(string sessionId, ErrorCode errorCode, string message)
+    {
+        var res = new SLoginRes();
+        res.ErrorCode = errorCode;
+
+        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
+        SendFunc(sessionId, bytes);
     }
 }

@@ -3,7 +3,7 @@ using Common;
 namespace GameServer;
 
 // 방 관련 기능
-public class Room : JobQueue
+public class Room
 {
     List<RoomUser> _users = new List<RoomUser>();
     Func<string, byte[], bool> SendFunc = null!;
@@ -174,7 +174,7 @@ public class Room : JobQueue
 
     public void GameCancle()
     {
-        
+
     }
 
     void GameStart()
