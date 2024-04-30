@@ -108,13 +108,15 @@ namespace GameClient
             }
         }
 
-
         // 로그인 요청
         private void button2_Click(object sender, EventArgs e)
         {
             var loginReq = new CLoginReq();
             loginReq.UserID = Convert.ToInt64(textBoxUserID.Text);
             loginReq.AuthToken = textBoxUserPW.Text;
+
+            _myUserData.UserID = loginReq.UserID;
+            _myUserData.NickName = $"USER_{textBoxUserID.Text}";
 
             PostSendPacket(PacketType.REQ_C_LOGIN, loginReq);            
             DevLog.Write($"로그인 요청:  {textBoxUserID.Text}, {textBoxUserPW.Text}");
@@ -175,7 +177,6 @@ namespace GameClient
         {
             var gamePutReq = new CGamePutReq
             {
-                RoomNumber = 1,
                 X = x,
                 Y = y
             };
@@ -188,7 +189,6 @@ namespace GameClient
         {
             var gameReadyReq = new CGameReadyReq
             {
-                RoomNumber = 1,
                 IsReady = true
             };
 
@@ -212,7 +212,6 @@ namespace GameClient
         {
             var gameReadyReq = new CGameReadyReq
             {
-                RoomNumber = 1,
                 IsReady = true
             };
 

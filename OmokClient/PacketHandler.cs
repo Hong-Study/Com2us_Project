@@ -25,8 +25,12 @@ public partial class mainForm
 
         _onRecv.Add((Int16)PacketType.RES_S_ROOM_ENTER, Make<SRoomEnterRes>);
         _onHandler.Add((Int16)PacketType.RES_S_ROOM_ENTER, Handle_S_RoomEnter);
+        _onRecv.Add((Int16)PacketType.REQ_S_NEW_USER_ENTER, Make<SNewUserEnterReq>);
+        _onHandler.Add((Int16)PacketType.REQ_S_NEW_USER_ENTER, Handle_S_RoomNewUser);
         _onRecv.Add((Int16)PacketType.RES_S_ROOM_LEAVE, Make<SRoomLeaveRes>);
         _onHandler.Add((Int16)PacketType.RES_S_ROOM_LEAVE, Handle_S_RoomLeave);
+        _onRecv.Add((Int16)PacketType.REQ_S_USER_LEAVE, Make<SUserLeaveReq>);
+        _onHandler.Add((Int16)PacketType.REQ_S_USER_LEAVE, Handle_S_RoomUserLeave);
         _onRecv.Add((Int16)PacketType.RES_S_ROOM_CHAT, Make<SRoomChatRes>);
         _onHandler.Add((Int16)PacketType.RES_S_ROOM_CHAT, Handle_S_RoomChat);
 
@@ -104,7 +108,6 @@ public partial class mainForm
         if (packet.ErrorCode == (Int16)ErrorCode.NONE)
         {
             MessageBox.Show("로그인 성공");
-            _myUserData = packet.UserData;
         }
         else
         {
@@ -258,6 +261,8 @@ public partial class mainForm
         {
             MessageBox.Show("에러 발생");
         }
+
+        System.Console.WriteLine($"돌 두기: {packet.PosX}, {packet.PosY}");
 
         플레이어_돌두기(true, packet.PosX, packet.PosY);
     }
