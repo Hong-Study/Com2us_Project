@@ -379,8 +379,6 @@ namespace GameClient
         }
         #endregion
 
-
-
         void 컴퓨터두기()
         {
             int x = 0, y = 0;
