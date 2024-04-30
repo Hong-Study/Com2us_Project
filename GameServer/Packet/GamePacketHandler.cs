@@ -12,13 +12,13 @@ public partial class PacketHandler
             return;
         }
 
-        var room = GetRoom(sessionID);
+        var room = GetRoom<SGameReadyRes>(sessionID);
         if (room == null)
         {
             return;
         }
 
-        room.Push(() => room.GameReady(sessionID, packet.IsReady));
+        room.GameReady(sessionID, packet.IsReady);
     }
 
     public void Handle_C_GameStart(string sessionID, IMessage message)
@@ -39,13 +39,13 @@ public partial class PacketHandler
             return;
         }
 
-        var room = GetRoom(sessionID);
+        var room = GetRoom<SGamePutRes>(sessionID);
         if (room == null)
         {
             return;
         }
 
-        room.Push(() => room.GamePut(sessionID, packet.X, packet.Y));
+       room.GamePut(sessionID, packet.X, packet.Y);
     }
 
     public void Handle_C_TurnChange(string sessionID, IMessage message)
