@@ -29,11 +29,11 @@ public class RoomManager
         return room;
     }
 
-    public void InitSendDelegate(Func<string, byte[], bool> sendFunc)
+    public void SetSendDelegate(Func<string, byte[], bool> sendFunc)
     {
         foreach (var room in _roomPool)
         {
-            room.Value.Init(sendFunc);
+            room.Value.SetDelegate(sendFunc);
         }
     }
 }

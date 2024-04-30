@@ -11,7 +11,7 @@ public class DatabaseManager : DataManager
     readonly QueryFactory _queryFactory;
     readonly string _connectionString;
 
-    DatabaseHandler _databaseHandler = null!;
+    // DatabaseHandler _databaseHandler = null!;
 
     public DatabaseManager(string connectionString)
     {
