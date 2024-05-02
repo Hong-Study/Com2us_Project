@@ -3,7 +3,8 @@ namespace Common;
 public enum ErrorCode : short
 {
     NONE = 0,
-
+    NOT_DESERIALIZE_PACKET = 1000,
+    
     NOT_MATCH_PACKET_TYPE = 2000,
     DESERIALIZE_PACKET_ERROR = 2001,
     SERIALIZE_PACKET_ERROR = 2002,
@@ -21,4 +22,5 @@ public enum ErrorCode : short
     NOT_EXIST_GAME_PUT_USER_DATA = 2014,
     NOT_START_GAME = 2015,
     ALREADY_START_GAME = 2016,
+    NOT_MY_TURN = 2017,
 }
