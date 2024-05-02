@@ -1,4 +1,3 @@
-using System.Threading.Tasks.Dataflow;
 using MemoryPack;
 using Common;
 
@@ -11,7 +10,7 @@ public class PacketManager : DataManager
 
     public PacketManager()
     {
-        InitHandler();   
+        InitHandler();
     }
 
     public override void InitHandler()
@@ -40,6 +39,9 @@ public class PacketManager : DataManager
         _onHandler.Add((Int16)PacketType.RES_C_GAME_END, _handler.Handle_C_GameEnd);
         _onRecv.Add((Int16)PacketType.RES_C_GAME_CANCLE, Make<CGameCancleRes>);
         _onHandler.Add((Int16)PacketType.RES_C_GAME_CANCLE, _handler.Handle_C_GameCancle);
+
+        _onRecv.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, Make<NTFCheckSessionLoginReq>);
+        _onHandler.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, _handler.Handle_NTFCheckSessionLogin);
     }
 
     public void SetUserDelegate(UserManager userManager)
@@ -54,9 +56,10 @@ public class PacketManager : DataManager
         _handler.GetRoomFunc = roomManager.GetRoom;
     }
 
-    public void SetSendDelegate(Func<string, byte[], bool> sendFunc)
+    public void SetMainDelegate(MainServer server)
     {
-        _handler.SendFunc = sendFunc;
+        _handler.SendFunc = server.SendData;
+        _handler.SessionTimeoutCheckedFunc = server.SessionTimeoutChecked;
     }
 
     void Make<T>(ServerPacketData data) where T : IMessage, new()
@@ -72,19 +75,12 @@ public class PacketManager : DataManager
         {
             action(data.SessionID, packet);
         }
+
     }
 
-    public static byte[] PacketSerialized<T>(T packet, PacketType type) where T : IMessage
-    {
-        return PacketSerialized(packet, (Int16)type);
-    }
-
-    public static byte[] PacketSerialized<T>(T packet, InnerPacketType type) where T : IMessage
-    {
-        return PacketSerialized(packet, (Int16)type);
-    }
-
-    public static byte[] PacketSerialized<T>(T packet, Int16 type) where T : IMessage
+    public static byte[] PacketSerialized<I, E>(I packet, E type)
+        where I : IMessage
+        where E : Enum
     {
         byte[]? bodyData = MemoryPackSerializer.Serialize(packet);
         Int16 bodyDataSize = 0;
@@ -95,14 +91,17 @@ public class PacketManager : DataManager
 
         var packetSize = (Int16)(bodyDataSize + PacketDef.PACKET_HEADER_SIZE);
 
+        MainServer.MainLogger.Info($"{packetSize} : {type} : {bodyDataSize}");
+
         var dataSource = new byte[packetSize];
-        Buffer.BlockCopy(BitConverter.GetBytes(packetSize), 0, dataSource, 0, 2);
-        Buffer.BlockCopy(BitConverter.GetBytes(type), 0, dataSource, 2, 2);
+        
+        FastBinaryWrite.Int16(dataSource, 0, packetSize);
+        FastBinaryWrite.Int16(dataSource, 2, (Int16)(object)type);
         dataSource[4] = 0;
 
         if (bodyData != null)
-        {
-            Buffer.BlockCopy(bodyData, 0, dataSource, PacketDef.PACKET_HEADER_SIZE, bodyData.Length);
+        {   
+            FastBinaryWrite.Bytes(dataSource, PacketDef.PACKET_HEADER_SIZE, bodyData);
         }
 
         return dataSource;

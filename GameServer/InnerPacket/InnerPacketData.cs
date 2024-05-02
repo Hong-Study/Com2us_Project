@@ -1,6 +1,8 @@
 using Common;
+using MemoryPack;
 
-public class NTFCheckSessionLoginReq : IMessage
+[MemoryPackable]
+public partial class NTFCheckSessionLoginReq : IMessage
 {
-    
+
 }

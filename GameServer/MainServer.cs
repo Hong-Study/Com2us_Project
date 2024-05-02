@@ -13,8 +13,6 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     RoomManager _roomManager;
     UserManager _userManager;
     PacketManager _packetManager;
-    // DatabaseManager _databaseManager;
-    // MemoryManager _memoryManager;
     #endregion
 
     ServerOption _serverOption;
@@ -24,6 +22,8 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     public static ILog MainLogger = null!;
     private readonly ILogger<MainServer> _logger;
     private readonly IHostApplicationLifetime _lifeTime;
+
+    System.Timers.Timer _sessionTimeoutTimer = new System.Timers.Timer();
 
     public MainServer(IHostApplicationLifetime lifeTime, IOptions<ServerOption> serverConfig, ILogger<MainServer> logger)
         : base(new DefaultReceiveFilterFactory<ReceiveFilter, PacketRequestInfo>())
@@ -40,9 +40,16 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
         _roomManager = new RoomManager(_serverOption.RoomMaxCount);
         _userManager = new UserManager(_serverOption.MaxConnectionNumber);
-        // _databaseManager = new DatabaseManager(_serverOption.DatabaseConnectionString);
-        // _memoryManager = new MemoryManager(_serverOption.MemoryConnectionString);
         _packetManager = new PacketManager();
+
+        _sessionTimeoutTimer.Interval = _serverOption.SessionTimeoutMilliSeconds;
+        _sessionTimeoutTimer.Elapsed += (sender, e) =>
+        {
+            var checkSessionReq = new NTFCheckSessionLoginReq();
+
+            var data = PacketManager.MakeInnerPacket("", checkSessionReq, InnerPacketType.NTF_CHECK_SESSION_LOGIN);
+            PacketInnerSend(data);
+        };
     }
 
     public void InitConfig(ServerOption option)
@@ -102,8 +109,6 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         MainLogger.Info("OnStopped - end");
     }
 
-    // 데이터를 모아서 한번에 보내는 방식?
-    // 현재는 하나씩 보내는 형식
     public bool SendData(string sessionID, byte[] bytes)
     {
         var session = GetSessionByID(sessionID);
@@ -150,6 +155,8 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
             CreateComponent(config);
 
             MainLogger.Info("서버 생성 성공");
+
+            // _sessionTimeoutTimer.Start();
         }
         catch (Exception ex)
         {
@@ -161,7 +168,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     {
         _packetManager.SetUserDelegate(_userManager);
         _packetManager.SetRoomDelegate(_roomManager);
-        _packetManager.SetSendDelegate(SendData);
+        _packetManager.SetMainDelegate(this);
 
         _roomManager.SetSendDelegate(SendData);
 
@@ -217,7 +224,6 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
     public void SessionTimeoutChecked()
     {
-        // 다 체크를 할거냐?
         DateTime now = DateTime.Now;
         foreach (var session in GetAllSessions())
         {
@@ -232,18 +238,9 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
                 continue;
             }
 
-            session.SendEndWhenSendingTimeOut();
             session.Close();
         }
+
+        _sessionTimeoutTimer.Start();
     }
-
-    // public void DatabaseInnerSend(ServerPacketData data)
-    // {
-    //     _databaseManager.Distribute(data);
-    // }
-
-    // public void MemoryInnerSend(ServerPacketData data)
-    // {
-    //     _memoryManager.Distribute(data);
-    // }
 }

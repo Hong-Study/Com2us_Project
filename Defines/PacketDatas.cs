@@ -86,8 +86,8 @@ public partial class CRoomChatReq : IMessage
 public partial class SRoomChatRes : IResMessage
 {
     public ErrorCode ErrorCode { get; set; }
-    public string UserName { get; set; } = null!;
-    public string Message { get; set; } = null!;
+    public string? UserName { get; set; }
+    public string? Message { get; set; }
 }
 
 [MemoryPackable]
@@ -146,7 +146,6 @@ public partial class STurnChangeReq : IMessage
 {
     public Int64 NextTurnUserID { get; set; }
 }
-
 [MemoryPackable]
 public partial class CTurnChangeRes : IResMessage
 {
