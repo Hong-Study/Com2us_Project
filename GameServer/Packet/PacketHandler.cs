@@ -7,8 +7,11 @@ public partial class PacketHandler
     public Action<string, UserGameData> AddUserFunc = null!;
     public Action<string> RemoveUserFunc = null!;
     public Func<string, User?> GetUserFunc = null!;
+
     public Func<int, Room?> GetRoomFunc = null!;
+
     public Func<string, byte[], bool> SendFunc = null!;
+    public Action SessionTimeoutCheckedFunc = null!;
 
     public void Handle_C_Login(string sessionID, IMessage message)
     {

@@ -1,5 +1,6 @@
 using Common;
-using GameServer;
+
+namespace GameServer;
 
 public partial class PacketHandler
 {
@@ -11,5 +12,6 @@ public partial class PacketHandler
             return;
         }
 
+        SessionTimeoutCheckedFunc();
     }
 }

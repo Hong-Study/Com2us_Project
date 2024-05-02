@@ -30,7 +30,7 @@ public class Room
     {
         if (_users.Count >= 2)
         {
-            SendFailedResponse<SRoomEnterRes>(user.SessionID, ErrorCode.FULL_ROOM_COUNT);
+            SendFailedResponse<SRoomEnterRes>(user.SessionID, ErrorCode.FULL_ROOM_COUNT, PacketType.RES_S_ROOM_ENTER);
             return;
         }
 
@@ -80,7 +80,7 @@ public class Room
         catch (Exception e)
         {
             MainServer.MainLogger.Error($"EnterRoom : {e.Message}");
-            SendFailedResponse<SRoomEnterRes>(user.SessionID, ErrorCode.ADD_USER_EXCEPTION);
+            SendFailedResponse<SRoomEnterRes>(user.SessionID, ErrorCode.ADD_USER_EXCEPTION, PacketType.RES_S_ROOM_ENTER);
         }
     }
 
@@ -89,7 +89,7 @@ public class Room
         var user = _users.Find(u => u.SessionID == sessionID);
         if (user == null)
         {
-            SendFailedResponse<SRoomLeaveRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_LEAVE_USER_DATA);
+            SendFailedResponse<SRoomLeaveRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_LEAVE_USER_DATA, PacketType.RES_S_ROOM_LEAVE);
             return;
         }
 
@@ -118,7 +118,7 @@ public class Room
         var user = _users.Find(u => u.SessionID == sessionID);
         if (user == null)
         {
-            SendFailedResponse<SRoomChatRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_CHAT_USER_DATA);
+            SendFailedResponse<SRoomChatRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_CHAT_USER_DATA, PacketType.RES_S_ROOM_CHAT);
             return;
         }
 
@@ -133,10 +133,16 @@ public class Room
 
     public void GameReady(string sessionID, bool isReady)
     {
+        if (IsStart)
+        {
+            SendFailedResponse<SGameReadyRes>(sessionID, ErrorCode.ALREADY_START_GAME, PacketType.RES_S_GAME_READY);
+            return;
+        }
+
         var user = _users.Find(u => u.SessionID == sessionID);
         if (user == null)
         {
-            SendFailedResponse<SGameReadyRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_READY_USER_DATA);
+            SendFailedResponse<SGameReadyRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_READY_USER_DATA, PacketType.RES_S_GAME_READY);
             return;
         }
 
@@ -167,12 +173,12 @@ public class Room
 
     public void GamePut(string sessionID, int x, int y)
     {
-        if(IsStart == false)
+        if (IsStart == false)
         {
-            SendFailedResponse<SGamePutRes>(sessionID, ErrorCode.NOT_START_GAME);
+            SendFailedResponse<SGamePutRes>(sessionID, ErrorCode.NOT_START_GAME, PacketType.RES_S_GAME_PUT);
             return;
         }
-        
+
         _game.GamePut(sessionID, x, y);
     }
 
@@ -226,14 +232,14 @@ public class Room
         // 복사로 초기화해버리기
     }
 
-    void SendFailedResponse<T>(string sessionID, ErrorCode errorCode) where T : IResMessage, new()
+    void SendFailedResponse<T>(string sessionID, ErrorCode errorCode, PacketType packetType) where T : IResMessage, new()
     {
         MainServer.MainLogger.Error($"Failed Room Action : {errorCode}");
 
         var res = new T();
         res.ErrorCode = errorCode;
 
-        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
+        byte[] bytes = PacketManager.PacketSerialized(res, packetType);
         SendFunc(sessionID, bytes);
     }
 }

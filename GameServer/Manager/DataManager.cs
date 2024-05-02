@@ -51,6 +51,10 @@ public abstract class DataManager
                 {
                     action(data);
                 }
+                else
+                {
+                    MainServer.MainLogger.Error($"Not found handler : {data.PacketType}");
+                }
             }
             catch
             {
@@ -59,9 +63,11 @@ public abstract class DataManager
         }
     }
 
-    public static ServerPacketData MakeInnerPacket<T>(string sessionID, T packet, Int16 type) where T : IMessage
+    public static ServerPacketData MakeInnerPacket<T>(string sessionID, T packet, InnerPacketType type) where T : IMessage
     {
         byte[] body = MemoryPackSerializer.Serialize(packet);
-        return new ServerPacketData(sessionID, body, type);
+        return new ServerPacketData(sessionID, body, (Int16)type);
     }
+
+    
 }
