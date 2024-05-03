@@ -2,7 +2,6 @@ using Common;
 
 namespace GameServer;
 
-// 방 관련 기능
 public class Room
 {
     public Int32 RoomID { get; private set; }
@@ -129,7 +128,6 @@ public class Room
 
     public void SendChat(string sessionID, string message)
     {
-        // 가져오는 코드
         var user = GetRoomUser(sessionID);
         if (user == null)
         {

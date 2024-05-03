@@ -23,7 +23,6 @@ public partial class PacketHandler
             return;
         }
 
-        // HeartBeat 처리
         HeartHeatCheckFunc();
     }
 
@@ -35,7 +34,6 @@ public partial class PacketHandler
             return;
         }
 
-        // RoomCheck 처리
         RoomCheckFunc();
     }
 

@@ -226,7 +226,6 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
     public void OnConnected(ClientSession session)
     {
-        // 연결 처리
         MainLogger.Debug($"On Connected {session.SessionID} : {session.RemoteEndPoint}");
 
         var packet = new NTFSessionConnectedReq();
@@ -240,7 +239,6 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     {
         MainLogger.Debug($"On Disconnected {session.SessionID} : {reason}");
 
-        // 룸 정리 처리도 해야됨.
         var packet = new NTFSessionDisconnectedReq();
         packet.SessionID = session.SessionID;
 

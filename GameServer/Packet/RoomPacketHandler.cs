@@ -13,7 +13,6 @@ public partial class PacketHandler
             return;
         }
 
-        // 방 입장 처리
         var user = GetUserFunc(sessionID);
         if (user == null)
         {   
@@ -53,7 +52,6 @@ public partial class PacketHandler
             return;
         }
 
-        // 방 퇴장 처리
         var room = GetRoom<SRoomLeaveRes>(sessionID);
         if (room != null)
         {
@@ -71,7 +69,6 @@ public partial class PacketHandler
 
         MainServer.MainLogger.Debug($"Room Chat : {packet.Message}");
 
-        // 방 채팅 처리
         Room? room = GetRoom<SRoomChatRes>(sessionID);
         if (room != null)
         {
