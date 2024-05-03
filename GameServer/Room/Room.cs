@@ -3,36 +3,48 @@ using Common;
 namespace GameServer;
 
 // 방 관련 기능
-public class Room : JobQueue
+public class Room
 {
+    public Int32 RoomID { get; private set; }
+
     List<RoomUser> _users = new List<RoomUser>();
     Func<string, byte[], bool> SendFunc = null!;
 
-    public Int32 RoomID { get; private set; }
-    public bool IsStart { get; private set; } = false;
-
     OmokGame _game;
+
+    DateTime _gameStartTime;
+    TimeSpan _maxGameTime;
 
     public Room(Int32 roomId)
     {
         RoomID = roomId;
-        _game = new OmokGame(SendFunc);
+        _game = new OmokGame();
     }
 
-    public void Init(Func<string, byte[], bool> SendFunc)
+    public void InitDefaultSetting(Int32 turnTimeoutSecond, Int32 timeoutCount, Int32 MaxGameTimeMinute)
+    {
+        _game.TimeoutCount = timeoutCount;
+        _game.TurnTimeoutSecond = turnTimeoutSecond;
+        _maxGameTime = new TimeSpan(0, MaxGameTimeMinute, 0);
+    }
+
+    public void SetDelegate(Func<string, byte[], bool> SendFunc)
     {
         this.SendFunc = SendFunc;
+
+        _game.SetDelegate(SendFunc);
     }
 
     public void EnterRoom(User user)
     {
         if (_users.Count >= 2)
         {
+            SendFailedResponse<SRoomEnterRes>(user.sessionID, ErrorCode.FULL_ROOM_COUNT, PacketType.RES_S_ROOM_ENTER);
             return;
         }
 
         RoomUser roomUser = new RoomUser();
-        roomUser.SessionID = user.SessionID;
+        roomUser.sessionID = user.sessionID;
         roomUser.UserID = user.UserID;
         roomUser.UserData = new UserData()
         {
@@ -49,16 +61,14 @@ public class Room : JobQueue
             _users.Add(roomUser);
             MainServer.MainLogger.Debug($"EnterRoom : {user.UserID} : {_users.Count}");
 
-            // 기존의 유저들에게 새로운 유저 정보를
             {
                 var req = new SNewUserEnterReq();
                 req.User = roomUser.UserData;
 
                 var bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_NEW_USER_ENTER);
-                BroadCast(bytes, user.SessionID);
+                BroadCast(bytes, user.sessionID);
             }
 
-            // 나에게 들어온 유저의 정보를
             {
                 var userList = new List<UserData>();
                 foreach (var u in _users)
@@ -67,11 +77,11 @@ public class Room : JobQueue
                 }
 
                 var res = new SRoomEnterRes();
-                res.ErrorCode = (Int16)ErrorCode.NONE;
+                res.ErrorCode = ErrorCode.NONE;
                 res.UserList = userList;
 
                 var bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_ROOM_ENTER);
-                SendFunc(user.SessionID, bytes);
+                SendFunc(user.sessionID, bytes);
             }
 
             user.RoomID = RoomID;
@@ -79,29 +89,35 @@ public class Room : JobQueue
         catch (Exception e)
         {
             MainServer.MainLogger.Error($"EnterRoom : {e.Message}");
+            SendFailedResponse<SRoomEnterRes>(user.sessionID, ErrorCode.EXCEPTION_ADD_USER, PacketType.RES_S_ROOM_ENTER);
         }
     }
 
     public void LeaveRoom(string sessionID)
     {
-        var user = _users.Find(u => u.SessionID == sessionID);
+        var user = _users.Find(u => u.sessionID == sessionID);
         if (user == null)
         {
+            SendFailedResponse<SRoomLeaveRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_LEAVE_USER_DATA, PacketType.RES_S_ROOM_LEAVE);
             return;
         }
 
         _users.Remove(user);
 
-        // 나간 유저에게 나간 것을 알림
+        if(_game.IsStart)
+        {
+            _game.GameEnd(true);
+            return;
+        }
+
         {
             var res = new SRoomLeaveRes();
-            res.ErrorCode = (Int16)ErrorCode.NONE;
+            res.ErrorCode = ErrorCode.NONE;
 
             byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_ROOM_LEAVE);
             SendFunc(sessionID, bytes);
         }
 
-        // 남은 유저에게 나간 유저를 알림
         {
             var req = new SUserLeaveReq();
             req.UserID = user.UserID;
@@ -114,15 +130,16 @@ public class Room : JobQueue
     public void SendChat(string sessionID, string message)
     {
         // 가져오는 코드
-        var user = _users.Find(u => u.SessionID == sessionID);
+        var user = _users.Find(u => u.sessionID == sessionID);
         if (user == null)
         {
+            SendFailedResponse<SRoomChatRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_CHAT_USER_DATA, PacketType.RES_S_ROOM_CHAT);
             return;
         }
 
         var res = new SRoomChatRes();
         res.ErrorCode = ErrorCode.NONE;
-        res.UserName = user.SessionID;
+        res.UserName = user.UserData.NickName;
         res.Message = message;
 
         byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_ROOM_CHAT);
@@ -131,16 +148,23 @@ public class Room : JobQueue
 
     public void GameReady(string sessionID, bool isReady)
     {
-        var user = _users.Find(u => u.SessionID == sessionID);
+        if (_game.IsStart)
+        {
+            SendFailedResponse<SGameReadyRes>(sessionID, ErrorCode.ALREADY_START_GAME, PacketType.RES_S_GAME_READY);
+            return;
+        }
+
+        var user = _users.Find(u => u.sessionID == sessionID);
         if (user == null)
         {
+            SendFailedResponse<SGameReadyRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_READY_USER_DATA, PacketType.RES_S_GAME_READY);
             return;
         }
 
         user.IsReady = isReady;
 
         var res = new SGameReadyRes();
-        res.ErrorCode = (Int16)ErrorCode.NONE;
+        res.ErrorCode = ErrorCode.NONE;
         res.IsReady = isReady;
 
         byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_GAME_READY);
@@ -161,61 +185,82 @@ public class Room : JobQueue
             GameStart();
         }
     }
-    
-    public void GamePut(string sessionID, int x, int y)
+
+    public void GamePut(string sessionID, Int32 x, Int32 y)
     {
+        if (_game.IsStart == false)
+        {
+            SendFailedResponse<SGamePutRes>(sessionID, ErrorCode.NOT_START_GAME, PacketType.RES_S_GAME_PUT);
+            return;
+        }
+
         _game.GamePut(sessionID, x, y);
-    }
-
-    public void GameEnd()
-    {
-
-    }
-
-    public void GameCancle()
-    {
-        
     }
 
     void GameStart()
     {
         var random = new Random();
-        int startRand = random.Next(1000);
-        int currentPlayer = startRand % 2;
+        Int32 startRand = random.Next(1000);
+        Int32 currentPlayer = startRand % 2;
 
         _users[currentPlayer].PlayerColor = BoardType.Black;
         _users[(currentPlayer + 1) % 2].PlayerColor = BoardType.White;
 
-        var req = new SGameStartReq();
-        req.StartPlayerID = _users[currentPlayer].UserID;
-        req.IsStart = true;
+        {
+            var req = new SGameStartReq();
+            req.StartPlayerID = _users[currentPlayer].UserID;
+            req.IsStart = true;
 
-        byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_GAME_START);
-        BroadCast(bytes);
-        
+            byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_GAME_START);
+            BroadCast(bytes);
+        }
+
         _game.GameStart(_users, currentPlayer);
-        
-        IsStart = true;
+
+        _gameStartTime = DateTime.Now;
     }
 
     void BroadCast(byte[] bytes, string expiredSessionID = "")
     {
         foreach (var user in _users)
         {
-            if (user.SessionID == expiredSessionID)
+            if (user.sessionID == expiredSessionID)
             {
                 continue;
             }
 
-            SendFunc(user.SessionID, bytes);
+            SendFunc(user.sessionID, bytes);
         }
     }
 
     void Clear()
     {
         _users.Clear();
-        IsStart = false;
+        _game.GameClear();
+    }
 
-        // 복사로 초기화해버리기
+    void SendFailedResponse<T>(string sessionID, ErrorCode errorCode, PacketType packetType) where T : IResMessage, new()
+    {
+        MainServer.MainLogger.Error($"Failed Room Action : {errorCode}");
+
+        var res = new T();
+        res.ErrorCode = errorCode;
+
+        byte[] bytes = PacketManager.PacketSerialized(res, packetType);
+        SendFunc(sessionID, bytes);
+    }
+
+    public void RoomCheck()
+    {
+        if (_game.IsStart)
+        {
+            TimeSpan ts = DateTime.Now - _gameStartTime;
+            if(ts > _maxGameTime)
+            {
+                _game.GameCancle();
+            }
+
+            _game.TurnTimeoutCheck();
+        }
     }
 }

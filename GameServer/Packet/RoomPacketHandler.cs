@@ -1,4 +1,5 @@
 using Common;
+using SqlKata;
 
 namespace GameServer;
 
@@ -13,23 +14,35 @@ public partial class PacketHandler
         }
 
         // 방 입장 처리
-        User? user = GetUserFunc(sessionID);
+        var user = GetUserFunc(sessionID);
         if (user == null)
-        {
-            MainServer.MainLogger.Debug($"Room Enter : User is null");
+        {   
+            MainServer.MainLogger.Error($"GetUser : User{sessionID} is not exist");
+            
+            SRoomEnterRes pkt = new SRoomEnterRes();
+            pkt.ErrorCode = ErrorCode.NOT_EXIST_USER;
+
+            byte[] bytes = PacketManager.PacketSerialized(pkt, PacketType.RES_S_ROOM_ENTER);
+            SendFunc(sessionID, bytes);
+
             return;
         }
 
-        MainServer.MainLogger.Debug($"Room Enter {user.UserID} : {packet.RoomNumber}");
-
-        Room? room = GetRoomFunc(packet.RoomNumber);
+        var room = GetRoomFunc(packet.RoomNumber);
         if (room == null)
         {
-            MainServer.MainLogger.Debug($"Room Enter : Room is null");
+            MainServer.MainLogger.Error($"GetRoom : Room({user.UserID}) is not exist");
+
+            SRoomEnterRes pkt = new SRoomEnterRes();
+            pkt.ErrorCode = ErrorCode.NOT_EXIST_ROOM;
+
+            byte[] bytes = PacketManager.PacketSerialized(pkt, PacketType.RES_S_ROOM_ENTER);
+            SendFunc(sessionID, bytes);
+            
             return;
         }
 
-        room.Push(() => room.EnterRoom(user));
+        room.EnterRoom(user);
     }
 
     public void Handle_C_RoomLeave(string sessionID, IMessage message)
@@ -41,19 +54,11 @@ public partial class PacketHandler
         }
 
         // 방 퇴장 처리
-        User? user = GetUserFunc(sessionID);
-        if (user == null)
+        var room = GetRoom<SRoomLeaveRes>(sessionID);
+        if (room != null)
         {
-            return;
+            room.LeaveRoom(sessionID);
         }
-
-        Room? room = GetRoomFunc(user.RoomID);
-        if (room == null)
-        {
-            return;
-        }
-
-        room.Push(() => room.LeaveRoom(sessionID));
     }
 
     public void Handle_C_RoomChat(string sessionID, IMessage message)
@@ -67,21 +72,11 @@ public partial class PacketHandler
         MainServer.MainLogger.Debug($"Room Chat : {packet.Message}");
 
         // 방 채팅 처리
-        User? user = GetUserFunc(sessionID);
-        if (user == null)
+        Room? room = GetRoom<SRoomChatRes>(sessionID);
+        if (room != null)
         {
-            MainServer.MainLogger.Debug($"Room Chat : User is null");
-            return;
+            room.SendChat(sessionID, packet.Message);
         }
 
-        Room? room = GetRoomFunc(user.RoomID);
-        if (room == null)
-        {
-            MainServer.MainLogger.Debug($"Room Chat : Room is null");
-            return;
-        }
-
-        // 채팅 메시지 전파
-        room.Push(() => room.SendChat(sessionID, packet.Message));
     }
 }
