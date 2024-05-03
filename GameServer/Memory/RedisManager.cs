@@ -1,21 +1,36 @@
 using System.Threading.Tasks.Dataflow;
+using CloudStructures;
 using Common;
 using MemoryPack;
 
 namespace GameServer;
 
-public abstract class DataManager
+public class RedisManager
 {
-    protected Dictionary<Int16, Action<ServerPacketData>> _onRecv = new Dictionary<Int16, Action<ServerPacketData>>();
-    protected Dictionary<Int16, Action<string, IMessage>> _onHandler = new Dictionary<Int16, Action<string, IMessage>>();
+    RedisHandler _handler;
+    Dictionary<Int16, Action<ServerPacketData>> _onRecv = new Dictionary<Int16, Action<ServerPacketData>>();
+    Dictionary<Int16, Func<string, IMessage, Task>> _onHandler = new Dictionary<Int16, Func<string, IMessage, Task>>();
     List<Thread> _logicThreads = new List<Thread>();
     BufferBlock<ServerPacketData> _msgBuffer = new BufferBlock<ServerPacketData>();
 
-    public abstract void InitHandler();
-
-    public void Distribute(ServerPacketData data)
+    public RedisManager(ref readonly ServerOption option)
     {
-        _msgBuffer.Post(data);
+        _handler = new RedisHandler();
+
+        InitHandler();
+
+        SetDelegate();
+    }
+
+    public void InitHandler()
+    {
+        _onRecv.Add((Int16)MemoryType.REQ_ME_USER_LOGIN, Make<MEUserLoginReq>);
+        _onHandler.Add((Int16)MemoryType.REQ_ME_USER_LOGIN, _handler.Handle_ME_UserLogin);
+    }
+
+    void SetDelegate()
+    {
+
     }
 
     public void Start(Int32 threadCount = 1)
@@ -34,6 +49,11 @@ public abstract class DataManager
         {
             thread.Join();
         }
+    }
+
+    public void Distribute(ServerPacketData data)
+    {
+        _msgBuffer.Post(data);
     }
 
     void Process()
@@ -63,13 +83,22 @@ public abstract class DataManager
         }
     }
 
-    public static ServerPacketData MakeInnerPacket<T>(string sessionID, T packet, InnerPacketType type) where T : IMessage
+    void Make<T>(ServerPacketData data) where T : IMessage, new()
     {
-        byte[] body = MemoryPackSerializer.Serialize(packet);
-        return new ServerPacketData(sessionID, body, (Int16)type);
+        var packet = MemoryPackSerializer.Deserialize<T>(data.Body);
+        if (packet == null)
+        {
+            return;
+        }
+
+        Func<string, IMessage, Task>? action = null;
+        if (_onHandler.TryGetValue(data.PacketType, out action))
+        {
+            action(data.sessionID, packet);
+        }
     }
 
-    public static ServerPacketData MakeInnerPacket<T>(string sessionID, T packet, PacketType type) where T : IMessage
+    public static ServerPacketData MakeMemoryPacket<T>(string sessionID, T packet, MemoryType type) where T : IMessage
     {
         byte[] body = MemoryPackSerializer.Serialize(packet);
         return new ServerPacketData(sessionID, body, (Int16)type);

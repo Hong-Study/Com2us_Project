@@ -14,6 +14,8 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     RoomManager _roomManager;
     UserManager _userManager;
     PacketManager _packetManager;
+    DatabaseManager _databaseManager;
+    RedisManager _redisManager;
     #endregion
 
     ServerOption _serverOption;
@@ -44,6 +46,9 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
         _roomManager = new RoomManager(ref _serverOption);
         _userManager = new UserManager(ref _serverOption);
+        _databaseManager = new DatabaseManager(ref _serverOption);
+        _redisManager = new RedisManager(ref _serverOption);
+
         _packetManager = new PacketManager();
     }
 
@@ -161,9 +166,11 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
     void CreateComponent(ServerOption option)
     {
-        _packetManager.SetUserDelegate(_userManager);
-        _packetManager.SetRoomDelegate(_roomManager);
-        _packetManager.SetMainDelegate(this);
+        _packetManager.SetUserDelegate(ref _userManager);
+        _packetManager.SetRoomDelegate(ref _roomManager);
+
+        MainServer mainServer = this;
+        _packetManager.SetMainDelegate(ref mainServer);
 
         _roomManager.SetDelegate(SendData, _userManager.GetUserInfo);
         _roomManager.SetDefaultSetting(option.OmokGameTurnTimeoutSeconds
@@ -256,5 +263,15 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     public void PacketInnerSend(ServerPacketData data)
     {
         _packetManager.Distribute(data);
+    }
+
+    public void PacketDatabaseSend(ServerPacketData data)
+    {
+        _databaseManager.Distribute(data);
+    }
+
+    public void PacketRedisSend(ServerPacketData data)
+    {
+        _redisManager.Distribute(data);
     }
 }
