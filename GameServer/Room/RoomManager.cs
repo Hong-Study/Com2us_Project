@@ -31,14 +31,14 @@ public class RoomManager
         return _roomPool.Find(r => r.RoomID == roomID);
     }
 
-    public void SetMainServerDelegate(MainServer mainServer)
+    public void SetDelegate(Func<string, byte[], bool> SendFunc, Func<string, User?> GetUserInfoFunc)
     {
         foreach (var room in _roomPool)
         {
-            room.SetDelegate(mainServer.SendData);
+            room.SetDelegate(SendFunc, GetUserInfoFunc);
         }
     }
-
+    
     public void SetDefaultSetting(Int32 turnTimeoutSecond, Int32 timeoutCount, Int32 maxGameTimeMinute)
     {
         foreach (var room in _roomPool)

@@ -9,6 +9,7 @@ public class OmokGame
     BoardType[,] _gameBoard;
 
     Func<string, byte[], bool> SendFunc = null!;
+    Action RoomClearFunc = null!;
 
     List<RoomUser> _users = null!;
 
@@ -24,9 +25,10 @@ public class OmokGame
         _gameBoard = new BoardType[BoardSize, BoardSize];
     }
 
-    public void SetDelegate(Func<string, byte[], bool> sendFunc)
+    public void SetDelegate(Func<string, byte[], bool> sendFunc, Action RoomClearFunc)
     {
         SendFunc = sendFunc;
+        this.RoomClearFunc = RoomClearFunc;
     }
 
     public void GameStart(List<RoomUser> users, Int32 currentPlayer)
@@ -48,6 +50,8 @@ public class OmokGame
 
         byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_GAME_CANCLE);
         BroadCast(bytes);
+
+        RoomClearFunc();
     }
 
     public void GameEnd(bool isNextUserWin = false)
@@ -64,6 +68,8 @@ public class OmokGame
 
         byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_GAME_END);
         BroadCast(bytes);
+
+        RoomClearFunc();
     }
 
     public void GamePut(string sessionID, Int32 x, Int32 y)
@@ -244,6 +250,4 @@ public class OmokGame
         byte[] bytes = PacketManager.PacketSerialized(res, packetType);
         SendFunc(sessionID, bytes);
     }
-
-
 }
