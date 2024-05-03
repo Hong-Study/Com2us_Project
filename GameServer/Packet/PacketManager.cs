@@ -5,7 +5,6 @@ namespace GameServer;
 
 public class PacketManager : DataManager
 {
-    // 패킷 전체 형태까지??
     public PacketHandler _handler = new PacketHandler();
 
     public PacketManager()
