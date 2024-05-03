@@ -1,18 +1,38 @@
+using Common;
 using SqlKata.Execution;
 
 namespace GameServer;
 
 public class DatabaseHandler
 {
-    readonly QueryFactory _queryFactory;
+    public Func<Int64, Task<UserGameData?>> GetUserGameDataAsync { get; set; } = null!;
+    public Func<Int64, Int32, Int32, Task<bool>> UpdateUserWinLoseAsync { get; set; } = null!;
 
-    public DatabaseHandler(QueryFactory queryFactory)
+    public async Task Handle_DB_Login(string sessionID, IMessage message)
     {
-        _queryFactory = queryFactory;
+        var packet = message as DBUserLoginReq;
+        if (packet == null)
+        {
+            return;
+        }
+
+        var data = await GetUserGameDataAsync(packet.UserID);
+        if (data == null)
+        {
+            return;
+        }
+
+
     }
 
-    public void Init()
+    public async Task Handle_DB_UpdateWinLoseCount(string sessionID, IMessage message)
     {
-        // DB 초기화
+        var packet = message as DBUpdateWinLoseCountReq;
+        if (packet == null)
+        {
+            return;
+        }
+
+        await Task.CompletedTask;
     }
 }

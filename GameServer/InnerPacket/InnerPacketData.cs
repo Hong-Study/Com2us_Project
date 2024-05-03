@@ -30,3 +30,16 @@ public partial class NTFSessionDisconnectedReq : IMessage
 {
     public string SessionID { get; set; } = null!;
 }
+
+[MemoryPackable]
+public partial class NTFUserLoginRes : IResMessage
+{
+    public ErrorCode ErrorCode { get; set; }
+    public UserData? UserData { get; set; }
+}
+
+[MemoryPackable]
+public partial class NTFUserLogoutRes : IResMessage
+{
+    public ErrorCode ErrorCode { get; set; }
+}

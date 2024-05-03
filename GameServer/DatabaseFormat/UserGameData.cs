@@ -1,3 +1,5 @@
+using MemoryPack;
+
 public class UserGameData
 {
     public Int64 user_id { get; set; }
