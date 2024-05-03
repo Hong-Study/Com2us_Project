@@ -21,7 +21,7 @@ public class ServerOption
     public Int32 MaxHeartBeatCheckCount { get; set; }
 
     public string DatabaseConnectionString { get; set; } = null!;
-    public string MemoryConnectionString { get; set; } = null!; 
+    public string RedisConnectionString { get; set; } = null!; 
 
     public Int32 SessionTimeoutMilliSeconds { get; set; }
     public Int32 HeartBeatMilliSeconds { get; set; }

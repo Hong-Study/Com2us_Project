@@ -1,18 +1,23 @@
 using MemoryPack;
 using Common;
+using System.Threading.Tasks.Dataflow;
 
 namespace GameServer;
 
-public class PacketManager : DataManager
+public class PacketManager
 {
     public PacketHandler _handler = new PacketHandler();
+    Dictionary<Int16, Action<ServerPacketData>> _onRecv = new Dictionary<Int16, Action<ServerPacketData>>();
+    Dictionary<Int16, Action<string, IMessage>> _onHandler = new Dictionary<Int16, Action<string, IMessage>>();
+    List<Thread> _logicThreads = new List<Thread>();
+    BufferBlock<ServerPacketData> _msgBuffer = new BufferBlock<ServerPacketData>();
 
     public PacketManager()
     {
         InitHandler();
     }
 
-    public override void InitHandler()
+    public void InitHandler()
     {
         _onRecv.Add((Int16)PacketType.RES_C_PONG, Make<CPongRes>);
         _onHandler.Add((Int16)PacketType.RES_C_PONG, _handler.Handle_C_Pong);
@@ -54,7 +59,7 @@ public class PacketManager : DataManager
         _onHandler.Add((Int16)InnerPacketType.NTF_ROOMS_CHECK, _handler.Handle_NTFRoomsCheck);
     }
 
-    public void SetUserDelegate(UserManager userManager)
+    public void SetUserDelegate(ref readonly UserManager userManager)
     {
         _handler.AddUserFunc = userManager.AddUser;
         _handler.LoginUserFunc = userManager.LoginUser;
@@ -65,29 +70,67 @@ public class PacketManager : DataManager
         _handler.ReceivePongFunc = userManager.ReceivePong;
     }
 
-    public void SetRoomDelegate(RoomManager roomManager)
+    public void SetRoomDelegate(ref readonly RoomManager roomManager)
     {
         _handler.GetRoomFunc = roomManager.GetRoom;
         _handler.RoomCheckFunc = roomManager.RoomsCheck;
     }
 
-    public void SetMainDelegate(MainServer server)
+    public void SetMainDelegate(ref readonly MainServer server)
     {
         _handler.SendFunc = server.SendData;
+        _handler.InnerSendFunc = server.PacketInnerSend;
+        _handler.DatabaseSendFunc = server.PacketDatabaseSend;
+        _handler.RedisSendFunc = server.PacketRedisSend;
     }
 
-    void Make<T>(ServerPacketData data) where T : IMessage, new()
+    public void Distribute(ServerPacketData data)
     {
-        var packet = MemoryPackSerializer.Deserialize<T>(data.Body);
-        if (packet == null)
-        {
-            return;
-        }
+        _msgBuffer.Post(data);
+    }
 
-        Action<string, IMessage>? action = null;
-        if (_onHandler.TryGetValue(data.PacketType, out action))
+    public void Start(Int32 threadCount = 1)
+    {
+        for (Int32 i = 0; i < threadCount; i++)
         {
-            action(data.sessionID, packet);
+            Thread thread = new Thread(this.Process);
+            thread.Start();
+            _logicThreads.Add(thread);
+        }
+    }
+
+    public void Stop()
+    {
+        foreach (var thread in _logicThreads)
+        {
+            thread.Join();
+        }
+    }
+
+    void Process()
+    {
+        while (MainServer.IsRunning)
+        {
+            // 멈출 때, Blocking 처리를 어떻게 할 지 고민해야 함.
+            try
+            {
+                TimeSpan timeOut = TimeSpan.FromSeconds(1);
+                ServerPacketData data = _msgBuffer.Receive(timeOut);
+
+                Action<ServerPacketData>? action = null;
+                if (_onRecv.TryGetValue(data.PacketType, out action))
+                {
+                    action(data);
+                }
+                else
+                {
+                    MainServer.MainLogger.Error($"Not found handler : {data.PacketType}");
+                }
+            }
+            catch
+            {
+
+            }
         }
     }
 
@@ -118,5 +161,32 @@ public class PacketManager : DataManager
         }
 
         return dataSource;
+    }
+
+    void Make<T>(ServerPacketData data) where T : IMessage, new()
+    {
+        var packet = MemoryPackSerializer.Deserialize<T>(data.Body);
+        if (packet == null)
+        {
+            return;
+        }
+
+        Action<string, IMessage>? action = null;
+        if (_onHandler.TryGetValue(data.PacketType, out action))
+        {
+            action(data.sessionID, packet);
+        }
+    }
+
+    public static ServerPacketData MakeInnerPacket<T>(string sessionID, T packet, InnerPacketType type) where T : IMessage
+    {
+        byte[] body = MemoryPackSerializer.Serialize(packet);
+        return new ServerPacketData(sessionID, body, (Int16)type);
+    }
+
+    public static ServerPacketData MakeInnerPacket<T>(string sessionID, T packet, PacketType type) where T : IMessage
+    {
+        byte[] body = MemoryPackSerializer.Serialize(packet);
+        return new ServerPacketData(sessionID, body, (Int16)type);
     }
 }
