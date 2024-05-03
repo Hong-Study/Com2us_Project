@@ -3,8 +3,6 @@ namespace Common;
 public enum ErrorCode : short
 {
     NONE = 0,
-    PING = 1,
-    PONG = 2,
     
     NOT_MATCH_PACKET_TYPE = 2000,
     DESERIALIZE_PACKET_ERROR = 2001,

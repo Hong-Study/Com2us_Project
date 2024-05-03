@@ -18,6 +18,9 @@ public partial class mainForm
 
     void InitPacketHandler()
     {
+        _onRecv.Add((Int16)PacketType.REQ_S_PING, Make<SPingReq>);
+        _onHandler.Add((Int16)PacketType.REQ_S_PING, Handle_S_Ping);
+
         _onRecv.Add((Int16)PacketType.RES_S_LOGIN, Make<SLoginRes>);
         _onHandler.Add((Int16)PacketType.RES_S_LOGIN, Handle_S_Login);
         _onRecv.Add((Int16)PacketType.RES_S_LOGOUT, Make<SLogOutRes>);
@@ -97,6 +100,20 @@ public partial class mainForm
         return dataSource;
     }
 
+    public void Handle_S_Ping(IMessage message)
+    {
+        SPingReq packet = message as SPingReq;
+        if (packet == null)
+        {
+            return;
+        }
+
+        CPongRes pongPacket = new CPongRes();
+
+        byte[] bytes = PacketSerialized(pongPacket, PacketType.RES_C_PONG);
+        Network.Send(bytes);
+    }
+
     public void Handle_S_Login(IMessage message)
     {
         SLoginRes packet = message as SLoginRes;
@@ -131,7 +148,7 @@ public partial class mainForm
 
         if (packet.ErrorCode != (Int16)ErrorCode.NONE)
         {
-            MessageBox.Show("에러 발생");
+            MessageBox.Show($"에러 발생 {packet.ErrorCode}");
             return;
         }
 
@@ -227,7 +244,7 @@ public partial class mainForm
             DevLog.Write($"게임 시작: {isMyTurn} {_myUserData.NickName} {_anotherUserData.NickName}");
             StartGame(isMyTurn, _myUserData.NickName, _anotherUserData.NickName);
         }
-    }   
+    }
 
     public void Handle_S_GameEnd(IMessage message)
     {
@@ -259,7 +276,7 @@ public partial class mainForm
 
         if (packet.ErrorCode != (Int16)ErrorCode.NONE)
         {
-            MessageBox.Show("에러 발생");
+            MessageBox.Show($"에러 발생 {packet.ErrorCode}");
         }
 
         System.Console.WriteLine($"돌 두기: {packet.PosX}, {packet.PosY}");

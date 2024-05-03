@@ -4,7 +4,7 @@ namespace GameServer;
 
 public class RoomUser
 {
-    public string sessionID { get; set; } = null!;
+    public string SessionID { get; set; } = null!;
     public Int64 UserID { get; set; }
     public bool IsReady { get; set; } = false;
     public BoardType PlayerColor { get; set; }
