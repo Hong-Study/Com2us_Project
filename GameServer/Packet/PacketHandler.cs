@@ -17,6 +17,10 @@ public partial class PacketHandler
     public Func<Int32, Room?> GetRoomFunc = null!;
     public Action RoomCheckFunc = null!;
 
+    public Action<ServerPacketData> InnerSendFunc = null!;
+    public Action<ServerPacketData> DatabaseSendFunc = null!;
+    public Action<ServerPacketData> RedisSendFunc = null!;
+
     public void Handle_C_Login(string sessionID, IMessage message)
     {
         var packet = message as CLoginReq;
