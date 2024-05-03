@@ -4,14 +4,17 @@ namespace GameServer;
 
 public partial class PacketHandler
 {
-    public Action<string, UserGameData> AddUserFunc = null!;
+    public Action<string> AddUserFunc = null!;
     public Action<string> RemoveUserFunc = null!;
+    public Action<string, UserGameData> LoginUserFunc = null!;
     public Func<string, User?> GetUserFunc = null!;
-
-    public Func<int, Room?> GetRoomFunc = null!;
+    public Action HeartHeatCheckFunc = null!;
+    public Action SessionLoginTimeoutCheckFunc = null!;
 
     public Func<string, byte[], bool> SendFunc = null!;
-    public Action SessionTimeoutCheckedFunc = null!;
+
+    public Func<Int32, Room?> GetRoomFunc = null!;
+    public Action RoomCheckFunc = null!;
 
     public void Handle_C_Login(string sessionID, IMessage message)
     {
@@ -30,7 +33,7 @@ public partial class PacketHandler
             level = 1,
         };
 
-        AddUserFunc(sessionID, data);
+        LoginUserFunc(sessionID, data);
     }
 
     public void Handle_C_Logout(string sessionID, IMessage message)
@@ -41,7 +44,6 @@ public partial class PacketHandler
             return;
         }
 
-        // 로그아웃 처리
         RemoveUserFunc(sessionID);
     }
 

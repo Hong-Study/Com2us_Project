@@ -18,9 +18,9 @@ public abstract class DataManager
         _msgBuffer.Post(data);
     }
 
-    public void Start(int threadCount = 1)
+    public void Start(Int32 threadCount = 1)
     {
-        for (int i = 0; i < threadCount; i++)
+        for (Int32 i = 0; i < threadCount; i++)
         {
             Thread thread = new Thread(this.Process);
             thread.Start();
@@ -43,7 +43,7 @@ public abstract class DataManager
             // 멈출 때, Blocking 처리를 어떻게 할 지 고민해야 함.
             try
             {
-                TimeSpan timeOut = TimeSpan.FromMilliseconds(1000);
+                TimeSpan timeOut = TimeSpan.FromSeconds(1);
                 ServerPacketData data = _msgBuffer.Receive(timeOut);
 
                 Action<ServerPacketData>? action = null;
@@ -68,6 +68,4 @@ public abstract class DataManager
         byte[] body = MemoryPackSerializer.Serialize(packet);
         return new ServerPacketData(sessionID, body, (Int16)type);
     }
-
-    
 }

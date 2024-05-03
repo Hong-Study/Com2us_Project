@@ -4,22 +4,32 @@ namespace GameServer;
 
 public class User
 {
-    public string SessionID { get; set; } = null!;
+    public string sessionID { get; set; } = null!;
+    public DateTime ConnectTime { get; set; }
+    public bool IsConnect { get; set; } = false;
+
+    public bool IsLogin { get; set; } = false;
+
     public Int64 UserID { get; set; }
-    public int RoomID { get; set; }
-    public int Level { get; set; }
+    public Int32 RoomID { get; set; }
+    public Int32 Level { get; set; }
     public string NickName { get; set; } = null!;
-    public int exp { get; set; }
-    public int Gold { get; set; }
-    public int Win { get; set; }
-    public int Lose { get; set; }
+    public Int32 exp { get; set; }
+    public Int32 Gold { get; set; }
+    public Int32 Win { get; set; }
+    public Int32 Lose { get; set; }
+
+    public DateTime PingTime { get; set; }
 
     public void Clear()
     {
+        Logouted();
 
+        sessionID = "";
+        IsConnect = false;
     }
 
-    public void SetInfo(UserGameData data)
+    public void Logined(UserGameData data)
     {
         this.UserID = data.user_id;
         this.NickName = data.user_name;
@@ -28,14 +38,23 @@ public class User
         this.Gold = data.gold;
         this.Win = data.win;
         this.Lose = data.lose;
+        this.IsLogin = true;
+
+        PingTime = DateTime.Now;
     }
 
-    public bool IsConfirm(string sessionId)
+    public void Logouted()
     {
-        return this.SessionID == sessionId;
+        this.UserID = 0;
+        this.IsLogin = false;
     }
 
-    public void EnterRoom(int roomId)
+    public bool IsConfirm(string sessionID)
+    {
+        return this.sessionID == sessionID;
+    }
+
+    public void EnterRoom(Int32 roomId)
     {
         this.RoomID = roomId;
     }
@@ -43,5 +62,14 @@ public class User
     public void LeaveRoom()
     {
         this.RoomID = -1;
+    }
+
+    public void SessionConnected(string sessionID)
+    {
+        this.IsConnect = true;
+        this.IsLogin = false;
+
+        this.ConnectTime = DateTime.Now;
+        this.sessionID = sessionID;
     }
 }

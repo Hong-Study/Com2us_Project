@@ -27,7 +27,7 @@ public class ReceiveFilter : FixedHeaderReceiveFilter<PacketRequestInfo>
     {
     }
 
-    protected override int GetBodyLengthFromHeader(byte[] header, int offset, int length)
+    protected override Int32 GetBodyLengthFromHeader(byte[] header, Int32 offset, Int32 length)
     {
         if (!BitConverter.IsLittleEndian)
         {
@@ -40,7 +40,7 @@ public class ReceiveFilter : FixedHeaderReceiveFilter<PacketRequestInfo>
         return bodySize;
     }
 
-    protected override PacketRequestInfo ResolveRequestInfo(ArraySegment<byte> header, byte[] bodyBuffer, int offset, int length)
+    protected override PacketRequestInfo ResolveRequestInfo(ArraySegment<byte> header, byte[] bodyBuffer, Int32 offset, Int32 length)
     {
         if (header.Array == null)
             throw new ArgumentNullException("header.Array");

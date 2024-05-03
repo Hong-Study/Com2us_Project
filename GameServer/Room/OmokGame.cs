@@ -1,43 +1,41 @@
-using System.Timers;
 using Common;
 
 namespace GameServer;
 
-// 게임 관련 기능
 public class OmokGame
 {
-    public const int BoardSize = 19;
+    public const Int32 BoardSize = 19;
 
     BoardType[,] _gameBoard;
 
     Func<string, byte[], bool> SendFunc = null!;
-    Action<string> EndGameFunc = null!;
 
     List<RoomUser> _users = null!;
-    public int CurrentPlayer { get; private set; } = 0;
 
-    System.Timers.Timer _putTimer = new System.Timers.Timer();
-    
+    DateTime _turnStartTime;
+    public Int32 TurnTimeoutSecond { get; set; } = 30;
+    public Int32 TimeoutCount { get; set; } = 3;
+
+    public Int32 CurrentPlayer { get; private set; } = 0;
+    public bool IsStart { get; private set; } = false;
+
     public OmokGame()
     {
         _gameBoard = new BoardType[BoardSize, BoardSize];
     }
 
-    public void SetDelegate(Func<string, byte[], bool> sendFunc, Action<string> endGameFunc)
+    public void SetDelegate(Func<string, byte[], bool> sendFunc)
     {
         SendFunc = sendFunc;
-        EndGameFunc = endGameFunc;
     }
 
-    public void GameStart(List<RoomUser> users, int currentPlayer)
+    public void GameStart(List<RoomUser> users, Int32 currentPlayer)
     {
-        // 유저에게 게임 시작을 알리고
-        // 색깔 배정
-        // 턴을 정하고
-        // 게임 시작을 알린다.
         GameClear();
 
         CurrentPlayer = currentPlayer;
+        IsStart = true;
+
         _users = users;
     }
 
@@ -50,13 +48,14 @@ public class OmokGame
         BroadCast(bytes);
     }
 
-    public void GameEnd(string winerSessionID)
+    public void GameEnd(bool isNextUserWin = false)
     {
-        var user = _users.Find(u => u.SessionID == winerSessionID);
-        if (user == null)
+        if (isNextUserWin)
         {
-            return;
+            CurrentPlayer = GetNextTurn();
         }
+
+        var user = _users[CurrentPlayer];
 
         SGameEndReq req = new SGameEndReq();
         req.WinUserID = user.UserID;
@@ -65,12 +64,18 @@ public class OmokGame
         BroadCast(bytes);
     }
 
-    public void GamePut(string sessionID, int x, int y)
+    public void GamePut(string sessionID, Int32 x, Int32 y)
     {
-        var user = _users.Find(u => u.SessionID == sessionID);
+        var user = _users.Find(u => u.sessionID == sessionID);
         if (user == null)
         {
-            SendFailedResponse<SGamePutRes>(sessionID, ErrorCode.NOT_EXIST_USER);
+            SendFailedResponse<SGamePutRes>(sessionID, ErrorCode.NOT_EXIST_USER, PacketType.RES_S_GAME_PUT);
+            return;
+        }
+
+        if (_users[CurrentPlayer].UserID != user.UserID)
+        {
+            SendFailedResponse<SGamePutRes>(sessionID, ErrorCode.NOT_MY_TURN, PacketType.RES_S_GAME_PUT);
             return;
         }
 
@@ -79,6 +84,8 @@ public class OmokGame
             return;
         }
 
+        user.TimeoutCount = 0;
+
         _gameBoard[x, y] = user.PlayerColor;
 
         var res = new SGamePutRes();
@@ -86,13 +93,13 @@ public class OmokGame
         res.PosY = y;
         res.ErrorCode = ErrorCode.NONE;
         res.UserID = user.UserID;
-        
+
         byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_GAME_PUT);
         BroadCast(bytes, sessionID);
 
         if (CheckWin(x, y, user.PlayerColor))
         {
-            GameEnd(sessionID);
+            GameEnd();
         }
         else
         {
@@ -100,21 +107,53 @@ public class OmokGame
         }
     }
 
+    public void TurnTimeoutCheck()
+    {
+        DateTime nowTime = DateTime.Now;
+        TimeSpan turnTime = nowTime - _turnStartTime;
+
+        if (turnTime.TotalSeconds > TurnTimeoutSecond)
+        {
+            TimeoutTurnChange();
+        }
+    }
+    
+    public void GameClear()
+    {
+        Array.Clear(_gameBoard, 0, _gameBoard.Length);
+
+        IsStart = false;
+    }
+
     void TurnChange()
     {
-        CurrentPlayer = (CurrentPlayer + 1) % 2;
+        CurrentPlayer = GetNextTurn();
 
         STurnChangeReq req = new STurnChangeReq();
         req.NextTurnUserID = _users[CurrentPlayer].UserID;
 
         byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_TURN_CHANGE);
         BroadCast(bytes);
+
+        _turnStartTime = DateTime.Now;
     }
 
-    bool CheckWin(int row, int col, BoardType currentPlayer)
+    void TimeoutTurnChange()
+    {
+        if (++_users[CurrentPlayer].TimeoutCount >= TimeoutCount)
+        {
+            GameEnd(true);
+
+            return;
+        }
+
+        TurnChange();
+    }
+
+    bool CheckWin(Int32 row, Int32 col, BoardType currentPlayer)
     {
         // 가로 체크
-        for (int c = 0; c <= BoardSize - 5; c++)
+        for (Int32 c = 0; c <= BoardSize - 5; c++)
         {
             if (_gameBoard[row, c] == currentPlayer &&
                 _gameBoard[row, c + 1] == currentPlayer &&
@@ -127,7 +166,7 @@ public class OmokGame
         }
 
         // 세로 체크
-        for (int r = 0; r <= BoardSize - 5; r++)
+        for (Int32 r = 0; r <= BoardSize - 5; r++)
         {
             if (_gameBoard[r, col] == currentPlayer &&
                 _gameBoard[r + 1, col] == currentPlayer &&
@@ -140,9 +179,9 @@ public class OmokGame
         }
 
         // 대각선 체크 (우상향)
-        for (int r = 0; r <= BoardSize - 5; r++)
+        for (Int32 r = 0; r <= BoardSize - 5; r++)
         {
-            for (int c = 0; c <= BoardSize - 5; c++)
+            for (Int32 c = 0; c <= BoardSize - 5; c++)
             {
                 if (_gameBoard[r, c] == currentPlayer &&
                     _gameBoard[r + 1, c + 1] == currentPlayer &&
@@ -156,9 +195,9 @@ public class OmokGame
         }
 
         // 대각선 체크 (우하향)
-        for (int r = 0; r <= BoardSize - 5; r++)
+        for (Int32 r = 0; r <= BoardSize - 5; r++)
         {
-            for (int c = BoardSize - 1; c >= 4; c--)
+            for (Int32 c = BoardSize - 1; c >= 4; c--)
             {
                 if (_gameBoard[r, c] == currentPlayer &&
                     _gameBoard[r + 1, c - 1] == currentPlayer &&
@@ -178,31 +217,28 @@ public class OmokGame
     {
         foreach (var user in _users)
         {
-            if (user.SessionID == expiredSessionID)
+            if (user.sessionID == expiredSessionID)
             {
                 continue;
             }
 
-            SendFunc(user.SessionID, bytes);
+            SendFunc(user.sessionID, bytes);
         }
     }
 
-    public void GameClear()
+    Int32 GetNextTurn()
     {
-        Array.Clear(_gameBoard, 0, _gameBoard.Length);
+        return (CurrentPlayer + 1) % 2;
     }
 
-    private void OnTimedEvent(object? sender, ElapsedEventArgs e)
-    {
-        
-    }
-
-    void SendFailedResponse<T>(string sessionID, ErrorCode errorCode) where T : IResMessage, new()
+    void SendFailedResponse<T>(string sessionID, ErrorCode errorCode, PacketType packetType) where T : IResMessage, new()
     {
         var res = new T();
         res.ErrorCode = errorCode;
 
-        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
+        byte[] bytes = PacketManager.PacketSerialized(res, packetType);
         SendFunc(sessionID, bytes);
     }
+
+
 }

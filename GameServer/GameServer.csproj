@@ -14,7 +14,7 @@
     <PackageReference Include="SqlKata.Execution" Version="3.2.3"/>
     <PackageReference Include="CloudStructures" Version="3.3.0"/>
     <PackageReference Include="MySqlConnector" Version="2.3.7"/>
-    <ProjectReference Include="..\Defines\Defines.csproj"/>
+    <ProjectReference Include="..\thirdparty\GameCommon\Defines.csproj"/>
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">
