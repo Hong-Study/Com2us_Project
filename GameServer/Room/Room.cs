@@ -8,6 +8,7 @@ public class Room
 
     List<RoomUser> _users = new List<RoomUser>();
     Func<string, byte[], bool> SendFunc = null!;
+    Func<string, User?> GetUserInfoFunc = null!;
 
     OmokGame _game;
 
@@ -27,11 +28,12 @@ public class Room
         _maxGameTime = new TimeSpan(0, MaxGameTimeMinute, 0);
     }
 
-    public void SetDelegate(Func<string, byte[], bool> SendFunc)
+    public void SetDelegate(Func<string, byte[], bool> SendFunc, Func<string, User?> GetUserInfoFunc)
     {
         this.SendFunc = SendFunc;
+        this.GetUserInfoFunc = GetUserInfoFunc;
 
-        _game.SetDelegate(SendFunc);
+        _game.SetDelegate(SendFunc, Clear);
     }
 
     public void EnterRoom(User user)
@@ -103,7 +105,7 @@ public class Room
 
         _users.Remove(user);
 
-        if(_game.IsStart)
+        if (_game.IsStart)
         {
             _game.GameEnd(true);
             return;
@@ -238,6 +240,19 @@ public class Room
 
     void Clear()
     {
+        MainServer.MainLogger.Debug($"Room Clear : {RoomID}");
+
+        foreach(var user in _users)
+        {
+            var userInfo = GetUserInfoFunc(user.SessionID);
+            if(userInfo == null)
+            {
+                continue;
+            }
+            MainServer.MainLogger.Debug($"Room Clear : {userInfo.UserID}");
+            userInfo.RoomID = 0;
+        }
+
         _users.Clear();
         _game.GameClear();
     }
@@ -258,7 +273,7 @@ public class Room
         if (_game.IsStart)
         {
             TimeSpan ts = DateTime.Now - _gameStartTime;
-            if(ts > _maxGameTime)
+            if (ts > _maxGameTime)
             {
                 _game.GameCancle();
             }

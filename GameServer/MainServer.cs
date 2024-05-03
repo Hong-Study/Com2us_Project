@@ -165,7 +165,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _packetManager.SetRoomDelegate(_roomManager);
         _packetManager.SetMainDelegate(this);
 
-        _roomManager.SetMainServerDelegate(this);
+        _roomManager.SetDelegate(SendData, _userManager.GetUserInfo);
         _roomManager.SetDefaultSetting(option.OmokGameTurnTimeoutSeconds
                                     , option.OmokGameTurnTimeoutCount
                                     , option.OmokGameMaxGameTimeMinute);
