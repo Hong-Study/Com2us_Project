@@ -42,24 +42,31 @@ public class PacketManager : DataManager
 
         _onRecv.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, Make<NTFCheckSessionLoginReq>);
         _onHandler.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, _handler.Handle_NTFCheckSessionLogin);
+        _onRecv.Add((Int16)InnerPacketType.NTF_HEART_BEAT, Make<NTFHeartBeatReq>);
+        _onHandler.Add((Int16)InnerPacketType.NTF_HEART_BEAT, _handler.Handle_NTFHeartBeat);
+        _onRecv.Add((Int16)InnerPacketType.NTF_ROOMS_CHECK, Make<NTFRoomsCheckReq>);
+        _onHandler.Add((Int16)InnerPacketType.NTF_ROOMS_CHECK, _handler.Handle_NTFRoomsCheck);
     }
 
     public void SetUserDelegate(UserManager userManager)
     {
         _handler.AddUserFunc = userManager.AddUser;
+        _handler.LoginUserFunc = userManager.LoginUser;
         _handler.RemoveUserFunc = userManager.RemoveUser;
         _handler.GetUserFunc = userManager.GetUserInfo;
+        _handler.HeartHeatCheckFunc = userManager.HeartBeatCheck;
+        _handler.SessionLoginTimeoutCheckFunc = userManager.SessionLoginTimeoutCheck;
     }
 
     public void SetRoomDelegate(RoomManager roomManager)
     {
         _handler.GetRoomFunc = roomManager.GetRoom;
+        _handler.RoomCheckFunc = roomManager.RoomsCheck;
     }
 
     public void SetMainDelegate(MainServer server)
     {
         _handler.SendFunc = server.SendData;
-        _handler.SessionTimeoutCheckedFunc = server.SessionTimeoutChecked;
     }
 
     void Make<T>(ServerPacketData data) where T : IMessage, new()
@@ -73,9 +80,8 @@ public class PacketManager : DataManager
         Action<string, IMessage>? action = null;
         if (_onHandler.TryGetValue(data.PacketType, out action))
         {
-            action(data.SessionID, packet);
+            action(data.sessionID, packet);
         }
-
     }
 
     public static byte[] PacketSerialized<I, E>(I packet, E type)
