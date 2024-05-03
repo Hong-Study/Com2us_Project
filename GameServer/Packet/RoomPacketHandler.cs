@@ -27,6 +27,19 @@ public partial class PacketHandler
             return;
         }
 
+        if(user.RoomID != 0)
+        {
+            MainServer.MainLogger.Error($"GetUser : User{sessionID} is already in room");
+            
+            SRoomEnterRes pkt = new SRoomEnterRes();
+            pkt.ErrorCode = ErrorCode.ALREADY_IN_ROOM;
+
+            byte[] bytes = PacketManager.PacketSerialized(pkt, PacketType.RES_S_ROOM_ENTER);
+            SendFunc(sessionID, bytes);
+
+            return;
+        }
+
         var room = GetRoomFunc(packet.RoomNumber);
         if (room == null)
         {
@@ -52,7 +65,7 @@ public partial class PacketHandler
             return;
         }
 
-        var room = GetRoom<SRoomLeaveRes>(sessionID);
+        var room = GetRoom<SRoomLeaveRes>(sessionID, PacketType.RES_S_ROOM_LEAVE);
         if (room != null)
         {
             room.LeaveRoom(sessionID);
@@ -69,7 +82,7 @@ public partial class PacketHandler
 
         MainServer.MainLogger.Debug($"Room Chat : {packet.Message}");
 
-        Room? room = GetRoom<SRoomChatRes>(sessionID);
+        Room? room = GetRoom<SRoomChatRes>(sessionID, PacketType.RES_S_ROOM_CHAT);
         if (room != null)
         {
             room.SendChat(sessionID, packet.Message);

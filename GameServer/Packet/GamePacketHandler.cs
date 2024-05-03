@@ -12,7 +12,7 @@ public partial class PacketHandler
             return;
         }
 
-        var room = GetRoom<SGameReadyRes>(sessionID);
+        var room = GetRoom<SGameReadyRes>(sessionID, PacketType.RES_S_GAME_READY);
         if (room == null)
         {
             return;
@@ -38,7 +38,7 @@ public partial class PacketHandler
             return;
         }
 
-        var room = GetRoom<SGamePutRes>(sessionID);
+        var room = GetRoom<SGamePutRes>(sessionID, PacketType.RES_S_GAME_PUT);
         if (room == null)
         {
             return;

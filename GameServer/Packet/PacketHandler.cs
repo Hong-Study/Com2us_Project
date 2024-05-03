@@ -59,7 +59,7 @@ public partial class PacketHandler
         ReceivePongFunc(sessionID);
     }
 
-    Room? GetRoom<T>(string sessionID) where T : IResMessage, new()
+    Room? GetRoom<T>(string sessionID, PacketType packetType) where T : IResMessage, new()
     {
         var user = GetUserFunc(sessionID);
         if (user == null)
@@ -69,7 +69,7 @@ public partial class PacketHandler
             T pkt = new T();
             pkt.ErrorCode = ErrorCode.NOT_EXIST_USER;
 
-            byte[] bytes = PacketManager.PacketSerialized(pkt, PacketType.RES_S_ROOM_ENTER);
+            byte[] bytes = PacketManager.PacketSerialized(pkt, packetType);
             SendFunc(sessionID, bytes);
 
             return null;
@@ -78,12 +78,12 @@ public partial class PacketHandler
         var room = GetRoomFunc(user.RoomID);
         if (room == null)
         {
-            MainServer.MainLogger.Error($"GetRoom : Room({user.UserID}) is not exist");
+            MainServer.MainLogger.Error($"GetRoom({user.UserID}) : Room({user.RoomID}) is not exist");
 
             T pkt = new T();
             pkt.ErrorCode = ErrorCode.NOT_EXIST_ROOM;
 
-            byte[] bytes = PacketManager.PacketSerialized(pkt, PacketType.RES_S_ROOM_ENTER);
+            byte[] bytes = PacketManager.PacketSerialized(pkt, packetType);
             SendFunc(sessionID, bytes);
             
             return null;
