@@ -39,12 +39,12 @@ public class Room
     {
         if (_users.Count >= 2)
         {
-            SendFailedResponse<SRoomEnterRes>(user.sessionID, ErrorCode.FULL_ROOM_COUNT, PacketType.RES_S_ROOM_ENTER);
+            SendFailedResponse<SRoomEnterRes>(user.SessionID, ErrorCode.FULL_ROOM_COUNT, PacketType.RES_S_ROOM_ENTER);
             return;
         }
 
         RoomUser roomUser = new RoomUser();
-        roomUser.sessionID = user.sessionID;
+        roomUser.SessionID = user.SessionID;
         roomUser.UserID = user.UserID;
         roomUser.UserData = new UserData()
         {
@@ -66,7 +66,7 @@ public class Room
                 req.User = roomUser.UserData;
 
                 var bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_NEW_USER_ENTER);
-                BroadCast(bytes, user.sessionID);
+                BroadCast(bytes, user.SessionID);
             }
 
             {
@@ -81,7 +81,7 @@ public class Room
                 res.UserList = userList;
 
                 var bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_ROOM_ENTER);
-                SendFunc(user.sessionID, bytes);
+                SendFunc(user.SessionID, bytes);
             }
 
             user.RoomID = RoomID;
@@ -89,13 +89,13 @@ public class Room
         catch (Exception e)
         {
             MainServer.MainLogger.Error($"EnterRoom : {e.Message}");
-            SendFailedResponse<SRoomEnterRes>(user.sessionID, ErrorCode.EXCEPTION_ADD_USER, PacketType.RES_S_ROOM_ENTER);
+            SendFailedResponse<SRoomEnterRes>(user.SessionID, ErrorCode.EXCEPTION_ADD_USER, PacketType.RES_S_ROOM_ENTER);
         }
     }
 
     public void LeaveRoom(string sessionID)
     {
-        var user = _users.Find(u => u.sessionID == sessionID);
+        var user = GetRoomUser(sessionID);
         if (user == null)
         {
             SendFailedResponse<SRoomLeaveRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_LEAVE_USER_DATA, PacketType.RES_S_ROOM_LEAVE);
@@ -130,7 +130,7 @@ public class Room
     public void SendChat(string sessionID, string message)
     {
         // 가져오는 코드
-        var user = _users.Find(u => u.sessionID == sessionID);
+        var user = GetRoomUser(sessionID);
         if (user == null)
         {
             SendFailedResponse<SRoomChatRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_CHAT_USER_DATA, PacketType.RES_S_ROOM_CHAT);
@@ -154,7 +154,7 @@ public class Room
             return;
         }
 
-        var user = _users.Find(u => u.sessionID == sessionID);
+        var user = GetRoomUser(sessionID);
         if (user == null)
         {
             SendFailedResponse<SGameReadyRes>(sessionID, ErrorCode.NOT_EXIST_ROOM_READY_USER_DATA, PacketType.RES_S_GAME_READY);
@@ -224,13 +224,18 @@ public class Room
     {
         foreach (var user in _users)
         {
-            if (user.sessionID == expiredSessionID)
+            if (user.SessionID == expiredSessionID)
             {
                 continue;
             }
 
-            SendFunc(user.sessionID, bytes);
+            SendFunc(user.SessionID, bytes);
         }
+    }
+
+    public RoomUser? GetRoomUser(string sessionID)
+    {
+        return _users.Find(u => u.SessionID == sessionID);
     }
 
     void Clear()

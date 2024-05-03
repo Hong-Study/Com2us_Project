@@ -11,7 +11,9 @@ public class UserManager
     TimeSpan _heartBeatTimeMillisecond;
     TimeSpan _sessionTimeOutMillisecond;
 
-    Int32 _maxUserCount = 1000;
+    Int32 _maxUserCount = 0;
+    Int32 _nowUserCount = 0;
+
     Int32 _nowUserPos = 0;
 
     Int32 _maxHeartBeatCheckCount = 0;
@@ -29,7 +31,7 @@ public class UserManager
         _heartBeatTimeMillisecond = new TimeSpan(0, 0, 0, 0, option.HeartBeatMilliSeconds);
         _sessionTimeOutMillisecond = new TimeSpan(0, 0, 0, 0, option.SessionTimeoutMilliSeconds);
 
-        for (int i = 0; i < _maxUserCount; i++)
+        for (Int32 i = 0; i < _maxUserCount; i++)
         {
             _users.Add(new User());
         }
@@ -45,12 +47,12 @@ public class UserManager
     {
         if (IsFullUserCount())
         {
-            SendResponse<SLoginRes>(sessionID, ErrorCode.FULL_USER_COUNT);
+            SendResponse<SConnectedRes>(sessionID, ErrorCode.FULL_USER_COUNT);
             return;
         }
         else if (IsExistUser(sessionID))
         {
-            SendResponse<SLoginRes>(sessionID, ErrorCode.ALREADY_EXIST_USER);
+            SendResponse<SConnectedRes>(sessionID, ErrorCode.ALREADY_EXIST_USER);
             return;
         }
 
@@ -62,21 +64,23 @@ public class UserManager
                 _nowUserPos = 0;
             }
 
-            var res = new SLoginRes();
+            var res = new SConnectedRes();
             res.ErrorCode = ErrorCode.NONE;
 
             byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
             SendFunc(sessionID, bytes);
+
+            _nowUserCount += 1;
         }
         catch
         {
-            SendResponse<SLoginRes>(sessionID, ErrorCode.EXCEPTION_ADD_USER);
+            SendResponse<SConnectedRes>(sessionID, ErrorCode.EXCEPTION_ADD_USER);
         }
     }
 
     public void RemoveUser(string sessionID)
     {
-        var user = _users.Find(u => u.sessionID == sessionID);
+        var user = GetUserInfo(sessionID);
         if (user == null)
         {
             SendResponse<SLogOutRes>(sessionID, ErrorCode.NOT_EXIST_USER);
@@ -85,6 +89,8 @@ public class UserManager
 
         user.Clear();
         SendResponse<SLogOutRes>(sessionID, ErrorCode.NONE);
+
+        _nowUserCount -= 1;
     }
 
     public void LoginUser(string sessionID, UserGameData data)
@@ -97,7 +103,7 @@ public class UserManager
 
         try
         {
-            var user = _users.Find(u => u.IsConfirm(sessionID));
+            var user = GetUserInfo(sessionID);
             if (user == null)
             {
                 return;
@@ -113,7 +119,7 @@ public class UserManager
 
     public void LogoutUser(string sessionID)
     {
-        var user = _users.Find(u => u.sessionID == sessionID);
+        var user = GetUserInfo(sessionID);
         if (user == null)
         {
             SendResponse<SLogOutRes>(sessionID, ErrorCode.NOT_EXIST_USER);
@@ -126,20 +132,20 @@ public class UserManager
 
     public User? GetUserInfo(string sessionID)
     {
-        return _users.Find(u => u.sessionID == sessionID);
+        return _users.Find(u => u.SessionID == sessionID);
     }
 
     public void HeartBeatCheck()
     {
-        System.Console.WriteLine($"HeartBeatCheck {_nowHeartBeatCheckCount} {_users.Count}");
-
         var now = DateTime.Now;
-        int maxCount = _nowHeartBeatCheckCount + _maxHeartBeatCheckCount;
-        for (; _nowHeartBeatCheckCount < _users.Count; _nowHeartBeatCheckCount++)
+        Int32 maxCount = _nowHeartBeatCheckCount + _maxHeartBeatCheckCount;
+        if (maxCount > _users.Count)
         {
-            if (_nowHeartBeatCheckCount == maxCount)
-                break;
+            maxCount = _users.Count;
+        }
 
+        for (; _nowHeartBeatCheckCount < maxCount; _nowHeartBeatCheckCount++)
+        {
             var user = _users[_nowHeartBeatCheckCount];
 
             if (!user.IsConnect || !user.IsLogin)
@@ -149,10 +155,14 @@ public class UserManager
 
             if (now - user.PingTime > _heartBeatTimeMillisecond)
             {
-                var session = GetSessionFunc(user.sessionID);
+                var session = GetSessionFunc(user.SessionID);
                 session.Close();
 
                 user.Clear();
+            }
+            else
+            {
+                SendPing(user.SessionID);
             }
         }
 
@@ -164,15 +174,15 @@ public class UserManager
 
     public void SessionLoginTimeoutCheck()
     {
-        System.Console.WriteLine($"SessionLoginTimeoutCheck {_nowSessionCheckCount} {_users.Count}");
-
         var now = DateTime.Now;
-        int maxCount = _nowSessionCheckCount + _maxSessionCheckCount;
-        for (; _nowSessionCheckCount < _users.Count; _nowSessionCheckCount++)
+        Int32 maxCount = _nowSessionCheckCount + _maxSessionCheckCount;
+        if (maxCount > _users.Count)
         {
-            if (_nowSessionCheckCount == maxCount)
-                break;
+            maxCount = _users.Count;
+        }
 
+        for (; _nowSessionCheckCount < maxCount; _nowSessionCheckCount++)
+        {
             var user = _users[_nowSessionCheckCount];
 
             if (!user.IsConnect || user.IsLogin)
@@ -182,7 +192,7 @@ public class UserManager
 
             if (now - user.ConnectTime > _sessionTimeOutMillisecond)
             {
-                var session = GetSessionFunc(user.sessionID);
+                var session = GetSessionFunc(user.SessionID);
                 session.Close();
 
                 user.Clear();
@@ -195,14 +205,33 @@ public class UserManager
         }
     }
 
+    public void SendPing(string sessionID)
+    {
+        var req = new SPingReq();
+        byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_PING);
+
+        SendFunc(sessionID, bytes);
+    }
+
+    public void ReceivePong(string sessionID)
+    {
+        var user = GetUserInfo(sessionID);
+        if (user == null)
+        {
+            return;
+        }
+
+        user.PingTime = DateTime.Now;
+    }
+
     bool IsFullUserCount()
     {
-        return _users.Count() >= _maxUserCount;
+        return _nowUserCount >= _maxUserCount;
     }
 
     bool IsExistUser(string sessionID)
     {
-        if (_users.Find(u => u.sessionID == sessionID) != null)
+        if (_users.Find(u => u.SessionID == sessionID) != null)
         {
             return true;
         }
@@ -222,6 +251,8 @@ public class UserManager
 
     void SendResponse<T>(string sessionID, ErrorCode errorCode) where T : IResMessage, new()
     {
+        MainServer.MainLogger.Error($"Failed User Action : {errorCode}");
+
         var res = new T();
         res.ErrorCode = errorCode;
 

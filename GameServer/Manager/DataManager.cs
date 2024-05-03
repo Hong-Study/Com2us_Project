@@ -68,4 +68,10 @@ public abstract class DataManager
         byte[] body = MemoryPackSerializer.Serialize(packet);
         return new ServerPacketData(sessionID, body, (Int16)type);
     }
+
+    public static ServerPacketData MakeInnerPacket<T>(string sessionID, T packet, PacketType type) where T : IMessage
+    {
+        byte[] body = MemoryPackSerializer.Serialize(packet);
+        return new ServerPacketData(sessionID, body, (Int16)type);
+    }
 }

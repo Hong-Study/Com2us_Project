@@ -33,10 +33,12 @@ public class OmokGame
     {
         GameClear();
 
+        _users = users;
+
         CurrentPlayer = currentPlayer;
         IsStart = true;
 
-        _users = users;
+        _turnStartTime = DateTime.Now;
     }
 
     public void GameCancle()
@@ -66,7 +68,7 @@ public class OmokGame
 
     public void GamePut(string sessionID, Int32 x, Int32 y)
     {
-        var user = _users.Find(u => u.sessionID == sessionID);
+        var user = _users.Find(u => u.SessionID == sessionID);
         if (user == null)
         {
             SendFailedResponse<SGamePutRes>(sessionID, ErrorCode.NOT_EXIST_USER, PacketType.RES_S_GAME_PUT);
@@ -217,12 +219,12 @@ public class OmokGame
     {
         foreach (var user in _users)
         {
-            if (user.sessionID == expiredSessionID)
+            if (user.SessionID == expiredSessionID)
             {
                 continue;
             }
 
-            SendFunc(user.sessionID, bytes);
+            SendFunc(user.SessionID, bytes);
         }
     }
 
@@ -231,9 +233,12 @@ public class OmokGame
         return (CurrentPlayer + 1) % 2;
     }
 
-    void SendFailedResponse<T>(string sessionID, ErrorCode errorCode, PacketType packetType) where T : IResMessage, new()
+    void SendFailedResponse<I>(string sessionID, ErrorCode errorCode, PacketType packetType)
+                            where I : IResMessage, new()
     {
-        var res = new T();
+        MainServer.MainLogger.Error($"Failed OmokGame Action : {errorCode}");
+
+        var res = new I();
         res.ErrorCode = errorCode;
 
         byte[] bytes = PacketManager.PacketSerialized(res, packetType);
