@@ -4,90 +4,228 @@ namespace GameServer;
 
 public class UserManager
 {
-    int MaxUserCount = 1000;
-    ConcurrentDictionary<string, User> _users = new ConcurrentDictionary<string, User>();
-    public UserManager(int maxUserCount)
+    List<User> _users = new List<User>();
+    Func<string, byte[], bool> SendFunc = null!;
+    Func<string, ClientSession> GetSessionFunc = null!;
+
+    TimeSpan _heartBeatTimeMillisecond;
+    TimeSpan _sessionTimeOutMillisecond;
+
+    Int32 _maxUserCount = 1000;
+    Int32 _nowUserPos = 0;
+
+    Int32 _maxHeartBeatCheckCount = 0;
+    Int32 _nowHeartBeatCheckCount = 0;
+
+    Int32 _maxSessionCheckCount = 0;
+    Int32 _nowSessionCheckCount = 0;
+
+    public UserManager(ref readonly ServerOption option)
     {
-        MaxUserCount = maxUserCount;
+        _maxUserCount = option.MaxUserCount;
+        _maxHeartBeatCheckCount = option.MaxHeartBeatCheckCount;
+        _maxSessionCheckCount = option.MaxSessionCheckCount;
+
+        _heartBeatTimeMillisecond = new TimeSpan(0, 0, 0, 0, option.HeartBeatMilliSeconds);
+        _sessionTimeOutMillisecond = new TimeSpan(0, 0, 0, 0, option.SessionTimeoutMilliSeconds);
+
+        for (int i = 0; i < _maxUserCount; i++)
+        {
+            _users.Add(new User());
+        }
     }
 
-    public record AddUserResult(ErrorCode ErrorCode, UserGameData? data);
-    public AddUserResult AddUser(string sessionId, UserGameData data)
+    public void SetMainServerDelegate(MainServer mainServer)
+    {
+        SendFunc = mainServer.SendData;
+        GetSessionFunc = mainServer.GetSessionByID;
+    }
+
+    public void AddUser(string sessionID)
     {
         if (IsFullUserCount())
         {
-            return MakeUserResult(ErrorCode.NONE);
+            SendResponse<SLoginRes>(sessionID, ErrorCode.FULL_USER_COUNT);
+            return;
         }
-
-        if (IsExistUser(sessionId))
+        else if (IsExistUser(sessionID))
         {
-            return MakeUserResult(ErrorCode.NONE);
+            SendResponse<SLoginRes>(sessionID, ErrorCode.ALREADY_EXIST_USER);
+            return;
         }
 
+        try
+        {
+            _users[_nowUserPos++].SessionConnected(sessionID);
+            if (_nowUserPos == _maxUserCount)
+            {
+                _nowUserPos = 0;
+            }
+
+            var res = new SLoginRes();
+            res.ErrorCode = ErrorCode.NONE;
+
+            byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
+            SendFunc(sessionID, bytes);
+        }
+        catch
+        {
+            SendResponse<SLoginRes>(sessionID, ErrorCode.EXCEPTION_ADD_USER);
+        }
+    }
+
+    public void RemoveUser(string sessionID)
+    {
+        var user = _users.Find(u => u.sessionID == sessionID);
+        if (user == null)
+        {
+            SendResponse<SLogOutRes>(sessionID, ErrorCode.NOT_EXIST_USER);
+            return;
+        }
+
+        user.Clear();
+        SendResponse<SLogOutRes>(sessionID, ErrorCode.NONE);
+    }
+
+    public void LoginUser(string sessionID, UserGameData data)
+    {
         if (IsExistUser(data.user_id))
         {
-            return MakeUserResult(ErrorCode.NONE);
+            SendResponse<SLoginRes>(sessionID, ErrorCode.ALREADY_EXIST_USER);
+            return;
         }
 
-        User user = new User(){
-            SessionID = sessionId,
-            UserID = data.user_id,
-            NickName = data.user_name,
-            Level = data.level,
-            Win = data.win,
-            Lose = data.lose,
-        };
-        
-        if (_users.TryAdd(sessionId, user))
+        try
         {
-            return MakeUserResult(ErrorCode.NONE, data);
-        }
+            var user = _users.Find(u => u.IsConfirm(sessionID));
+            if (user == null)
+            {
+                return;
+            }
 
-        return MakeUserResult(ErrorCode.NONE);
-    }
-
-    public ErrorCode RemoveUser(string sessionId)
-    {
-        if (_users.TryRemove(sessionId, out User? user))
-        {
-            user.Clear();
-            return ErrorCode.NONE;
+            user.Logined(data);
         }
-        else
+        catch
         {
-            return ErrorCode.NONE;
+            SendResponse<SLoginRes>(sessionID, ErrorCode.EXCEPTION_LOGIN_USER);
         }
     }
 
-    public User? GetUserInfo(string sessionId)
+    public void LogoutUser(string sessionID)
     {
-        if (_users.TryGetValue(sessionId, out User? user))
+        var user = _users.Find(u => u.sessionID == sessionID);
+        if (user == null)
         {
-            return user;
+            SendResponse<SLogOutRes>(sessionID, ErrorCode.NOT_EXIST_USER);
+            return;
         }
-        else
+
+        user.Logouted();
+        SendResponse<SLogOutRes>(sessionID, ErrorCode.NONE);
+    }
+
+    public User? GetUserInfo(string sessionID)
+    {
+        return _users.Find(u => u.sessionID == sessionID);
+    }
+
+    public void HeartBeatCheck()
+    {
+        System.Console.WriteLine($"HeartBeatCheck {_nowHeartBeatCheckCount} {_users.Count}");
+
+        var now = DateTime.Now;
+        int maxCount = _nowHeartBeatCheckCount + _maxHeartBeatCheckCount;
+        for (; _nowHeartBeatCheckCount < _users.Count; _nowHeartBeatCheckCount++)
         {
-            return null;
+            if (_nowHeartBeatCheckCount == maxCount)
+                break;
+
+            var user = _users[_nowHeartBeatCheckCount];
+
+            if (!user.IsConnect || !user.IsLogin)
+            {
+                continue;
+            }
+
+            if (now - user.PingTime > _heartBeatTimeMillisecond)
+            {
+                var session = GetSessionFunc(user.sessionID);
+                session.Close();
+
+                user.Clear();
+            }
+        }
+
+        if (_nowHeartBeatCheckCount >= _users.Count)
+        {
+            _nowHeartBeatCheckCount = 0;
+        }
+    }
+
+    public void SessionLoginTimeoutCheck()
+    {
+        System.Console.WriteLine($"SessionLoginTimeoutCheck {_nowSessionCheckCount} {_users.Count}");
+
+        var now = DateTime.Now;
+        int maxCount = _nowSessionCheckCount + _maxSessionCheckCount;
+        for (; _nowSessionCheckCount < _users.Count; _nowSessionCheckCount++)
+        {
+            if (_nowSessionCheckCount == maxCount)
+                break;
+
+            var user = _users[_nowSessionCheckCount];
+
+            if (!user.IsConnect || user.IsLogin)
+            {
+                continue;
+            }
+
+            if (now - user.ConnectTime > _sessionTimeOutMillisecond)
+            {
+                var session = GetSessionFunc(user.sessionID);
+                session.Close();
+
+                user.Clear();
+            }
+        }
+
+        if (_nowSessionCheckCount >= _users.Count)
+        {
+            _nowSessionCheckCount = 0;
         }
     }
 
     bool IsFullUserCount()
     {
-        return _users.Count() >= MaxUserCount;
+        return _users.Count() >= _maxUserCount;
     }
 
-    bool IsExistUser(string sessionId)
+    bool IsExistUser(string sessionID)
     {
-        return _users.ContainsKey(sessionId);
+        if (_users.Find(u => u.sessionID == sessionID) != null)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     bool IsExistUser(Int64 userId)
     {
-        return _users.Values.Any(user => user.UserID == userId);
+        if (_users.Find(u => u.UserID == userId) != null)
+        {
+            return true;
+        }
+
+        return false;
     }
 
-    AddUserResult MakeUserResult(ErrorCode errorCode, UserGameData? data = null)
+    void SendResponse<T>(string sessionID, ErrorCode errorCode) where T : IResMessage, new()
     {
-        return new AddUserResult(errorCode, data);
+        var res = new T();
+        res.ErrorCode = errorCode;
+
+        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
+        SendFunc(sessionID, bytes);
     }
 }

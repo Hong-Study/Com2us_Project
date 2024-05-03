@@ -1,0 +1,10 @@
+public enum InnerPacketType : Int16
+{
+    NONE = 0,
+
+    NTF_SESSION_CONNECTED = 3000,
+    NTF_SESSION_DISCONNECTED = 3001,
+    NTF_CHECK_SESSION_LOGIN = 3002,
+    NTF_HEART_BEAT = 3003,
+    NTF_ROOMS_CHECK = 3004,
+}

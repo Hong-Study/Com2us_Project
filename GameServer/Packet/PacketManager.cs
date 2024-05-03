@@ -1,4 +1,3 @@
-using System.Threading.Tasks.Dataflow;
 using MemoryPack;
 using Common;
 
@@ -11,7 +10,7 @@ public class PacketManager : DataManager
 
     public PacketManager()
     {
-        InitHandler();   
+        InitHandler();
     }
 
     public override void InitHandler()
@@ -40,23 +39,34 @@ public class PacketManager : DataManager
         _onHandler.Add((Int16)PacketType.RES_C_GAME_END, _handler.Handle_C_GameEnd);
         _onRecv.Add((Int16)PacketType.RES_C_GAME_CANCLE, Make<CGameCancleRes>);
         _onHandler.Add((Int16)PacketType.RES_C_GAME_CANCLE, _handler.Handle_C_GameCancle);
+
+        _onRecv.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, Make<NTFCheckSessionLoginReq>);
+        _onHandler.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, _handler.Handle_NTFCheckSessionLogin);
+        _onRecv.Add((Int16)InnerPacketType.NTF_HEART_BEAT, Make<NTFHeartBeatReq>);
+        _onHandler.Add((Int16)InnerPacketType.NTF_HEART_BEAT, _handler.Handle_NTFHeartBeat);
+        _onRecv.Add((Int16)InnerPacketType.NTF_ROOMS_CHECK, Make<NTFRoomsCheckReq>);
+        _onHandler.Add((Int16)InnerPacketType.NTF_ROOMS_CHECK, _handler.Handle_NTFRoomsCheck);
     }
 
     public void SetUserDelegate(UserManager userManager)
     {
         _handler.AddUserFunc = userManager.AddUser;
+        _handler.LoginUserFunc = userManager.LoginUser;
         _handler.RemoveUserFunc = userManager.RemoveUser;
         _handler.GetUserFunc = userManager.GetUserInfo;
+        _handler.HeartHeatCheckFunc = userManager.HeartBeatCheck;
+        _handler.SessionLoginTimeoutCheckFunc = userManager.SessionLoginTimeoutCheck;
     }
 
     public void SetRoomDelegate(RoomManager roomManager)
     {
         _handler.GetRoomFunc = roomManager.GetRoom;
+        _handler.RoomCheckFunc = roomManager.RoomsCheck;
     }
 
-    public void SetSendDelegate(Func<string, byte[], bool> sendFunc)
+    public void SetMainDelegate(MainServer server)
     {
-        _handler.SendFunc = sendFunc;
+        _handler.SendFunc = server.SendData;
     }
 
     void Make<T>(ServerPacketData data) where T : IMessage, new()
@@ -70,11 +80,13 @@ public class PacketManager : DataManager
         Action<string, IMessage>? action = null;
         if (_onHandler.TryGetValue(data.PacketType, out action))
         {
-            action(data.SessionID, packet);
+            action(data.sessionID, packet);
         }
     }
 
-    public static byte[] PacketSerialized<T>(T packet, PacketType type) where T : IMessage
+    public static byte[] PacketSerialized<I, E>(I packet, E type)
+        where I : IMessage
+        where E : Enum
     {
         byte[]? bodyData = MemoryPackSerializer.Serialize(packet);
         Int16 bodyDataSize = 0;
@@ -85,14 +97,17 @@ public class PacketManager : DataManager
 
         var packetSize = (Int16)(bodyDataSize + PacketDef.PACKET_HEADER_SIZE);
 
+        MainServer.MainLogger.Info($"{packetSize} : {type} : {bodyDataSize}");
+
         var dataSource = new byte[packetSize];
-        Buffer.BlockCopy(BitConverter.GetBytes(packetSize), 0, dataSource, 0, 2);
-        Buffer.BlockCopy(BitConverter.GetBytes((Int16)type), 0, dataSource, 2, 2);
+        
+        FastBinaryWrite.Int16(dataSource, 0, packetSize);
+        FastBinaryWrite.Int16(dataSource, 2, (Int16)(object)type);
         dataSource[4] = 0;
 
         if (bodyData != null)
-        {
-            Buffer.BlockCopy(bodyData, 0, dataSource, PacketDef.PACKET_HEADER_SIZE, bodyData.Length);
+        {   
+            FastBinaryWrite.Bytes(dataSource, PacketDef.PACKET_HEADER_SIZE, bodyData);
         }
 
         return dataSource;
