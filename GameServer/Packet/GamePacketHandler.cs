@@ -28,7 +28,6 @@ public partial class PacketHandler
         {
             return;
         }
-
     }
 
     public void Handle_C_GamePut(string sessionID, IMessage message)

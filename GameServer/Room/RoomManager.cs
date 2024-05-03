@@ -28,8 +28,7 @@ public class RoomManager
             return null;
         }
 
-        var room = _roomPool.Find(r => r.RoomID == roomID);
-        return room;
+        return _roomPool.Find(r => r.RoomID == roomID);
     }
 
     public void SetMainServerDelegate(MainServer mainServer)
@@ -50,14 +49,14 @@ public class RoomManager
 
     public void RoomsCheck()
     {
-        System.Console.WriteLine($"Room Check {_nowRoomCheckCount} {_maxRoomCheckCount} ");
-
-        int maxCount = _nowRoomCheckCount + _maxRoomCheckCount;
-        for (; _nowRoomCheckCount < _roomPool.Count; _nowRoomCheckCount++)
+        Int32 maxCount = _nowRoomCheckCount + _maxRoomCheckCount;
+        if (maxCount > _roomPool.Count)
         {
-            if (_nowRoomCheckCount == maxCount)
-                break;
+            maxCount = _roomPool.Count;
+        }
 
+        for (; _nowRoomCheckCount < maxCount; _nowRoomCheckCount++)
+        {
             _roomPool[_nowRoomCheckCount].RoomCheck();
         }
 
