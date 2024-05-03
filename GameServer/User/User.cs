@@ -4,7 +4,7 @@ namespace GameServer;
 
 public class User
 {
-    public string sessionID { get; set; } = null!;
+    public string SessionID { get; set; } = null!;
     public DateTime ConnectTime { get; set; }
     public bool IsConnect { get; set; } = false;
 
@@ -25,7 +25,8 @@ public class User
     {
         Logouted();
 
-        sessionID = "";
+        SessionID = "";
+        RoomID = 0;
         IsConnect = false;
     }
 
@@ -51,7 +52,7 @@ public class User
 
     public bool IsConfirm(string sessionID)
     {
-        return this.sessionID == sessionID;
+        return this.SessionID == sessionID;
     }
 
     public void EnterRoom(Int32 roomId)
@@ -70,6 +71,6 @@ public class User
         this.IsLogin = false;
 
         this.ConnectTime = DateTime.Now;
-        this.sessionID = sessionID;
+        this.SessionID = sessionID;
     }
 }

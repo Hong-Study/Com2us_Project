@@ -23,7 +23,6 @@ public partial class PacketHandler
             return;
         }
 
-        // HeartBeat 처리
         HeartHeatCheckFunc();
     }
 
@@ -35,7 +34,38 @@ public partial class PacketHandler
             return;
         }
 
-        // RoomCheck 처리
         RoomCheckFunc();
+    }
+
+    public void Handle_NTFSessionConnected(string sessionID, IMessage message)
+    {
+        NTFSessionConnectedReq? packet = message as NTFSessionConnectedReq;
+        if (packet == null)
+        {
+            return;
+        }
+
+        AddUserFunc(packet.SessionID);
+    }
+
+    public void Handle_NTFSessionDisconnected(string sessionID, IMessage message)
+    {
+        NTFSessionDisconnectedReq? packet = message as NTFSessionDisconnectedReq;
+        if (packet == null)
+        {
+            return;
+        }
+
+        var user = GetUserFunc(packet.SessionID);
+        if (user != null)
+        {
+            var room = GetRoomFunc(user.RoomID);
+            if (room != null)
+            {
+                room.LeaveRoom(sessionID);
+            }
+        }
+        
+        RemoveUserFunc(packet.SessionID);
     }
 }

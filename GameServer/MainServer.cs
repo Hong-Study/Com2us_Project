@@ -1,3 +1,4 @@
+using Common;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -120,7 +121,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            MainLogger.Error(ex.Message);
 
             session.SendEndWhenSendingTimeOut();
             session.Close();
@@ -154,7 +155,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            MainLogger.Error(ex.Message);
         }
     }
 
@@ -225,13 +226,12 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
     public void OnConnected(ClientSession session)
     {
-        // 연결 처리
         MainLogger.Debug($"On Connected {session.SessionID} : {session.RemoteEndPoint}");
 
         var packet = new NTFSessionConnectedReq();
         packet.SessionID = session.SessionID;
 
-        var data = PacketManager.MakeInnerPacket("", packet, InnerPacketType.NTF_SESSION_CONNECTED);
+        var data = PacketManager.MakeInnerPacket(session.SessionID, packet, InnerPacketType.NTF_SESSION_CONNECTED);
         PacketInnerSend(data);
     }
 
@@ -239,19 +239,15 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     {
         MainLogger.Debug($"On Disconnected {session.SessionID} : {reason}");
 
-        // 룸 정리 처리도 해야됨.
-
         var packet = new NTFSessionDisconnectedReq();
         packet.SessionID = session.SessionID;
 
-        var data = PacketManager.MakeInnerPacket("", packet, InnerPacketType.NTF_SESSION_DISCONNECTED);
+        var data = PacketManager.MakeInnerPacket(session.SessionID, packet, InnerPacketType.NTF_SESSION_DISCONNECTED);
         PacketInnerSend(data);
     }
 
     public void OnReceived(ClientSession session, PacketRequestInfo requestInfo)
     {
-        MainLogger.Debug($"On Received {session.SessionID} : {requestInfo.Body.Length}");
-
         ServerPacketData data = new ServerPacketData(session.SessionID, requestInfo.Body, (Int16)requestInfo.PacketType);
 
         _packetManager.Distribute(data);

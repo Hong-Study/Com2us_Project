@@ -6,6 +6,7 @@ public partial class PacketHandler
 {
     public Action<string> AddUserFunc = null!;
     public Action<string> RemoveUserFunc = null!;
+    public Action<string> ReceivePongFunc = null!;
     public Action<string, UserGameData> LoginUserFunc = null!;
     public Func<string, User?> GetUserFunc = null!;
     public Action HeartHeatCheckFunc = null!;
@@ -18,7 +19,7 @@ public partial class PacketHandler
 
     public void Handle_C_Login(string sessionID, IMessage message)
     {
-        CLoginReq? packet = message as CLoginReq;
+        var packet = message as CLoginReq;
         if (packet == null)
         {
             return;
@@ -38,13 +39,24 @@ public partial class PacketHandler
 
     public void Handle_C_Logout(string sessionID, IMessage message)
     {
-        CLogOutReq? packet = message as CLogOutReq;
+        var packet = message as CLogOutReq;
         if (packet == null)
         {
             return;
         }
 
         RemoveUserFunc(sessionID);
+    }
+
+    public void Handle_C_Pong(string sessionID, IMessage message)
+    {
+        var packet = message as CPongRes;
+        if (packet == null)
+        {
+            return;
+        }
+
+        ReceivePongFunc(sessionID);
     }
 
     Room? GetRoom<T>(string sessionID) where T : IResMessage, new()

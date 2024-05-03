@@ -5,7 +5,6 @@ namespace GameServer;
 
 public class PacketManager : DataManager
 {
-    // 패킷 전체 형태까지??
     public PacketHandler _handler = new PacketHandler();
 
     public PacketManager()
@@ -15,6 +14,9 @@ public class PacketManager : DataManager
 
     public override void InitHandler()
     {
+        _onRecv.Add((Int16)PacketType.RES_C_PONG, Make<CPongRes>);
+        _onHandler.Add((Int16)PacketType.RES_C_PONG, _handler.Handle_C_Pong);
+
         _onRecv.Add((Int16)PacketType.REQ_C_LOGIN, Make<CLoginReq>);
         _onHandler.Add((Int16)PacketType.REQ_C_LOGIN, _handler.Handle_C_Login);
         _onRecv.Add((Int16)PacketType.REQ_C_LOGOUT, Make<CLogOutReq>);
@@ -40,6 +42,10 @@ public class PacketManager : DataManager
         _onRecv.Add((Int16)PacketType.RES_C_GAME_CANCLE, Make<CGameCancleRes>);
         _onHandler.Add((Int16)PacketType.RES_C_GAME_CANCLE, _handler.Handle_C_GameCancle);
 
+        _onRecv.Add((Int16)InnerPacketType.NTF_SESSION_CONNECTED, Make<NTFSessionConnectedReq>);
+        _onHandler.Add((Int16)InnerPacketType.NTF_SESSION_CONNECTED, _handler.Handle_NTFSessionConnected);
+        _onRecv.Add((Int16)InnerPacketType.NTF_SESSION_DISCONNECTED, Make<NTFSessionDisconnectedReq>);
+        _onHandler.Add((Int16)InnerPacketType.NTF_SESSION_DISCONNECTED, _handler.Handle_NTFSessionDisconnected);
         _onRecv.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, Make<NTFCheckSessionLoginReq>);
         _onHandler.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, _handler.Handle_NTFCheckSessionLogin);
         _onRecv.Add((Int16)InnerPacketType.NTF_HEART_BEAT, Make<NTFHeartBeatReq>);
@@ -56,6 +62,7 @@ public class PacketManager : DataManager
         _handler.GetUserFunc = userManager.GetUserInfo;
         _handler.HeartHeatCheckFunc = userManager.HeartBeatCheck;
         _handler.SessionLoginTimeoutCheckFunc = userManager.SessionLoginTimeoutCheck;
+        _handler.ReceivePongFunc = userManager.ReceivePong;
     }
 
     public void SetRoomDelegate(RoomManager roomManager)
@@ -100,13 +107,13 @@ public class PacketManager : DataManager
         MainServer.MainLogger.Info($"{packetSize} : {type} : {bodyDataSize}");
 
         var dataSource = new byte[packetSize];
-        
+
         FastBinaryWrite.Int16(dataSource, 0, packetSize);
         FastBinaryWrite.Int16(dataSource, 2, (Int16)(object)type);
         dataSource[4] = 0;
 
         if (bodyData != null)
-        {   
+        {
             FastBinaryWrite.Bytes(dataSource, PacketDef.PACKET_HEADER_SIZE, bodyData);
         }
 

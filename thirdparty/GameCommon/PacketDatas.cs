@@ -19,6 +19,24 @@ public interface IResMessage : IMessage
 }
 
 [MemoryPackable]
+public partial class SPingReq : IMessage
+{
+
+}
+
+[MemoryPackable]
+public partial class CPongRes : IResMessage
+{
+    public ErrorCode ErrorCode { get; set; }
+}
+
+[MemoryPackable]
+public partial class SConnectedRes : IResMessage
+{
+    public ErrorCode ErrorCode { get; set; }
+}
+
+[MemoryPackable]
 public partial class CLoginReq : IMessage
 {
     public Int64 UserID { get; set; }
