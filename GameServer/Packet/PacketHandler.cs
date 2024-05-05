@@ -6,17 +6,16 @@ public partial class PacketHandler
 {
     public Action<string> AddUserFunc = null!;
     public Action<string> RemoveUserFunc = null!;
-    public Action<string> ReceivePongFunc = null!;
-    public Action<string, UserGameData> LoginUserFunc = null!;
+    public Action<string, ErrorCode, UserData?> LoginUserFunc = null!;
     public Func<string, User?> GetUserFunc = null!;
-    public Action HeartHeatCheckFunc = null!;
     public Action SessionLoginTimeoutCheckFunc = null!;
-
-    public Func<string, byte[], bool> SendFunc = null!;
+    public Action HeartHeatCheckFunc = null!;
+    public Action<string> ReceivePongFunc = null!;
 
     public Func<Int32, Room?> GetRoomFunc = null!;
     public Action RoomCheckFunc = null!;
 
+    public Func<string, byte[], bool> SendFunc = null!;
     public Action<ServerPacketData> InnerSendFunc = null!;
     public Action<ServerPacketData> DatabaseSendFunc = null!;
     public Action<ServerPacketData> RedisSendFunc = null!;
@@ -29,16 +28,13 @@ public partial class PacketHandler
             return;
         }
 
-        UserGameData data = new UserGameData()
-        {
-            user_id = packet.UserID,
-            user_name = $"User{packet.UserID}",
-            win = 0,
-            lose = 0,
-            level = 1,
-        };
+        var req = new RDUserLoginReq();
 
-        LoginUserFunc(sessionID, data);
+        req.UserID = packet.UserID;
+        req.AuthToken = packet.AuthToken;
+
+        var serverPacketData = RedisManager.MakeRedisPacket(sessionID, req, RedisType.REQ_RD_USER_LOGIN);
+        RedisSendFunc(serverPacketData);
     }
 
     public void Handle_C_Logout(string sessionID, IMessage message)

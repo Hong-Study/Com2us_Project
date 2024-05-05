@@ -83,13 +83,17 @@ namespace GameClient
 
         void EndGame()
         {
+            _userList.Clear();
+            listBoxRoomChatMsg.Items.Clear();
+
             OmokLogic.EndGame();
+
+            MessageBox.Show("게임 종료");
 
             MyPlayerName = "";
             백돌플레이어Name = "";
             흑돌플레이어Name = "";
         }
-
 
         /*void 한수무르기()
         {

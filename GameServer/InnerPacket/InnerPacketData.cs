@@ -43,3 +43,9 @@ public partial class NTFUserLogoutRes : IResMessage
 {
     public ErrorCode ErrorCode { get; set; }
 }
+
+[MemoryPackable]
+public partial class NTFUserWinLoseUpdateRes : IResMessage
+{
+    public ErrorCode ErrorCode { get; set; }
+}
