@@ -13,8 +13,8 @@ public class PacketDef
 }
 
 public interface IMessage { }
-public interface IResMessage : IMessage 
-{ 
+public interface IResMessage : IMessage
+{
     ErrorCode ErrorCode { get; set; }
 }
 
@@ -188,6 +188,8 @@ public partial class UserData
     public Int16 PlayerColor { get; set; }
     public string NickName { get; set; } = null!;
     public Int32 Level { get; set; }
+    public Int32 Exp { get; set; }
+    public Int32 Gold { get; set; }
     public Int32 Win { get; set; }
     public Int32 Lose { get; set; }
 }

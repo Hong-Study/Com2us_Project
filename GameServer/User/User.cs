@@ -1,5 +1,4 @@
-using MemoryPack;
-
+using Common;
 namespace GameServer;
 
 public class User
@@ -9,17 +8,19 @@ public class User
     public bool IsConnect { get; set; } = false;
 
     public bool IsLogin { get; set; } = false;
+    public Int32 RoomID { get; set; } = 0;
 
-    public Int64 UserID { get; set; }
-    public Int32 RoomID { get; set; }
-    public Int32 Level { get; set; }
-    public string NickName { get; set; } = null!;
-    public Int32 exp { get; set; }
-    public Int32 Gold { get; set; }
-    public Int32 Win { get; set; }
-    public Int32 Lose { get; set; }
+    public Int64 UserID { get => Data.UserID; set => Data.UserID = value; }
+    public Int32 Level { get => Data.Level; set => Data.Level = value; }
+    public string NickName { get => Data.NickName; set => Data.NickName = value; }
+    public Int32 Exp { get => Data.Exp; set => Data.Exp = value; }
+    public Int32 Gold { get => Data.Gold; set => Data.Gold = value; }
+    public Int32 Win { get => Data.Win; set => Data.Win = value; }
+    public Int32 Lose { get => Data.Lose; set => Data.Lose = value; }
 
     public DateTime PingTime { get; set; }
+
+    public UserData Data { get; set; } = null!;
 
     public void Clear()
     {
@@ -30,15 +31,9 @@ public class User
         IsConnect = false;
     }
 
-    public void Logined(UserGameData data)
+    public void Logined(UserData data)
     {
-        this.UserID = data.user_id;
-        this.NickName = data.user_name;
-        this.Level = data.level;
-        this.exp = data.exp;
-        this.Gold = data.gold;
-        this.Win = data.win;
-        this.Lose = data.lose;
+        Data = data;
         this.IsLogin = true;
 
         PingTime = DateTime.Now;

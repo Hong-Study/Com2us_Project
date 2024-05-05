@@ -1,5 +1,9 @@
+using Common;
+
+namespace GameServer;
+
 public interface IUserRepository
 {
-    Task<UserGameData?> GetUserGameDataAsync(Int64 userId);
-    Task<bool> UpdateUserWinLoseAsync(Int64 userId, Int32 win, Int32 lose);
+    public Task<UserRepository.GetUserGameDataResult> GetUserGameDataAsync(Int64 userID);
+    public Task<ErrorCode> UpdateUserWinLoseAsync(Int64 userID, Int32 winCount, Int32 loseCount);
 }

@@ -8,7 +8,6 @@ public class RoomUser
     public Int64 UserID { get; set; }
     public bool IsReady { get; set; } = false;
     public BoardType PlayerColor { get; set; }
-    public UserData UserData { get; set; } = null!;
     public Int16 TimeoutCount { get; set; } = 0;
 }
 

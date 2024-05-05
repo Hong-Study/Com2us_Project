@@ -48,25 +48,27 @@ public class PacketManager
         _onHandler.Add((Int16)PacketType.RES_C_GAME_CANCLE, _handler.Handle_C_GameCancle);
 
         _onRecv.Add((Int16)InnerPacketType.NTF_SESSION_CONNECTED, Make<NTFSessionConnectedReq>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_SESSION_CONNECTED, _handler.Handle_NTFSessionConnected);
+        _onHandler.Add((Int16)InnerPacketType.NTF_SESSION_CONNECTED, _handler.Handle_NTF_SessionConnected);
         _onRecv.Add((Int16)InnerPacketType.NTF_SESSION_DISCONNECTED, Make<NTFSessionDisconnectedReq>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_SESSION_DISCONNECTED, _handler.Handle_NTFSessionDisconnected);
+        _onHandler.Add((Int16)InnerPacketType.NTF_SESSION_DISCONNECTED, _handler.Handle_NTF_SessionDisconnected);
         _onRecv.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, Make<NTFCheckSessionLoginReq>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, _handler.Handle_NTFCheckSessionLogin);
+        _onHandler.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, _handler.Handle_NTF_CheckSessionLogin);
         _onRecv.Add((Int16)InnerPacketType.NTF_HEART_BEAT, Make<NTFHeartBeatReq>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_HEART_BEAT, _handler.Handle_NTFHeartBeat);
+        _onHandler.Add((Int16)InnerPacketType.NTF_HEART_BEAT, _handler.Handle_NTF_HeartBeat);
         _onRecv.Add((Int16)InnerPacketType.NTF_ROOMS_CHECK, Make<NTFRoomsCheckReq>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_ROOMS_CHECK, _handler.Handle_NTFRoomsCheck);
+        _onHandler.Add((Int16)InnerPacketType.NTF_ROOMS_CHECK, _handler.Handle_NTF_RoomsCheck);
+        _onRecv.Add((Int16)InnerPacketType.NTF_RES_USER_LOGIN, Make<NTFUserLoginRes>);
+        _onHandler.Add((Int16)InnerPacketType.NTF_RES_USER_LOGIN, _handler.Handle_NTF_UserLogin);
     }
 
     public void SetUserDelegate(ref readonly UserManager userManager)
     {
         _handler.AddUserFunc = userManager.AddUser;
-        _handler.LoginUserFunc = userManager.LoginUser;
         _handler.RemoveUserFunc = userManager.RemoveUser;
+        _handler.LoginUserFunc = userManager.LoginUser;
         _handler.GetUserFunc = userManager.GetUserInfo;
-        _handler.HeartHeatCheckFunc = userManager.HeartBeatCheck;
         _handler.SessionLoginTimeoutCheckFunc = userManager.SessionLoginTimeoutCheck;
+        _handler.HeartHeatCheckFunc = userManager.HeartBeatCheck;
         _handler.ReceivePongFunc = userManager.ReceivePong;
     }
 

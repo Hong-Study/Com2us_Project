@@ -48,7 +48,6 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _userManager = new UserManager(ref _serverOption);
         _databaseManager = new DatabaseManager(ref _serverOption);
         _redisManager = new RedisManager(ref _serverOption);
-
         _packetManager = new PacketManager();
     }
 
@@ -179,7 +178,12 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
         _userManager.SetMainServerDelegate(this);
 
+        _databaseManager.SetMainServerDelegate(ref mainServer);
+        _redisManager.SetMainServerDelegate(ref mainServer);
+
         _packetManager.Start(1);
+        _databaseManager.Start(1);
+        _redisManager.Start(1);
     }
 
     void StartTimer()
