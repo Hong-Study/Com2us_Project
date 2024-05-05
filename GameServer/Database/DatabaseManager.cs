@@ -59,6 +59,11 @@ public class DatabaseManager
         }
     }
 
+    public void SetMainServerDelegate(ref readonly MainServer mainServer)
+    {
+        _handler.InnerSendFunc = mainServer.PacketInnerSend;
+    }
+
     void SetDelegate()
     {
         _handler.GetUserGameDataAsync = userRepository.GetUserGameDataAsync;

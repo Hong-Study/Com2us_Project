@@ -10,6 +10,7 @@ public class OmokGame
 
     Func<string, byte[], bool> SendFunc = null!;
     Action RoomClearFunc = null!;
+    Action<string, bool> UpdateWinLoseFunc = null!;
 
     List<RoomUser> _users = null!;
 
@@ -63,6 +64,9 @@ public class OmokGame
 
         var user = _users[CurrentPlayer];
 
+        UpdateWinLoseFunc(user.SessionID, true);
+        UpdateWinLoseFunc(_users[GetNextTurn()].SessionID, false);
+        
         SGameEndReq req = new SGameEndReq();
         req.WinUserID = user.UserID;
 

@@ -4,7 +4,7 @@ namespace GameServer;
 
 public partial class PacketHandler
 {
-    public void Handle_NTFCheckSessionLogin(string sessionID, IMessage message)
+    public void Handle_NTF_CheckSessionLogin(string sessionID, IMessage message)
     {
         NTFCheckSessionLoginReq? packet = message as NTFCheckSessionLoginReq;
         if (packet == null)
@@ -15,7 +15,7 @@ public partial class PacketHandler
         SessionLoginTimeoutCheckFunc();
     }
 
-    public void Handle_NTFHeartBeat(string sessionID, IMessage message)
+    public void Handle_NTF_HeartBeat(string sessionID, IMessage message)
     {
         NTFHeartBeatReq? packet = message as NTFHeartBeatReq;
         if (packet == null)
@@ -26,7 +26,7 @@ public partial class PacketHandler
         HeartHeatCheckFunc();
     }
 
-    public void Handle_NTFRoomsCheck(string sessionID, IMessage message)
+    public void Handle_NTF_RoomsCheck(string sessionID, IMessage message)
     {
         NTFRoomsCheckReq? packet = message as NTFRoomsCheckReq;
         if (packet == null)
@@ -37,7 +37,7 @@ public partial class PacketHandler
         RoomCheckFunc();
     }
 
-    public void Handle_NTFSessionConnected(string sessionID, IMessage message)
+    public void Handle_NTF_SessionConnected(string sessionID, IMessage message)
     {
         NTFSessionConnectedReq? packet = message as NTFSessionConnectedReq;
         if (packet == null)
@@ -48,7 +48,7 @@ public partial class PacketHandler
         AddUserFunc(packet.SessionID);
     }
 
-    public void Handle_NTFSessionDisconnected(string sessionID, IMessage message)
+    public void Handle_NTF_SessionDisconnected(string sessionID, IMessage message)
     {
         NTFSessionDisconnectedReq? packet = message as NTFSessionDisconnectedReq;
         if (packet == null)
@@ -65,7 +65,18 @@ public partial class PacketHandler
                 room.LeaveRoom(sessionID);
             }
         }
-        
+
         RemoveUserFunc(packet.SessionID);
+    }
+
+    public void Handle_NTF_UserLogin(string sessionID, IMessage message)
+    {
+        NTFUserLoginRes? packet = message as NTFUserLoginRes;
+        if (packet == null)
+        {
+            return;
+        }
+
+        LoginUserFunc(sessionID, packet.ErrorCode, packet.UserData);
     }
 }

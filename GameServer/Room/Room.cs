@@ -47,15 +47,6 @@ public class Room
         RoomUser roomUser = new RoomUser();
         roomUser.SessionID = user.SessionID;
         roomUser.UserID = user.UserID;
-        roomUser.UserData = new UserData()
-        {
-            UserID = user.UserID,
-            NickName = user.NickName,
-            Level = user.Level,
-            Win = user.Win,
-            Lose = user.Lose,
-            PlayerColor = (Int16)BoardType.None,
-        };
 
         try
         {
@@ -64,7 +55,7 @@ public class Room
 
             {
                 var req = new SNewUserEnterReq();
-                req.User = roomUser.UserData;
+                req.User = user.Data;
 
                 var bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_NEW_USER_ENTER);
                 BroadCast(bytes, user.SessionID);
@@ -74,7 +65,13 @@ public class Room
                 var userList = new List<UserData>();
                 foreach (var u in _users)
                 {
-                    userList.Add(u.UserData);
+                    var userInfo = GetUserInfoFunc(u.SessionID);
+                    if (userInfo == null)
+                    {
+                        continue;
+                    }
+
+                    userList.Add(userInfo.Data);
                 }
 
                 var res = new SRoomEnterRes();
@@ -137,9 +134,16 @@ public class Room
             return;
         }
 
+        var userInfo = GetUserInfoFunc(user.SessionID);
+        if (userInfo == null)
+        {
+            SendFailedResponse<SRoomChatRes>(sessionID, ErrorCode.NOT_EXIST_USER, PacketType.RES_S_ROOM_CHAT);
+            return;
+        }
+
         var res = new SRoomChatRes();
         res.ErrorCode = ErrorCode.NONE;
-        res.UserName = user.UserData.NickName;
+        res.UserName = userInfo.NickName;
         res.Message = message;
 
         byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_ROOM_CHAT);

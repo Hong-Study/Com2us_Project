@@ -137,7 +137,10 @@ namespace GameClient
             roomLeaveReq.RoomNumber = Convert.ToInt32(textBoxRoomNumber.Text);
 
             PostSendPacket(PacketType.REQ_C_ROOM_LEAVE, roomLeaveReq);
-            DevLog.Write($"방 입장 요청:  {textBoxRoomNumber.Text} 번");
+            DevLog.Write($"방 퇴장 요청:  {textBoxRoomNumber.Text} 번");
+
+            _userList.Clear();
+            listBoxRoomUserList.Items.Clear();
         }
 
         private void btnRoomChat_Click(object sender, EventArgs e)
@@ -160,7 +163,6 @@ namespace GameClient
             //PostSendPacket(PACKET_ID.MATCH_USER_REQ, null);
             DevLog.Write($"매칭 요청");
         }
-
 
         private void listBoxRoomChatMsg_SelectedIndexChanged(object sender, EventArgs e)
         {
