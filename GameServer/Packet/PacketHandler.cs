@@ -28,13 +28,19 @@ public partial class PacketHandler
             return;
         }
 
-        var req = new RDUserLoginReq();
+        // var req = new RDUserLoginReq();
 
+        // req.UserID = packet.UserID;
+        // req.AuthToken = packet.AuthToken;
+
+        // var serverPacketData = RedisManager.MakeRedisPacket(sessionID, req, RedisType.REQ_RD_USER_LOGIN);
+        // RedisSendFunc(serverPacketData);
+
+        var req = new DBUserLoginReq();
         req.UserID = packet.UserID;
-        req.AuthToken = packet.AuthToken;
 
-        var serverPacketData = RedisManager.MakeRedisPacket(sessionID, req, RedisType.REQ_RD_USER_LOGIN);
-        RedisSendFunc(serverPacketData);
+        var serverPacketData = DatabaseManager.MakeDatabasePacket(sessionID, req, DatabaseType.REQ_DB_USER_LOGIN);
+        DatabaseSendFunc(serverPacketData);
     }
 
     public void Handle_C_Logout(string sessionID, IMessage message)

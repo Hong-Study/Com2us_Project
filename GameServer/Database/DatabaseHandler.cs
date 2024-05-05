@@ -12,6 +12,8 @@ public class DatabaseHandler
 
     public async Task Handle_DB_Login(string sessionID, IMessage message)
     {
+        System.Console.WriteLine("Handle_DB_Login");
+
         var packet = message as DBUserLoginReq;
         if (packet == null)
         {
