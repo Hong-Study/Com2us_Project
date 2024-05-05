@@ -13,9 +13,12 @@ public class RedisManager
     List<Thread> _logicThreads = new List<Thread>();
     BufferBlock<ServerPacketData> _msgBuffer = new BufferBlock<ServerPacketData>();
 
+    RedisRepository _redis = null!;
+
     public RedisManager(ref readonly ServerOption option)
     {
         _handler = new RedisHandler();
+        _redis = new RedisRepository(option.RedisConnectionString);
 
         InitHandler();
 
@@ -24,13 +27,19 @@ public class RedisManager
 
     public void InitHandler()
     {
-        _onRecv.Add((Int16)MemoryType.REQ_ME_USER_LOGIN, Make<MEUserLoginReq>);
-        _onHandler.Add((Int16)MemoryType.REQ_ME_USER_LOGIN, _handler.Handle_ME_UserLogin);
+        _onRecv.Add((Int16)RedisType.REQ_RD_USER_LOGIN, Make<RDUserLoginReq>);
+        _onHandler.Add((Int16)RedisType.REQ_RD_USER_LOGIN, _handler.Handle_RD_UserLogin);
+    }
+
+    public void SetMainServerDelegate(ref readonly MainServer mainServer)
+    {
+        _handler.InnerSendFunc = mainServer.PacketInnerSend;
+        _handler.DatabaseSendFunc = mainServer.PacketDatabaseSend;
     }
 
     void SetDelegate()
     {
-
+        _handler.ValidataeTokenFunc = _redis.ValidateToken;
     }
 
     public void Start(Int32 threadCount = 1)
@@ -98,7 +107,7 @@ public class RedisManager
         }
     }
 
-    public static ServerPacketData MakeMemoryPacket<T>(string sessionID, T packet, MemoryType type) where T : IMessage
+    public static ServerPacketData MakeRedisPacket<T>(string sessionID, T packet, RedisType type) where T : IMessage
     {
         byte[] body = MemoryPackSerializer.Serialize(packet);
         return new ServerPacketData(sessionID, body, (Int16)type);

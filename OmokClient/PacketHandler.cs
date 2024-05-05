@@ -175,10 +175,10 @@ public partial class mainForm
         {
             return;
         }
-        // packet.
 
         if (_userList.TryGetValue(packet.UserID, out UserData user))
         {
+            // MessageBox.Show($"{user.NickName}님이 퇴장하였습니다.");
             _userList.Remove(packet.UserID);
             listBoxRoomUserList.Items.Remove(user.NickName);
         }
@@ -307,6 +307,9 @@ public partial class mainForm
 
     public void Handle_S_GameCancle(IMessage message)
     {
+        MessageBox.Show("게임이 종료되었습니다.");
 
+        _userList.Clear();
+        listBoxRoomUserList.Items.Clear();
     }
 }

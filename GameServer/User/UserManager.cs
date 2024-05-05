@@ -8,6 +8,8 @@ public class UserManager
     Func<string, byte[], bool> SendFunc = null!;
     Func<string, ClientSession> GetSessionFunc = null!;
 
+    Action<ServerPacketData> DatabaseSendFunc = null!;
+
     TimeSpan _heartBeatTimeMillisecond;
     TimeSpan _sessionTimeOutMillisecond;
 
@@ -93,9 +95,21 @@ public class UserManager
         _nowUserCount -= 1;
     }
 
-    public void LoginUser(string sessionID, UserGameData data)
+    public void LoginUser(string sessionID, ErrorCode errorCode, UserData? data)
     {
-        if (IsExistUser(data.user_id))
+        if (errorCode != ErrorCode.NONE)
+        {
+            SendResponse<SLoginRes>(sessionID, errorCode);
+            return;
+        }
+
+        if (data == null)
+        {
+            SendResponse<SLoginRes>(sessionID, errorCode);
+            return;
+        }
+
+        if (IsExistUser(data.UserID))
         {
             SendResponse<SLoginRes>(sessionID, ErrorCode.ALREADY_EXIST_USER);
             return;
@@ -222,6 +236,32 @@ public class UserManager
         }
 
         user.PingTime = DateTime.Now;
+    }
+
+    public void UpdateUserWinLoseCount(string sessionID, bool isWin)
+    {
+        var user = GetUserInfo(sessionID);
+        if (user == null)
+        {
+            return;
+        }
+
+        if (isWin)
+        {
+            user.Win += 1;
+        }
+        else
+        {
+            user.Lose += 1;
+        }
+
+        var req = new DBUpdateWinLoseCountReq();
+        req.UserID = user.UserID;
+        req.WinCount = user.Win;
+        req.LoseCount = user.Lose;
+
+        var data = DatabaseManager.MakeDatabasePacket(sessionID, req, DatabaseType.REQ_DB_UPDATE_WIN_LOSE_COUNT);
+        DatabaseSendFunc(data);
     }
 
     bool IsFullUserCount()
