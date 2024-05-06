@@ -10,10 +10,15 @@ public class DatabaseHandler
 
     public Action<ServerPacketData> InnerSendFunc = null!;
 
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
+
+    public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
+    {
+        Logger = logger;
+    }
+
     public async Task Handle_DB_Login(string sessionID, IMessage message)
     {
-        System.Console.WriteLine("Handle_DB_Login");
-
         var packet = message as DBUserLoginReq;
         if (packet == null)
         {

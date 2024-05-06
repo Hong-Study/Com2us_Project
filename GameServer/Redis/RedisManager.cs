@@ -15,6 +15,15 @@ public class RedisManager
 
     RedisRepository _redis = null!;
 
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
+
+    public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
+    {
+        Logger = logger;
+        _handler.InitLogger(logger);
+        _redis.InitLogger(logger);
+    }
+
     public RedisManager(ref readonly ServerOption option)
     {
         _handler = new RedisHandler();
@@ -82,7 +91,7 @@ public class RedisManager
                 }
                 else
                 {
-                    MainServer.MainLogger.Error($"Not found handler : {data.PacketType}");
+                    Logger.Error($"Not found handler : {data.PacketType}");
                 }
             }
             catch

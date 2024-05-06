@@ -20,6 +20,13 @@ public partial class PacketHandler
     public Action<ServerPacketData> DatabaseSendFunc = null!;
     public Action<ServerPacketData> RedisSendFunc = null!;
 
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
+
+    public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
+    {
+        Logger = logger;
+    }
+
     public void Handle_C_Login(string sessionID, IMessage message)
     {
         var packet = message as CLoginReq;
@@ -70,7 +77,7 @@ public partial class PacketHandler
         var user = GetUserFunc(sessionID);
         if (user == null)
         {   
-            MainServer.MainLogger.Error($"GetUser : User{sessionID} is not exist");
+            Logger.Error($"GetUser : User{sessionID} is not exist");
             
             T pkt = new T();
             pkt.ErrorCode = ErrorCode.NOT_EXIST_USER;
@@ -84,7 +91,7 @@ public partial class PacketHandler
         var room = GetRoomFunc(user.RoomID);
         if (room == null)
         {
-            MainServer.MainLogger.Error($"GetRoom({user.UserID}) : Room({user.RoomID}) is not exist");
+            Logger.Error($"GetRoom({user.UserID}) : Room({user.RoomID}) is not exist");
 
             T pkt = new T();
             pkt.ErrorCode = ErrorCode.NOT_EXIST_ROOM;

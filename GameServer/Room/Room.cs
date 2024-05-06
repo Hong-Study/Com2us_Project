@@ -6,6 +6,8 @@ public class Room
 {
     public Int32 RoomID { get; private set; }
 
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
+
     List<RoomUser> _users = new List<RoomUser>();
     Func<string, byte[], bool> SendFunc = null!;
     Func<string, User?> GetUserInfoFunc = null!;
@@ -26,6 +28,12 @@ public class Room
         _game.TimeoutCount = timeoutCount;
         _game.TurnTimeoutSecond = turnTimeoutSecond;
         _maxGameTime = new TimeSpan(0, MaxGameTimeMinute, 0);
+    }
+
+    public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
+    {
+        Logger = logger;
+        _game.InitLogger(logger);
     }
 
     public void SetDelegate(Func<string, byte[], bool> SendFunc, Func<string, User?> GetUserInfoFunc)
@@ -51,7 +59,6 @@ public class Room
         try
         {
             _users.Add(roomUser);
-            MainServer.MainLogger.Debug($"EnterRoom : {user.UserID} : {_users.Count}");
 
             {
                 var req = new SNewUserEnterReq();
@@ -86,7 +93,7 @@ public class Room
         }
         catch (Exception e)
         {
-            MainServer.MainLogger.Error($"EnterRoom : {e.Message}");
+            Logger.Error($"EnterRoom : {e.Message}");
             SendFailedResponse<SRoomEnterRes>(user.SessionID, ErrorCode.EXCEPTION_ADD_USER, PacketType.RES_S_ROOM_ENTER);
         }
     }
@@ -101,6 +108,9 @@ public class Room
         }
 
         _users.Remove(user);
+
+        var userInfo = GetUserInfoFunc(sessionID)!;
+        userInfo.LeaveRoom();
 
         if (_game.IsStart)
         {
@@ -244,8 +254,6 @@ public class Room
 
     void Clear()
     {
-        MainServer.MainLogger.Debug($"Room Clear : {RoomID}");
-
         foreach(var user in _users)
         {
             var userInfo = GetUserInfoFunc(user.SessionID);
@@ -253,8 +261,7 @@ public class Room
             {
                 continue;
             }
-            MainServer.MainLogger.Debug($"Room Clear : {userInfo.UserID}");
-            userInfo.RoomID = 0;
+            userInfo.LeaveRoom();
         }
 
         _users.Clear();
@@ -263,7 +270,7 @@ public class Room
 
     void SendFailedResponse<T>(string sessionID, ErrorCode errorCode, PacketType packetType) where T : IResMessage, new()
     {
-        MainServer.MainLogger.Error($"Failed Room Action : {errorCode}");
+        Logger.Error($"Failed Room Action : {errorCode}");
 
         var res = new T();
         res.ErrorCode = errorCode;
