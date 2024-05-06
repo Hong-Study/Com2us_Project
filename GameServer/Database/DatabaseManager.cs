@@ -10,21 +10,30 @@ namespace GameServer;
 public class DatabaseManager
 {
     DatabaseHandler _handler;
-    IUserRepository userRepository;
+    IUserRepository _userRepository;
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
 
     Dictionary<Int16, Action<ServerPacketData>> _onRecv = new Dictionary<Int16, Action<ServerPacketData>>();
     Dictionary<Int16, Func<string, IMessage, Task>> _onHandler = new Dictionary<Int16, Func<string, IMessage, Task>>();
     List<Thread> _logicThreads = new List<Thread>();
     BufferBlock<ServerPacketData> _msgBuffer = new BufferBlock<ServerPacketData>();
 
+
     public DatabaseManager(ref readonly ServerOption option)
     {
-        userRepository = new UserRepository(option.DatabaseConnectionString);
+        _userRepository = new UserRepository(option.DatabaseConnectionString);
         _handler = new DatabaseHandler();
 
         InitHandler();
 
         SetDelegate();
+    }
+
+    public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
+    {
+        Logger = logger;
+        _handler.InitLogger(logger);
+        _userRepository.InitLogger(logger);
     }
 
     public void InitHandler()
@@ -66,8 +75,8 @@ public class DatabaseManager
 
     void SetDelegate()
     {
-        _handler.GetUserGameDataAsync = userRepository.GetUserGameDataAsync;
-        _handler.UpdateUserWinLoseAsync = userRepository.UpdateUserWinLoseAsync;
+        _handler.GetUserGameDataAsync = _userRepository.GetUserGameDataAsync;
+        _handler.UpdateUserWinLoseAsync = _userRepository.UpdateUserWinLoseAsync;
     }
 
     void Process()
@@ -87,7 +96,7 @@ public class DatabaseManager
                 }
                 else
                 {
-                    MainServer.MainLogger.Error($"Not found handler : {data.PacketType}");
+                    Logger.Error($"Not found handler : {data.PacketType}");
                 }
             }
             catch

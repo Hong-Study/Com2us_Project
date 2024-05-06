@@ -10,6 +10,8 @@ public class RoomManager
 
     List<Room> _roomPool = new List<Room>();
 
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
+    
     public RoomManager(ref readonly ServerOption option)
     {
         _maxRoomCount = option.MaxRoomCount;
@@ -18,6 +20,15 @@ public class RoomManager
         for (Int32 i = 1; i <= _maxRoomCount; i++)
         {
             _roomPool.Add(new Room(i));
+        }
+    }
+
+    public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
+    {
+        Logger = logger;
+        foreach (var room in _roomPool)
+        {
+            room.InitLogger(logger);
         }
     }
 

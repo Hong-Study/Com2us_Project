@@ -9,6 +9,13 @@ public class RedisRepository : IRedisRepository
     public RedisConnection _redisConn;
     public string _tokenKey = "_token";
 
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
+
+    public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
+    {
+        Logger = logger;
+    }
+
     public RedisRepository(string connectionString)
     {
         var config = new RedisConfig("default", connectionString);
@@ -31,7 +38,7 @@ public class RedisRepository : IRedisRepository
         }
         catch (Exception ex)
         {
-            MainServer.MainLogger.Error(ex.Message);
+            Logger.Error(ex.Message);
             return ErrorCode.EXCEPTION_REDIS;
         }
     }

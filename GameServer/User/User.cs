@@ -20,7 +20,7 @@ public class User
 
     public DateTime PingTime { get; set; }
 
-    public UserData Data { get; set; } = null!;
+    public UserData Data { get; set; } = new UserData();
 
     public void Clear()
     {
@@ -33,7 +33,14 @@ public class User
 
     public void Logined(UserData data)
     {
-        Data = data;
+        UserID = data.UserID;
+        Level = data.Level;
+        NickName = data.NickName;
+        Exp = data.Exp;
+        Gold = data.Gold;
+        Win = data.Win;
+        Lose = data.Lose;
+        
         this.IsLogin = true;
 
         PingTime = DateTime.Now;
@@ -57,7 +64,7 @@ public class User
 
     public void LeaveRoom()
     {
-        this.RoomID = -1;
+        this.RoomID = 0;
     }
 
     public void SessionConnected(string sessionID)
