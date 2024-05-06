@@ -12,9 +12,17 @@ public class PacketManager
     List<Thread> _logicThreads = new List<Thread>();
     BufferBlock<ServerPacketData> _msgBuffer = new BufferBlock<ServerPacketData>();
 
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
+
     public PacketManager()
     {
         InitHandler();
+    }
+
+    public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
+    {
+        Logger = logger;
+        _handler.InitLogger(logger);
     }
 
     public void InitHandler()
@@ -126,12 +134,12 @@ public class PacketManager
                 }
                 else
                 {
-                    MainServer.MainLogger.Error($"Not found handler : {data.PacketType}");
+                    Logger.Error($"Not found handler : {data.PacketType}");
                 }
             }
-            catch
+            catch(Exception e)
             {
-
+                Logger.Error(e.Message);
             }
         }
     }
@@ -148,8 +156,6 @@ public class PacketManager
         }
 
         var packetSize = (Int16)(bodyDataSize + PacketDef.PACKET_HEADER_SIZE);
-
-        MainServer.MainLogger.Info($"{packetSize} : {type} : {bodyDataSize}");
 
         var dataSource = new byte[packetSize];
 

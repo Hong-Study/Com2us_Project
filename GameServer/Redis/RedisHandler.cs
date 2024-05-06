@@ -9,6 +9,13 @@ public class RedisHandler
     public Action<ServerPacketData> InnerSendFunc = null!;
     public Action<ServerPacketData> DatabaseSendFunc = null!;
 
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
+
+    public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
+    {
+        Logger = logger;
+    }
+    
     public async Task Handle_RD_UserLogin(string sessionID, IMessage message)
     {
         var packet = message as RDUserLoginReq;

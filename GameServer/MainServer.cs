@@ -165,6 +165,12 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
     void CreateComponent(ServerOption option)
     {
+        _packetManager.InitLogger(MainLogger);
+        _roomManager.InitLogger(MainLogger);
+        _userManager.InitLogger(MainLogger);
+        _databaseManager.InitLogger(MainLogger);
+        _redisManager.InitLogger(MainLogger);
+
         _packetManager.SetUserDelegate(ref _userManager);
         _packetManager.SetRoomDelegate(ref _roomManager);
 

@@ -6,6 +6,8 @@ public class OmokGame
 {
     public const Int32 BoardSize = 19;
 
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
+
     BoardType[,] _gameBoard;
 
     Func<string, byte[], bool> SendFunc = null!;
@@ -24,6 +26,11 @@ public class OmokGame
     public OmokGame()
     {
         _gameBoard = new BoardType[BoardSize, BoardSize];
+    }
+
+    public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
+    {
+        Logger = logger;
     }
 
     public void SetDelegate(Func<string, byte[], bool> sendFunc, Action RoomClearFunc)
@@ -66,7 +73,7 @@ public class OmokGame
 
         UpdateWinLoseFunc(user.SessionID, true);
         UpdateWinLoseFunc(_users[GetNextTurn()].SessionID, false);
-        
+
         SGameEndReq req = new SGameEndReq();
         req.WinUserID = user.UserID;
 
@@ -246,7 +253,7 @@ public class OmokGame
     void SendFailedResponse<I>(string sessionID, ErrorCode errorCode, PacketType packetType)
                             where I : IResMessage, new()
     {
-        MainServer.MainLogger.Error($"Failed OmokGame Action : {errorCode}");
+        Logger.Error($"Failed OmokGame Action : {errorCode}");
 
         var res = new I();
         res.ErrorCode = errorCode;
