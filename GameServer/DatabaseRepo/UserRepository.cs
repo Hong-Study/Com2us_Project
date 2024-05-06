@@ -5,8 +5,15 @@ namespace GameServer;
 
 public class UserRepository : DefaultDbConnection, IUserRepository
 {
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
+
     public UserRepository(string connectionString) : base(connectionString)
     {
+    }
+
+    public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
+    {
+        Logger = logger;
     }
 
     public record GetUserGameDataResult(ErrorCode errorCode, UserData? userData);
@@ -37,7 +44,7 @@ public class UserRepository : DefaultDbConnection, IUserRepository
         }
         catch (Exception e)
         {
-            System.Console.WriteLine("AuthRepository " + e.Message);
+            Logger.Error("UserRepository " + e.Message);
             return MakeUserGameDataResult(ErrorCode.EXCEPTION_USER_DATABASE, null);
         }
     }
@@ -67,7 +74,7 @@ public class UserRepository : DefaultDbConnection, IUserRepository
         }
         catch (Exception e)
         {
-            System.Console.WriteLine("AuthRepository " + e.Message);
+            Logger.Error("UserRepository " + e.Message);
             return ErrorCode.EXCEPTION_USER_DATABASE;
         }
     }

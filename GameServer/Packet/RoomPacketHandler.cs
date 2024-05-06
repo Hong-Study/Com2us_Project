@@ -16,7 +16,7 @@ public partial class PacketHandler
         var user = GetUserFunc(sessionID);
         if (user == null)
         {   
-            MainServer.MainLogger.Error($"GetUser : User{sessionID} is not exist");
+            Logger.Error($"GetUser : User{sessionID} is not exist");
             
             SRoomEnterRes pkt = new SRoomEnterRes();
             pkt.ErrorCode = ErrorCode.NOT_EXIST_USER;
@@ -29,7 +29,7 @@ public partial class PacketHandler
 
         if(user.RoomID != 0)
         {
-            MainServer.MainLogger.Error($"GetUser : User{sessionID} is already in room");
+            Logger.Error($"GetUser : User{sessionID} is already in room");
             
             SRoomEnterRes pkt = new SRoomEnterRes();
             pkt.ErrorCode = ErrorCode.ALREADY_IN_ROOM;
@@ -43,7 +43,7 @@ public partial class PacketHandler
         var room = GetRoomFunc(packet.RoomNumber);
         if (room == null)
         {
-            MainServer.MainLogger.Error($"GetRoom : Room({user.UserID}) is not exist");
+            Logger.Error($"GetRoom : Room({user.UserID}) is not exist");
 
             SRoomEnterRes pkt = new SRoomEnterRes();
             pkt.ErrorCode = ErrorCode.NOT_EXIST_ROOM;
@@ -80,7 +80,7 @@ public partial class PacketHandler
             return;
         }
 
-        MainServer.MainLogger.Debug($"Room Chat : {packet.Message}");
+        Logger.Debug($"Room Chat : {packet.Message}");
 
         Room? room = GetRoom<SRoomChatRes>(sessionID, PacketType.RES_S_ROOM_CHAT);
         if (room != null)

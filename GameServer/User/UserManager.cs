@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using Common;
+using Microsoft.Extensions.Logging;
 namespace GameServer;
 
 public class UserManager
@@ -24,6 +25,8 @@ public class UserManager
     Int32 _maxSessionCheckCount = 0;
     Int32 _nowSessionCheckCount = 0;
 
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
+    
     public UserManager(ref readonly ServerOption option)
     {
         _maxUserCount = option.MaxUserCount;
@@ -37,6 +40,11 @@ public class UserManager
         {
             _users.Add(new User());
         }
+    }
+
+    public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
+    {
+        Logger = logger;
     }
 
     public void SetMainServerDelegate(MainServer mainServer)
@@ -124,6 +132,8 @@ public class UserManager
             }
 
             user.Logined(data);
+
+            SendResponse<SLoginRes>(sessionID, ErrorCode.NONE);
         }
         catch
         {
@@ -291,7 +301,7 @@ public class UserManager
 
     void SendResponse<T>(string sessionID, ErrorCode errorCode) where T : IResMessage, new()
     {
-        MainServer.MainLogger.Error($"Failed User Action : {errorCode}");
+        Logger.Error($"Failed User Action : {errorCode}");
 
         var res = new T();
         res.ErrorCode = errorCode;
