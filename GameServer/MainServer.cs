@@ -149,6 +149,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
             {
                 MainLogger = base.Logger;
             }
+
             IsRunning = true;
 
             CreateComponent(config);
@@ -177,7 +178,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         MainServer mainServer = this;
         _packetManager.SetMainDelegate(ref mainServer);
 
-        _roomManager.SetDelegate(SendData, _userManager.GetUserInfo);
+        _roomManager.SetDelegate(SendData, _userManager.GetUserInfo, PacketDatabaseSend);
         _roomManager.SetDefaultSetting(option.OmokGameTurnTimeoutSeconds
                                     , option.OmokGameTurnTimeoutCount
                                     , option.OmokGameMaxGameTimeMinute);
