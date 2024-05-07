@@ -9,7 +9,7 @@ public class AttendanceService : IAttendanceService
     }
 
     public record AttendanceResult(ErrorCodes errorCode, bool isSuccess);
-    public async Task<AttendanceResult> AttendanceCheck(int userId, DateTime nowTime)
+    public async Task<AttendanceResult> AttendanceCheck(Int64 userId, DateTime nowTime)
     {
         // 서버와의 시간을 체크
         try
