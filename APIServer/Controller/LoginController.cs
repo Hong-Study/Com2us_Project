@@ -21,6 +21,8 @@ public class LoginController : ControllerBase
             _logger.LogError($"Login failed: {result.errorCode.ToString()}");
         }
 
+        _logger.LogInformation($"Login success: {result.gameData?.user_name}");
+
         return new LoginRes
         {
             ErrorCode = result.errorCode,

@@ -4,8 +4,8 @@ public class SendMailReq
     public string RecvUserName { get; set; } = null!;
     public string Title { get; set; } = null!;
     public string Content { get; set; } = null!;
-    // public int ItemId { get; set; }
-    // public int ItemCount { get; set; }
+    // public Int32 ItemId { get; set; }
+    // public Int32 ItemCount { get; set; }
 }
 
 public class SendMailRes : DefaultRes

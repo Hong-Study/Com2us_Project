@@ -12,10 +12,10 @@ public class LogManager
 
     public static Dictionary<EventType, EventId> EventIdDic = new()
     {
-        { EventType.CreateAccount, new EventId((int)EventType.CreateAccount, "CreateAccount") },
-        { EventType.Login, new EventId((int)EventType.Login, "Login") },
-        { EventType.LoginAddRedis, new EventId((int)EventType.LoginAddRedis, "LoginAddRedis") },
-        { EventType.CreateCharacter, new EventId((int)EventType.CreateCharacter, "CreateCharacter") },
+        { EventType.CreateAccount, new EventId((Int32)EventType.CreateAccount, "CreateAccount") },
+        { EventType.Login, new EventId((Int32)EventType.Login, "Login") },
+        { EventType.LoginAddRedis, new EventId((Int32)EventType.LoginAddRedis, "LoginAddRedis") },
+        { EventType.CreateCharacter, new EventId((Int32)EventType.CreateCharacter, "CreateCharacter") },
     };
 
     public static ILogger Logger { get; private set; } = null!;

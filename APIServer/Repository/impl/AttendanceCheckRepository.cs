@@ -8,11 +8,11 @@ public class AttendanceCheckRepository : DefaultDbConnection, IAttendanceCheckRe
         _logger = logger;
     }
 
-    public async Task<bool> DeleteAttendanceChcek(long userId, DateTime data)
+    public async Task<bool> DeleteAttendanceChcek(Int64 userId, DateTime data)
     {
         try
         {
-            int result = await _queryFactory.Query("user_attendance_data")
+            Int32 result = await _queryFactory.Query("user_attendance_data")
                 .Where("user_id", userId)
                 .Where("attendance_date", data)
                 .DeleteAsync();
@@ -31,7 +31,7 @@ public class AttendanceCheckRepository : DefaultDbConnection, IAttendanceCheckRe
         }
     }
 
-    public async Task<bool> IsAttendanceCheck(long userId, DateTime date)
+    public async Task<bool> IsAttendanceCheck(Int64 userId, DateTime date)
     {
         try
         {
@@ -55,7 +55,7 @@ public class AttendanceCheckRepository : DefaultDbConnection, IAttendanceCheckRe
     {
         try
         {
-            int result = await _queryFactory.Query("user_attendance_data").InsertAsync(data);
+            Int32 result = await _queryFactory.Query("user_attendance_data").InsertAsync(data);
             if (result == 0)
                 return false;
             return true;

@@ -37,7 +37,7 @@ public class MailRepository : DefaultDbConnection, IMailRepository
     {
         try
         {
-            int count = await _queryFactory.Query("mail_data").InsertAsync(mailData);
+            Int32 count = await _queryFactory.Query("mail_data").InsertAsync(mailData);
             if(count == 0)
             {
                 return false;
