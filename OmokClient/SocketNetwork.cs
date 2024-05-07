@@ -20,7 +20,10 @@ public partial class mainForm
     ConcurrentQueue<byte[]> RecvPacketQueue = new ConcurrentQueue<byte[]>();
     ConcurrentQueue<byte[]> SendPacketQueue = new ConcurrentQueue<byte[]>();
 
-    void InitNetwork()
+    string _gameServerAddress;
+    Int32  _gameServerPort;
+
+    void InitSocketNetwork()
     {
         IsNetworkThreadRunning = true;
         NetworkReadThread = new System.Threading.Thread(this.NetworkReadProcess);
@@ -32,6 +35,24 @@ public partial class mainForm
         dispatcherUITimer.Tick += new EventHandler(NetworkProcess);
         dispatcherUITimer.Interval = 100;
         dispatcherUITimer.Start();
+    }
+
+    void ConnectGameServer()
+    {
+        if (Network.Connect(_gameServerAddress, _gameServerPort))
+        {
+            labelStatus.Text = string.Format("{0}. 서버에 접속 중", DateTime.Now);
+            btnConnect.Enabled = false;
+            btnDisconnect.Enabled = true;
+
+            DevLog.Write($"서버에 접속 중", LOG_LEVEL.INFO);
+        }
+        else
+        {
+            labelStatus.Text = string.Format("{0}. 서버에 접속 실패", DateTime.Now);
+        }
+
+        PacketBuffer.Clear();
     }
 
     void CloseNetwork()
@@ -56,7 +77,7 @@ public partial class mainForm
             }
 
             var recvData = Network.Receive();
-            
+
             if (recvData != null)
             {
                 System.Console.WriteLine($"받은 데이터: {recvData.Item1}");

@@ -4,18 +4,21 @@ using Microsoft.AspNetCore.Mvc;
 [Route("api/[controller]")]
 public class LoginController : ControllerBase
 {
+    ILogger<LoginController> _logger;
     IAuthService _service;
-    public LoginController(IAuthService service)
+    public LoginController(IAuthService service, ILogger<LoginController> logger)
     {
         _service = service;
+        _logger = logger;
     }
 
     [HttpPost]
     public async Task<LoginRes> Login([FromBody] LoginReq request)
     {
-        // 서비스 입장에서는 HTTP로 주던지 어떤 형태로 주던지 상관 없기 때문에
-        // 서비스와의 의존성이 강하기 때문에 분리하는 것을 노리기
+        _logger.LogInformation("Login");
+        
         AuthService.LoginResult result = await _service.LoginAsync(request);
+
         return new LoginRes()
         {
             ErrorCode = result.ErrorCode,

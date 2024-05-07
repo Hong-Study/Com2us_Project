@@ -24,7 +24,9 @@ public class LoginController : ControllerBase
         return new LoginRes
         {
             ErrorCode = result.errorCode,
-            GameData = result.gameData
+            GameData = result.gameData,
+            GameServerAddress = result.gameServerAddress,
+            GameServerPort = result.gameServerPort
         };
     }
 }
