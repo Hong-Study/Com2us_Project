@@ -16,13 +16,13 @@ public class AuthService : IAuthService
         _memoryRepo = memoryRepository;
     }
 
-    public record LoginResult(ErrorCodes errorCode, UserGameData? gameData, string? gameServerAddress = null, Int32 gameServerPort = 0);
+    public record LoginResult(ErrorCode errorCode, UserGameData? gameData, string? gameServerAddress = null, Int32 gameServerPort = 0);
     public async Task<LoginResult> LoginAsync(Int64 id, string token)
     {
         string? url = _config.GetValue<string>("HiveServerUrl");
         if (url == null)
         {
-            return FailedLogin(ErrorCodes.FAILED_LOGIN);
+            return FailedLogin(ErrorCode.FAILED_LOGIN);
         }
 
         _client.BaseAddress = new Uri(url);
@@ -38,44 +38,44 @@ public class AuthService : IAuthService
             HttpResponseMessage resopnse = await _client.PostAsJsonAsync("api/verifylogin", verifyLoginReq);
             if (resopnse.StatusCode != HttpStatusCode.OK)
             {
-                return FailedLogin(ErrorCodes.FAILED_VERIFY_LOGIN);
+                return FailedLogin(ErrorCode.FAILED_VERIFY_LOGIN);
             }
 
             VerifyLoginRes? VerifyLoginRes = await resopnse.Content.ReadFromJsonAsync<VerifyLoginRes>();
             if (VerifyLoginRes == null)
             {
-                return FailedLogin(ErrorCodes.FAILED_VERIFY_LOGIN_PARSING);
+                return FailedLogin(ErrorCode.FAILED_VERIFY_LOGIN_PARSING);
             }
 
             if (!VerifyLoginRes.IsSuccess)
             {
-                return FailedLogin(ErrorCodes.FAILED_VERIFY_LOGIN);
+                return FailedLogin(ErrorCode.FAILED_VERIFY_LOGIN);
             }
 
             bool IsSuccess = await _memoryRepo.SetAccessToken(id.ToString(), token);
             if (!IsSuccess)
             {
-                return FailedLogin(ErrorCodes.FAILED_SET_TOKEN);
+                return FailedLogin(ErrorCode.FAILED_SET_TOKEN);
             }
 
             UserGameData? gameData = await GetOrCreateUserGameData(id);
             if (gameData == null)
             {
                 await _memoryRepo.DeleteAccessToken(id.ToString());
-                return FailedLogin(ErrorCodes.ERROR_USER_GAME_DATA);
+                return FailedLogin(ErrorCode.ERROR_USER_GAME_DATA);
             }
 
-            return new LoginResult(ErrorCodes.NONE, gameData, "127.0.0.1", 7777);
+            return new LoginResult(ErrorCode.NONE, gameData, "127.0.0.1", 7777);
 
         }
         catch(Exception e)
         {
             System.Console.WriteLine($"Failed Hive Connect {e.Message}");
-            return FailedLogin(ErrorCodes.FAILED_HIVE_CONNECT);
+            return FailedLogin(ErrorCode.FAILED_HIVE_CONNECT);
         }
     }
 
-    private LoginResult FailedLogin(ErrorCodes errorCode)
+    private LoginResult FailedLogin(ErrorCode errorCode)
     {
         return new LoginResult(errorCode, null);
     }

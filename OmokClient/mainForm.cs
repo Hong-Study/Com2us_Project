@@ -37,14 +37,17 @@ namespace GameClient
             CloseNetwork();
         }
 
-        private void btnConnect_Click(object sender, EventArgs e)
+        private async void btnRegister_ClickAsync(object sender, EventArgs e)
         {
-            
+            string email = textBoxRegisterID.Text;
+            string password = textBoxRegisterPW.Text;
+
+            await HiveRegister(email, password);
         }
 
         private void btnDisconnect_Click(object sender, EventArgs e)
         {
-            SetDisconnectd();
+            // SetDisconnectd();
         }
 
         void AddRoomUserList(string userID)

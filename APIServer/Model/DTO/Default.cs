@@ -1,4 +1,4 @@
 public abstract class DefaultRes
 {
-    public ErrorCodes ErrorCode { get; set; } = ErrorCodes.NONE;
+    public ErrorCode ErrorCode { get; set; } = ErrorCode.NONE;
 }

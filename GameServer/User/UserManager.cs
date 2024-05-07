@@ -55,12 +55,13 @@ public class UserManager
     {
         if (IsFullUserCount())
         {
-            SendResponse<SConnectedRes>(sessionID, ErrorCode.FULL_USER_COUNT);
+            SendResponse<SConnectedRes>(sessionID, ErrorCode.FULL_USER_COUNT, PacketType.RES_S_CONNECT);
             return;
         }
-        else if (IsExistUser(sessionID))
+        
+        if (IsExistUser(sessionID))
         {
-            SendResponse<SConnectedRes>(sessionID, ErrorCode.ALREADY_EXIST_USER);
+            SendResponse<SConnectedRes>(sessionID, ErrorCode.ALREADY_EXIST_USER, PacketType.RES_S_CONNECT);
             return;
         }
 
@@ -86,14 +87,14 @@ public class UserManager
             var res = new SConnectedRes();
             res.ErrorCode = ErrorCode.NONE;
 
-            byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
+            byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_CONNECT);
             SendFunc(sessionID, bytes);
 
             _nowUserCount += 1;
         }
         catch
         {
-            SendResponse<SConnectedRes>(sessionID, ErrorCode.EXCEPTION_ADD_USER);
+            SendResponse<SConnectedRes>(sessionID, ErrorCode.EXCEPTION_ADD_USER, PacketType.RES_S_CONNECT);
         }
     }
 
@@ -102,33 +103,29 @@ public class UserManager
         var user = GetUserInfo(sessionID);
         if (user == null)
         {
-            SendResponse<SLogOutRes>(sessionID, ErrorCode.NOT_EXIST_USER);
+            SendResponse<SLogOutRes>(sessionID, ErrorCode.NOT_EXIST_USER, PacketType.RES_S_LOGOUT);
             return;
         }
 
         user.Clear();
-        SendResponse<SLogOutRes>(sessionID, ErrorCode.NONE);
+        SendResponse<SLogOutRes>(sessionID, ErrorCode.NONE, PacketType.RES_S_LOGOUT);
 
         _nowUserCount -= 1;
     }
 
     public void LoginUser(string sessionID, ErrorCode errorCode, UserData? data)
     {
-        if (errorCode != ErrorCode.NONE)
+        if (errorCode != ErrorCode.NONE || data == null)
         {
-            SendResponse<SLoginRes>(sessionID, errorCode);
-            return;
-        }
-
-        if (data == null)
-        {
-            SendResponse<SLoginRes>(sessionID, errorCode);
+            SessionDisconnect(sessionID);
+            SendResponse<SLoginRes>(sessionID, errorCode, PacketType.RES_S_LOGIN);
             return;
         }
 
         if (IsExistUser(data.UserID))
         {
-            SendResponse<SLoginRes>(sessionID, ErrorCode.ALREADY_EXIST_USER);
+            SessionDisconnect(sessionID);
+            SendResponse<SLoginRes>(sessionID, ErrorCode.ALREADY_EXIST_USER, PacketType.RES_S_LOGIN);
             return;
         }
 
@@ -142,11 +139,12 @@ public class UserManager
 
             user.Logined(data);
 
-            SendResponse<SLoginRes>(sessionID, ErrorCode.NONE);
+            SendResponse<SLoginRes>(sessionID, ErrorCode.NONE, PacketType.RES_S_LOGIN);
         }
         catch
         {
-            SendResponse<SLoginRes>(sessionID, ErrorCode.EXCEPTION_LOGIN_USER);
+            SessionDisconnect(sessionID);
+            SendResponse<SLoginRes>(sessionID, ErrorCode.EXCEPTION_LOGIN_USER, PacketType.RES_S_LOGIN);
         }
     }
 
@@ -155,12 +153,12 @@ public class UserManager
         var user = GetUserInfo(sessionID);
         if (user == null)
         {
-            SendResponse<SLogOutRes>(sessionID, ErrorCode.NOT_EXIST_USER);
+            SendResponse<SLogOutRes>(sessionID, ErrorCode.NOT_EXIST_USER, PacketType.RES_S_LOGOUT);
             return;
         }
 
         user.Logouted();
-        SendResponse<SLogOutRes>(sessionID, ErrorCode.NONE);
+        SendResponse<SLogOutRes>(sessionID, ErrorCode.NONE, PacketType.RES_S_LOGOUT);
     }
 
     public User? GetUserInfo(string sessionID)
@@ -257,6 +255,17 @@ public class UserManager
         user.PingTime = DateTime.Now;
     }
 
+    void SessionDisconnect(string sessionID)
+    {
+        var session = GetSessionFunc(sessionID);
+        if (session == null)
+        {
+            return;
+        }
+
+        session.Close();
+    }
+
     bool IsFullUserCount()
     {
         return _nowUserCount >= _maxUserCount;
@@ -282,7 +291,7 @@ public class UserManager
         return false;
     }
 
-    void SendResponse<T>(string sessionID, ErrorCode errorCode) where T : IResMessage, new()
+    void SendResponse<T>(string sessionID, ErrorCode errorCode, PacketType packetType) where T : IResMessage, new()
     {
         if (errorCode != ErrorCode.NONE)
         {
@@ -292,7 +301,7 @@ public class UserManager
         var res = new T();
         res.ErrorCode = errorCode;
 
-        byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_LOGIN);
+        byte[] bytes = PacketManager.PacketSerialized(res, packetType);
         SendFunc(sessionID, bytes);
     }
 }

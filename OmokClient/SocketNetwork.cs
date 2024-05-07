@@ -42,7 +42,6 @@ public partial class mainForm
         if (Network.Connect(_gameServerAddress, _gameServerPort))
         {
             labelStatus.Text = string.Format("{0}. 서버에 접속 중", DateTime.Now);
-            btnConnect.Enabled = false;
             btnDisconnect.Enabled = true;
 
             DevLog.Write($"서버에 접속 중", LOG_LEVEL.INFO);
@@ -144,11 +143,11 @@ public partial class mainForm
 
     public void SetDisconnectd()
     {
-        if (btnConnect.Enabled == false)
-        {
-            btnConnect.Enabled = true;
-            btnDisconnect.Enabled = false;
-        }
+        // if (btnConnect.Enabled == false)
+        // {
+        //     btnConnect.Enabled = true;
+        //     btnDisconnect.Enabled = false;
+        // }
 
         while (true)
         {

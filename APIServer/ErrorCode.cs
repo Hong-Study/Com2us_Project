@@ -1,4 +1,4 @@
-public enum ErrorCodes : UInt16
+public enum ErrorCode : Int16
 {
     NONE = 0,
     INVALID_REQUEST = 100,
@@ -10,6 +10,7 @@ public enum ErrorCodes : UInt16
     NOT_LOGIN = 106,
     INVALID_TOKEN = 107,
     TOKEN_EXPIRED = 108,
+
     FAILED_LOGIN = 200,
     FAILED_HIVE_CONNECT = 201,
     FAILED_VERIFY_LOGIN = 202,
@@ -22,5 +23,6 @@ public enum ErrorCodes : UInt16
     FAILED_READ_MAIL = 209,
     FAILED_SEND_MAIL = 210,
     NOT_FOUND_USER_NAME = 211,
+
     INTERNAL_SERVER_ERROR = 500,
 }
