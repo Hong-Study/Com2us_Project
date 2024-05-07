@@ -7,7 +7,6 @@ IConfiguration config = builder.Configuration;
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IMemoryRepository, MemoryRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ITestRepository, TestRepository>();
 
 SettingLogger();
 

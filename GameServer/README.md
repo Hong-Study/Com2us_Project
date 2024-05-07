@@ -45,7 +45,6 @@
 | 오목 로직 기능 | <input type="checkbox" checked> |
 |   게임 종료    | <input type="checkbox" checked> |
 
-
 ### 에러 처리
 |    **기능**    |          **완료 여부**          |
 | :------------: | :-----------------------------: |
@@ -59,3 +58,4 @@
 |   게임 종료    | <input type="checkbox" checked> |
 
 
+<!-- ### 진행 사항 -->

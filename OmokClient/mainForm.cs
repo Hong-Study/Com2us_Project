@@ -1,6 +1,7 @@
 ﻿using Common;
 using System;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 #pragma warning disable CA1416
@@ -19,7 +20,9 @@ namespace GameClient
         {
             PacketBuffer.Init((8096 * 10), PacketDef.PACKET_HEADER_SIZE, 2048);
 
-            InitNetwork();
+            InitSocketNetwork();
+
+            InitHttpNetwork();
 
             btnDisconnect.Enabled = false;
 
@@ -36,29 +39,7 @@ namespace GameClient
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
-            string address = textBoxIP.Text;
-
-            if (checkBoxLocalHostIP.Checked)
-            {
-                address = "127.0.0.1";
-            }
-
-            int port = Convert.ToInt32(textBoxPort.Text);
-
-            if (Network.Connect(address, port))
-            {
-                labelStatus.Text = string.Format("{0}. 서버에 접속 중", DateTime.Now);
-                btnConnect.Enabled = false;
-                btnDisconnect.Enabled = true;
-
-                DevLog.Write($"서버에 접속 중", LOG_LEVEL.INFO);
-            }
-            else
-            {
-                labelStatus.Text = string.Format("{0}. 서버에 접속 실패", DateTime.Now);
-            }
-
-            PacketBuffer.Clear();
+            
         }
 
         private void btnDisconnect_Click(object sender, EventArgs e)
@@ -109,14 +90,25 @@ namespace GameClient
         }
 
         // 로그인 요청
-        private void button2_Click(object sender, EventArgs e)
+        private async void button2_ClickAsync(object sender, EventArgs e)
         {
-            var loginReq = new CLoginReq();
-            loginReq.UserID = Convert.ToInt64(textBoxUserID.Text);
-            loginReq.AuthToken = textBoxUserPW.Text;
+            bool isSuccess = await HiveLogin(textBoxUserID.Text, textBoxUserPW.Text);
+            if (isSuccess == false)
+            {
+                return;
+            }
 
-            _myUserData.UserID = loginReq.UserID;
-            _myUserData.NickName = $"USER_{textBoxUserID.Text}";
+            isSuccess = await ApiLogin(_userID, _authToken);
+            if (isSuccess == false)
+            {
+                return;
+            }
+
+            ConnectGameServer();
+
+            var loginReq = new CLoginReq();
+            loginReq.UserID = _userID;
+            loginReq.AuthToken = _authToken;
 
             PostSendPacket(PacketType.REQ_C_LOGIN, loginReq);            
             DevLog.Write($"로그인 요청:  {textBoxUserID.Text}, {textBoxUserPW.Text}");

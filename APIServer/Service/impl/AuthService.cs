@@ -19,7 +19,7 @@ public class AuthService : IAuthService
         _memoryRepo = memoryRepository;
     }
 
-    public record LoginResult(ErrorCodes errorCode, UserGameData? gameData);
+    public record LoginResult(ErrorCodes errorCode, UserGameData? gameData, string? gameServerAddress = null, int gameServerPort = 0);
     public async Task<LoginResult> LoginAsync(Int64 id, string token)
     {
         string? url = _config.GetValue<string>("HiveServerUrl");
@@ -68,7 +68,7 @@ public class AuthService : IAuthService
                 return FailedLogin(ErrorCodes.ERROR_USER_GAME_DATA);
             }
 
-            return new LoginResult(ErrorCodes.NONE, gameData);
+            return new LoginResult(ErrorCodes.NONE, gameData, "127.0.0.1", 7777);
 
         }
         catch(Exception e)

@@ -12,4 +12,6 @@ public class LoginReq
 public class LoginRes : DefaultRes
 {
     public UserGameData? GameData { get; set; }
+    public string? GameServerAddress { get; set; }
+    public Int32 GameServerPort { get; set; }
 }

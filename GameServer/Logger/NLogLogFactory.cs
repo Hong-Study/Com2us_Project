@@ -16,8 +16,6 @@ namespace GameServer;
             if (!IsSharedConfig)
             {
                 LogManager.Setup().LoadConfigurationFromFile(new[] { ConfigFile });
-                // 2023.11.28 최흥배 비추천이 되어서 위의 코드로 변경
-                //NLog.Config.XmlLoggingConfiguration.SetCandidateConfigFilePaths(new[] { ConfigFile });
             }
             else
             {                

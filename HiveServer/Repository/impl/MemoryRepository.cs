@@ -3,9 +3,12 @@ using CloudStructures.Structures;
 
 public class MemoryRepository : IMemoryRepository
 {
+    public ILogger<MemoryRepository> _logger;
     public RedisConnection _redisConn;
-    public MemoryRepository(IConfiguration config)
+    public MemoryRepository(IConfiguration config, ILogger<MemoryRepository> logger)
     {
+        _logger = logger;
+
         string? connectionString = config.GetConnectionString("Redis");
         if (connectionString == null)
         {
@@ -28,7 +31,8 @@ public class MemoryRepository : IMemoryRepository
         }
         catch (Exception e)
         {
-            System.Console.WriteLine(e.Message);
+            _logger.LogError(e.Message);
+
             return false;
         }
     }
@@ -36,7 +40,6 @@ public class MemoryRepository : IMemoryRepository
     public async Task<string?> GetAccessToken(long user_id)
     {
         string key = user_id.ToString();
-        System.Console.WriteLine("GetAccessToken" + key);
         try
         {
             RedisString<string> redis = new(_redisConn, key, TimeSpanUtils.TicketKeyTimeSpan());
@@ -51,7 +54,8 @@ public class MemoryRepository : IMemoryRepository
         }
         catch (Exception e)
         {
-            System.Console.WriteLine(e.Message);
+            _logger.LogError(e.Message);
+
             return null;
         }
 
@@ -67,7 +71,8 @@ public class MemoryRepository : IMemoryRepository
         }
         catch (Exception e)
         {
-            System.Console.WriteLine(e.Message);
+            _logger.LogError(e.Message);
+            
             return false;
         }
     }
