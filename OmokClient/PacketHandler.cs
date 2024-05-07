@@ -21,6 +21,9 @@ public partial class mainForm
         _onRecv.Add((Int16)PacketType.REQ_S_PING, Make<SPingReq>);
         _onHandler.Add((Int16)PacketType.REQ_S_PING, Handle_S_Ping);
 
+        _onRecv.Add((Int16)PacketType.RES_S_CONNECT, Make<SConnectedRes>);
+        _onHandler.Add((Int16)PacketType.RES_S_CONNECT, Handle_S_Connected);
+
         _onRecv.Add((Int16)PacketType.RES_S_LOGIN, Make<SLoginRes>);
         _onHandler.Add((Int16)PacketType.RES_S_LOGIN, Handle_S_Login);
         _onRecv.Add((Int16)PacketType.RES_S_LOGOUT, Make<SLogOutRes>);
@@ -114,6 +117,23 @@ public partial class mainForm
         Network.Send(bytes);
     }
 
+    public void Handle_S_Connected(IMessage message)
+    {
+        SConnectedRes packet = message as SConnectedRes;
+        if (packet == null)
+        {
+            return;
+        }
+
+        if (packet.ErrorCode == (Int16)ErrorCode.NONE)
+        {
+            DevLog.Write("서버 연결 성공");
+        }
+        else
+        {
+            DevLog.Write("서버 연결 실패");
+        }
+    }
     public void Handle_S_Login(IMessage message)
     {
         SLoginRes packet = message as SLoginRes;
@@ -124,11 +144,11 @@ public partial class mainForm
 
         if (packet.ErrorCode == (Int16)ErrorCode.NONE)
         {
-            MessageBox.Show("로그인 성공");
+            DevLog.Write("로그인 성공");
         }
         else
         {
-            MessageBox.Show("로그인 실패");
+            DevLog.Write("로그인 실패");
         }
     }
 

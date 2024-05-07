@@ -16,7 +16,7 @@ public class LoginController : ControllerBase
     public async Task<LoginRes> Post([FromBody] LoginReq request)
     {
         AuthService.LoginResult result = await _authService.LoginAsync(request.UserId, request.Token);    
-        if(result.errorCode != ErrorCodes.NONE)
+        if(result.errorCode != ErrorCode.NONE)
         {
             _logger.LogError($"Login failed: {result.errorCode.ToString()}");
         }

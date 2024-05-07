@@ -1,3 +1,5 @@
+namespace APIServer;
+
 public class TokenCheckMiddleware
 {
     private readonly RequestDelegate _next;
@@ -42,7 +44,6 @@ public class TokenCheckMiddleware
             return;
         }
 
-        // context.Request.Headers["UserId"] = id;
         await _next(context);
     }
 }
