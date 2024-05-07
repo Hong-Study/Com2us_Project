@@ -23,7 +23,7 @@ public class MailService : IMailService
     }
 
     public record SendMailResult(ErrorCodes errorCode, bool isSuccess);
-    public async Task<SendMailResult> SendMail(string sendUserName, string recvUserName, string title, string content, int itemId = 0, int itemCount = 0)
+    public async Task<SendMailResult> SendMail(string sendUserName, string recvUserName, string title, string content, Int32 itemId = 0, Int32 itemCount = 0)
     {
         MailData mailData = new MailData()
         {
@@ -45,7 +45,7 @@ public class MailService : IMailService
         return new SendMailResult(ErrorCodes.NONE, true);
     }
 
-    public async Task<SendMailResult> SendMail(long userId, string recvUserName, string title, string content, int itemId = 0, int itemCount = 0)
+    public async Task<SendMailResult> SendMail(Int64 userId, string recvUserName, string title, string content, Int32 itemId = 0, Int32 itemCount = 0)
     {
         UserNameData? data = await _authRepo.GetUserNameDataAsync(userId);
         if(data == null)

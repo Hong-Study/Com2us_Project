@@ -4,14 +4,16 @@ using SqlKata.Execution;
 
 public class AuthRepository : IAuthRepository
 {
-    private IDbConnection _dbConn = null!;
-    private readonly IConfiguration _config;
-    private readonly SqlKata.Compilers.MySqlCompiler _compiler;
-    private readonly QueryFactory _queryFactory;
-    private readonly string _connectionString;
+    ILogger<AuthRepository> _logger;
+    IDbConnection _dbConn = null!;
+    readonly IConfiguration _config;
+    readonly SqlKata.Compilers.MySqlCompiler _compiler;
+    readonly QueryFactory _queryFactory;
+    readonly string _connectionString;
 
-    public AuthRepository(IConfiguration config)
+    public AuthRepository(IConfiguration config, ILogger<AuthRepository> logger)
     {
+        _logger = logger;
         _config = config;
 
         // 코드 심플?
@@ -46,7 +48,8 @@ public class AuthRepository : IAuthRepository
         }
         catch (Exception e)
         {
-            System.Console.WriteLine("AuthRepository " + e.Message);
+            _logger.LogError(e.Message);
+
             return false;
         }
     }
@@ -69,7 +72,8 @@ public class AuthRepository : IAuthRepository
         }
         catch (Exception e)
         {
-            System.Console.WriteLine("AuthRepository " + e.Message);
+            _logger.LogError(e.Message);
+
             return false;
         }
     }
@@ -86,7 +90,8 @@ public class AuthRepository : IAuthRepository
         }
         catch (Exception e)
         {
-            System.Console.WriteLine("AuthRepository " + e.Message);
+            _logger.LogError(e.Message);
+            
             return null;
         }
     }

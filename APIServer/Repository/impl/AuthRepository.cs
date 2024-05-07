@@ -15,7 +15,7 @@ public class AuthRepository : DefaultDbConnection, IAuthRepository
     {
         try
         {
-            int count = await _queryFactory.Query("user_game_data").InsertAsync(data);
+            Int32 count = await _queryFactory.Query("user_game_data").InsertAsync(data);
             return count == 0 ? false : true;
         }
         catch (Exception e)

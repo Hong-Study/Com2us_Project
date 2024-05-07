@@ -36,12 +36,17 @@ public class Room
         _game.InitLogger(logger);
     }
 
-    public void SetDelegate(Func<string, byte[], bool> SendFunc, Func<string, User?> GetUserInfoFunc)
+    public void SetDelegate(Func<string, byte[], bool> SendFunc, Func<string, User?> GetUserInfoFunc
+                            , Action<ServerPacketData> databaseSendFunc)
     {
         this.SendFunc = SendFunc;
         this.GetUserInfoFunc = GetUserInfoFunc;
 
-        _game.SetDelegate(SendFunc, Clear);
+        _game.SendFunc = SendFunc;
+        _game.DatabaseSendFunc = databaseSendFunc;
+        _game.GetUserInfoFunc = GetUserInfoFunc;
+
+        _game.RoomClearFunc = RoomClear;
     }
 
     public void EnterRoom(User user)
@@ -252,7 +257,9 @@ public class Room
         return _users.Find(u => u.SessionID == sessionID);
     }
 
-    void Clear()
+    
+
+    void RoomClear()
     {
         foreach(var user in _users)
         {
@@ -283,6 +290,12 @@ public class Room
     {
         if (_game.IsStart)
         {
+            if(_users.Count != 2)
+            {
+                _game.GameCancle();
+
+            }
+
             TimeSpan ts = DateTime.Now - _gameStartTime;
             if (ts > _maxGameTime)
             {

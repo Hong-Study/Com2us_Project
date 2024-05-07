@@ -9,8 +9,6 @@ public class UserManager
     Func<string, byte[], bool> SendFunc = null!;
     Func<string, ClientSession> GetSessionFunc = null!;
 
-    Action<ServerPacketData> DatabaseSendFunc = null!;
-
     TimeSpan _heartBeatTimeMillisecond;
     TimeSpan _sessionTimeOutMillisecond;
 
@@ -26,7 +24,7 @@ public class UserManager
     Int32 _nowSessionCheckCount = 0;
 
     SuperSocket.SocketBase.Logging.ILog Logger = null!;
-    
+
     public UserManager(ref readonly ServerOption option)
     {
         _maxUserCount = option.MaxUserCount;
@@ -68,10 +66,21 @@ public class UserManager
 
         try
         {
-            _users[_nowUserPos++].SessionConnected(sessionID);
-            if (_nowUserPos == _maxUserCount)
+            while (true)
             {
-                _nowUserPos = 0;
+                if (_nowUserPos == _maxUserCount)
+                {
+                    _nowUserPos = 0;
+                }
+
+                if (_users[_nowUserPos].IsConnect)
+                {
+                    _nowUserPos += 1;
+                    continue;
+                }
+
+                _users[_nowUserPos++].SessionID = sessionID;
+                break;
             }
 
             var res = new SConnectedRes();
@@ -248,32 +257,6 @@ public class UserManager
         user.PingTime = DateTime.Now;
     }
 
-    public void UpdateUserWinLoseCount(string sessionID, bool isWin)
-    {
-        var user = GetUserInfo(sessionID);
-        if (user == null)
-        {
-            return;
-        }
-
-        if (isWin)
-        {
-            user.Win += 1;
-        }
-        else
-        {
-            user.Lose += 1;
-        }
-
-        var req = new DBUpdateWinLoseCountReq();
-        req.UserID = user.UserID;
-        req.WinCount = user.Win;
-        req.LoseCount = user.Lose;
-
-        var data = DatabaseManager.MakeDatabasePacket(sessionID, req, DatabaseType.REQ_DB_UPDATE_WIN_LOSE_COUNT);
-        DatabaseSendFunc(data);
-    }
-
     bool IsFullUserCount()
     {
         return _nowUserCount >= _maxUserCount;
@@ -301,7 +284,10 @@ public class UserManager
 
     void SendResponse<T>(string sessionID, ErrorCode errorCode) where T : IResMessage, new()
     {
-        Logger.Error($"Failed User Action : {errorCode}");
+        if (errorCode != ErrorCode.NONE)
+        {
+            Logger.Error($"Failed User Action : {errorCode}");
+        }
 
         var res = new T();
         res.ErrorCode = errorCode;

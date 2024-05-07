@@ -1,4 +1,4 @@
-public enum ErrorCodes : UInt16
+public enum ErrorCode : Int16
 {
     NONE = 0,
     INVALID_REQUEST = 100,

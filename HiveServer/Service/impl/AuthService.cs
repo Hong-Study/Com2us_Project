@@ -1,26 +1,28 @@
 public class AuthService : IAuthService
 {
+    ILogger<AuthService> _logger;
     IAuthRepository _authRepo;
     IMemoryRepository _memoryRepo;
-    public AuthService(IAuthRepository accountRepo, IMemoryRepository memoryRepo)
+    public AuthService(IAuthRepository accountRepo, IMemoryRepository memoryRepo, ILogger<AuthService> logger)
     {
+        _logger = logger;
         _authRepo = accountRepo;
         _memoryRepo = memoryRepo;
     }
 
-    public record RegisterResut(ErrorCodes ErrorCode, bool IsSuccess);
+    public record RegisterResut(ErrorCode ErrorCode, bool IsSuccess);
     public async Task<RegisterResut> RegisterAsync(RegisterReq registerReq)
     {
         bool IsExist = await _authRepo.CheckAccountAsync(registerReq.Email);
         if (IsExist == true)
         {
-            return FailedRegister(ErrorCodes.EMAIL_ALREADY_EXISTS);
+            return FailedRegister(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         string? hashPassword = SHA256Hash.EncodingHash(registerReq.Password);
         if (hashPassword == null)
         {
-            return FailedRegister(ErrorCodes.INTERNAL_SERVER_ERROR);
+            return FailedRegister(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
         bool isSuccess = await _authRepo.CreateAccountAsync(new UserData
@@ -31,32 +33,32 @@ public class AuthService : IAuthService
 
         if (isSuccess == false)
         {
-            return FailedRegister(ErrorCodes.INTERNAL_SERVER_ERROR);
+            return FailedRegister(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
         // 에러 코드로 처리
         // 굳이 IsSuccess를 사용할 필요가 없다.
-        return new RegisterResut(ErrorCodes.NONE, true);
+        return new RegisterResut(ErrorCode.NONE, true);
     }
 
-    public record LoginResult(ErrorCodes ErrorCode, long Id, string Token);
+    public record LoginResult(ErrorCode ErrorCode, long Id, string? Token);
     public async Task<LoginResult> LoginAsync(LoginReq loginReq)
     {
         UserData? userData = await _authRepo.GetAccountAsync(loginReq.Email);
         if (userData == null)
         {
-            return FailedLogin(ErrorCodes.EMAIL_DOES_NOT_EXIST);
+            return FailedLogin(ErrorCode.EMAIL_DOES_NOT_EXIST);
         }
 
         string? hashPassword = SHA256Hash.EncodingHash(loginReq.Password);
         if (hashPassword == null)
         {
-            return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
+            return FailedLogin(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
         if (userData.password != hashPassword)
         {
-            return FailedLogin(ErrorCodes.PASSWORD_DOES_NOT_MATCH);
+            return FailedLogin(ErrorCode.PASSWORD_DOES_NOT_MATCH);
         }
 
         string token = $"{userData.user_id}{DateTime.Now.Ticks}";
@@ -64,46 +66,52 @@ public class AuthService : IAuthService
 
         if (hashToken == null)
         {
-            return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
+            return FailedLogin(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
         if (await _memoryRepo.SetAccessToken(userData.user_id, hashToken) == false)
         {
-            return FailedLogin(ErrorCodes.INTERNAL_SERVER_ERROR);
+            return FailedLogin(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
-        return new LoginResult(ErrorCodes.NONE, userData.user_id, hashToken);
+        return new LoginResult(ErrorCode.NONE, userData.user_id, hashToken);
     }
 
-    public record VerifyLoginResult(ErrorCodes ErrorCode, bool IsSuccess);
+    public record VerifyLoginResult(ErrorCode ErrorCode, bool IsSuccess);
     public async Task<VerifyLoginResult> VerifyLoginAsync(VerifyLoginReq VerifyLoginReq)
     {
         string? token = await _memoryRepo.GetAccessToken(VerifyLoginReq.UserId);
         if (token == null)
         {
-            return FailedVerifyLogin(ErrorCodes.NOT_LOGIN);
+            return FailedVerifyLogin(ErrorCode.NOT_LOGIN);
         }
 
         if (token != VerifyLoginReq.Token)
         {
-            return FailedVerifyLogin(ErrorCodes.INVALID_TOKEN);
+            return FailedVerifyLogin(ErrorCode.INVALID_TOKEN);
         }
 
-        return new VerifyLoginResult(ErrorCodes.NONE, true);
+        return new VerifyLoginResult(ErrorCode.NONE, true);
     }
 
-    private VerifyLoginResult FailedVerifyLogin(ErrorCodes error)
+    private VerifyLoginResult FailedVerifyLogin(ErrorCode error)
     {
+        _logger.LogError("FailedVerifyLogin : " + error.ToString());
+        
         return new VerifyLoginResult(error, false);
     }
 
-    private LoginResult FailedLogin(ErrorCodes error)
+    private LoginResult FailedLogin(ErrorCode error)
     {
+        _logger.LogError("FailedLogin : " + error.ToString());
+
         return new LoginResult(error, 0, "");
     }
 
-    private RegisterResut FailedRegister(ErrorCodes error)
+    private RegisterResut FailedRegister(ErrorCode error)
     {
+        _logger.LogError("FailedRegister : " + error.ToString());
+
         return new RegisterResut(error, false);
     }
 }

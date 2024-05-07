@@ -20,5 +20,5 @@ public class LoginReq
 public class LoginRes : DefaultRes
 {
     public long Id { get; set; }
-    public string Token { get; set; } = null!;
+    public string? Token { get; set; }
 }
