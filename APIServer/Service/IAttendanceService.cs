@@ -1,4 +1,4 @@
 public interface IAttendanceService
 {
-    public Task<AttendanceService.AttendanceResult> AttendanceCheck(int userId, DateTime nowTime);
+    public Task<AttendanceService.AttendanceResult> AttendanceCheck(Int64 userId, DateTime nowTime);
 }

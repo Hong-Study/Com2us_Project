@@ -13,13 +13,11 @@ public class VerifyLoginController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<VerifyLoginRes> CheckLogin(VerifyLoginReq request)
+    public async Task<VerifyLoginRes> VerifyLogin(VerifyLoginReq request)
     {
+        _logger.LogInformation("VerifyLogin");
+
         AuthService.VerifyLoginResult result = await _service.VerifyLoginAsync(request);
-        if (result.ErrorCode != ErrorCodes.NONE)
-        {
-            _logger.LogError($"Register failed: {result.ErrorCode}");
-        }
 
         return new VerifyLoginRes()
         {

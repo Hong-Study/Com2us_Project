@@ -1,7 +1,4 @@
-using System.Globalization;
 using System.Net;
-using System.Text;
-using Newtonsoft.Json;
 
 public class AuthService : IAuthService
 {
@@ -19,7 +16,7 @@ public class AuthService : IAuthService
         _memoryRepo = memoryRepository;
     }
 
-    public record LoginResult(ErrorCodes errorCode, UserGameData? gameData);
+    public record LoginResult(ErrorCodes errorCode, UserGameData? gameData, string? gameServerAddress = null, Int32 gameServerPort = 0);
     public async Task<LoginResult> LoginAsync(Int64 id, string token)
     {
         string? url = _config.GetValue<string>("HiveServerUrl");
@@ -68,7 +65,7 @@ public class AuthService : IAuthService
                 return FailedLogin(ErrorCodes.ERROR_USER_GAME_DATA);
             }
 
-            return new LoginResult(ErrorCodes.NONE, gameData);
+            return new LoginResult(ErrorCodes.NONE, gameData, "127.0.0.1", 7777);
 
         }
         catch(Exception e)
@@ -89,14 +86,18 @@ public class AuthService : IAuthService
         bool isExist = await _authRepo.CheckUserAsync(id);
         if (!isExist)
         {
-            await CreateUserGameData(id);
+            if(await CreateUserGameData(id) == false)
+            {
+                System.Console.WriteLine("Create User Game Data Failed");
+                return null;
+            }
         }
         return await _authRepo.GetUserGameDataAsync(id);
     }
 
     private async Task<bool> CreateUserGameData(Int64 id)
     {
-        await _authRepo.CreateUserAsync(new UserGameData
+        return await _authRepo.CreateUserAsync(new UserGameData
         {
             user_id = id,
             user_name = "user_" + id,
@@ -106,7 +107,5 @@ public class AuthService : IAuthService
             win = 0,
             lose = 0
         });
-
-        return true;
     }
 }

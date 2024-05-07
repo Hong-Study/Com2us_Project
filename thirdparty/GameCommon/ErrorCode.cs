@@ -1,6 +1,6 @@
 namespace Common;
 
-public enum ErrorCode : short
+public enum ErrorCode : Int16
 {
     NONE = 0,
     

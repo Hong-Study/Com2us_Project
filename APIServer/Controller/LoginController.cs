@@ -21,10 +21,14 @@ public class LoginController : ControllerBase
             _logger.LogError($"Login failed: {result.errorCode.ToString()}");
         }
 
+        _logger.LogInformation($"Login success: {result.gameData?.user_name}");
+
         return new LoginRes
         {
             ErrorCode = result.errorCode,
-            GameData = result.gameData
+            GameData = result.gameData,
+            GameServerAddress = result.gameServerAddress,
+            GameServerPort = result.gameServerPort
         };
     }
 }

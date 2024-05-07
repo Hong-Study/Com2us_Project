@@ -178,21 +178,21 @@
             // textBoxUserID
             // 
             this.textBoxUserID.Location = new System.Drawing.Point(62, 67);
-            this.textBoxUserID.MaxLength = 6;
+            this.textBoxUserID.MaxLength = 20;
             this.textBoxUserID.Name = "textBoxUserID";
             this.textBoxUserID.Size = new System.Drawing.Size(87, 21);
             this.textBoxUserID.TabIndex = 43;
-            this.textBoxUserID.Text = "1";
+            this.textBoxUserID.Text = "fnvl7855@naver.com";
             this.textBoxUserID.WordWrap = false;
             // 
             // textBoxUserPW
             // 
             this.textBoxUserPW.Location = new System.Drawing.Point(220, 68);
-            this.textBoxUserPW.MaxLength = 6;
+            this.textBoxUserPW.MaxLength = 20;
             this.textBoxUserPW.Name = "textBoxUserPW";
             this.textBoxUserPW.Size = new System.Drawing.Size(87, 21);
             this.textBoxUserPW.TabIndex = 45;
-            this.textBoxUserPW.Text = "123qwe";
+            this.textBoxUserPW.Text = "skybood13!";
             this.textBoxUserPW.WordWrap = false;
             // 
             // label2
@@ -213,7 +213,7 @@
             this.button2.TabIndex = 46;
             this.button2.Text = "Login";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.button2.Click += new System.EventHandler(this.button2_ClickAsync);
             // 
             // Room
             // 

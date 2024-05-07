@@ -13,17 +13,14 @@ public class SendMailController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<SendMailRes> Post([FromHeader(Name ="UserId")] int userId
+    public async Task<SendMailRes> Post([FromHeader(Name ="UserId")] Int32 userId
                                         , [FromBody] SendMailReq request)
     {
+        _logger.LogInformation($"SendMailController Post: {request.SendUserName} -> {request.RecvUserName}");
+        
         MailService.SendMailResult result = await _mailService.SendMail(
                                 request.SendUserName, request.RecvUserName
                                 , request.Title, request.Content);
-
-        if(result.errorCode != ErrorCodes.NONE)
-        {
-            _logger.LogError($"Send mail failed: {result.errorCode.ToString()}");
-        }
 
         return new SendMailRes()
         {

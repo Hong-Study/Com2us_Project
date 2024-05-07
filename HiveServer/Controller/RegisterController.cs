@@ -15,11 +15,9 @@ public class RegisterController : ControllerBase
     [HttpPost]
     public async Task<RegisterRes> Register([FromBody] RegisterReq request)
     {
+        _logger.LogInformation("Register");
+        
         AuthService.RegisterResut result = await _service.RegisterAsync(request);
-        if (result.ErrorCode != ErrorCodes.NONE)
-        {
-            _logger.LogError($"Register failed: {result.ErrorCode}");
-        }
 
         return new RegisterRes()
         {

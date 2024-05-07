@@ -10,9 +10,11 @@ public class OmokGame
 
     BoardType[,] _gameBoard;
 
-    Func<string, byte[], bool> SendFunc = null!;
-    Action RoomClearFunc = null!;
-    Action<string, bool> UpdateWinLoseFunc = null!;
+    public Func<string, byte[], bool> SendFunc = null!;
+    public Func<string, User?> GetUserInfoFunc = null!;
+    public Action<ServerPacketData> DatabaseSendFunc = null!;
+
+    public Action RoomClearFunc = null!;
 
     List<RoomUser> _users = null!;
 
@@ -71,8 +73,8 @@ public class OmokGame
 
         var user = _users[CurrentPlayer];
 
-        UpdateWinLoseFunc(user.SessionID, true);
-        UpdateWinLoseFunc(_users[GetNextTurn()].SessionID, false);
+        UpdateUserWinLoseCount(user.SessionID, true);
+        UpdateUserWinLoseCount(_users[GetNextTurn()].SessionID, false);
 
         SGameEndReq req = new SGameEndReq();
         req.WinUserID = user.UserID;
@@ -142,6 +144,32 @@ public class OmokGame
         Array.Clear(_gameBoard, 0, _gameBoard.Length);
 
         IsStart = false;
+    }
+
+    public void UpdateUserWinLoseCount(string sessionID, bool isWin)
+    {
+        var user = GetUserInfoFunc(sessionID);
+        if (user == null)
+        {
+            return;
+        }
+
+        if (isWin)
+        {
+            user.Win += 1;
+        }
+        else
+        {
+            user.Lose += 1;
+        }
+
+        var req = new DBUpdateWinLoseCountReq();
+        req.UserID = user.UserID;
+        req.WinCount = user.Win;
+        req.LoseCount = user.Lose;
+
+        var data = DatabaseManager.MakeDatabasePacket(sessionID, req, DatabaseType.REQ_DB_UPDATE_WIN_LOSE_COUNT);
+        DatabaseSendFunc(data);
     }
 
     void TurnChange()
