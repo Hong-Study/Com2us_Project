@@ -6,6 +6,6 @@ namespace GameServer;
 [MemoryPackable]
 public partial class RDUserLoginReq : IMessage
 {
-    public Int64 UserID { get; set; }
+    public string UserID { get; set; } = null!;
     public string AuthToken { get; set; } = null!;
 }

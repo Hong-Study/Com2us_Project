@@ -27,7 +27,7 @@ public class RedisRepository : IRedisRepository
         _redisConn = new RedisConnection(config);
     }
 
-    public async Task<ErrorCode> ValidateToken(Int64 userID, string token)
+    public async Task<ErrorCode> ValidateToken(string userID, string token)
     {
         string key = userID.ToString() + _tokenKey;
         try

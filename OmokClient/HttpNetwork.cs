@@ -15,7 +15,7 @@ public partial class mainForm
     string _hiveServerUrl = "http://localhost:5241";
     string _apiServerUrl = "http://localhost:5122";
 
-    Int64 _userID = 0;
+    string _userID = "";
     string _authToken = "";
 
     void InitHttpNetwork()
@@ -66,7 +66,7 @@ public partial class mainForm
             if (response.IsSuccessStatusCode)
             {
                 var res = await response.Content.ReadFromJsonAsync<HiveLoginRes>();
-                _userID = res.Id;
+                _userID = res.UserID;
                 _authToken = res.Token;
 
                 return true;
@@ -84,18 +84,22 @@ public partial class mainForm
         }
     }
 
-    async Task<bool> ApiLogin(Int64 userId, string token)
+    async Task<bool> ApiLogin(string userID, string token)
     {
+        MessageBox.Show($"{userID}");
+
         ApiLoginReq req = new ApiLoginReq();
-        req.UserId = userId;
+        req.UserID = userID;
         req.Token = token;
 
         try
         {
             var response = await _apiServer.PostAsJsonAsync("/api/login", req);
-            if (response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)   
             {
                 var res = await response.Content.ReadFromJsonAsync<ApiLoginRes>();
+
+                MessageBox.Show("API 로그인 성공");
 
                 _myUserData.UserID = res.GameData.user_id;
                 _myUserData.NickName = res.GameData.user_name;
@@ -105,7 +109,7 @@ public partial class mainForm
                 _myUserData.Win = res.GameData.win;
                 _myUserData.Lose = res.GameData.lose;
 
-                _gameServerAddress = res.GameServerAddress;
+                _gameServerAddress = "127.0.0.1";
                 _gameServerPort = res.GameServerPort;
 
                 return true;

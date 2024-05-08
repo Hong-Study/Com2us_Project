@@ -16,13 +16,13 @@ public class HiveLoginReq
 
 public class HiveLoginRes : DefaultRes
 {
-    public long Id { get; set; }
+    public string UserID { get; set; }
     public string Token { get; set; }
 }
 
 public class ApiLoginReq
 {
-    public Int64 UserId { get; set; }
+    public string UserID { get; set; }
 
     public string Token { get; set; } = null!;
 }
@@ -36,7 +36,7 @@ public class ApiLoginRes : DefaultRes
 
 public class UserGameData
 {
-    public Int64 user_id { get; set; }
+    public string user_id { get; set; }
     public string user_name { get; set; } = null!;
     public int level { get; set; }
     public int exp { get; set; }

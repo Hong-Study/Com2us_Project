@@ -17,7 +17,7 @@ public class UserRepository : DefaultDbConnection, IUserRepository
     }
 
     public record GetUserGameDataResult(ErrorCode errorCode, UserData? userData);
-    public async Task<GetUserGameDataResult> GetUserGameDataAsync(Int64 userId)
+    public async Task<GetUserGameDataResult> GetUserGameDataAsync(string userId)
     {
         try
         {
@@ -49,7 +49,7 @@ public class UserRepository : DefaultDbConnection, IUserRepository
         }
     }
 
-    public async Task<ErrorCode> UpdateUserWinLoseAsync(Int64 userId, Int32 win, Int32 lose)
+    public async Task<ErrorCode> UpdateUserWinLoseAsync(string userId, Int32 win, Int32 lose)
     {
         NTFUserWinLoseUpdateRes res = new NTFUserWinLoseUpdateRes();
 

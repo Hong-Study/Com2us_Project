@@ -37,7 +37,7 @@ public class AuthRepository : IAuthRepository
         try
         {
             UserData? userData = await _queryFactory.Query("user_data")
-                                        .Where("email", email)
+                                        .Where("user_id", email)
                                         .FirstOrDefaultAsync<UserData>();
             if (userData == null)
             {
@@ -83,7 +83,7 @@ public class AuthRepository : IAuthRepository
         try
         {
             UserData? userData = await _queryFactory.Query("user_data")
-                                        .Where("email", email)
+                                        .Where("user_id", email)
                                         .FirstOrDefaultAsync<UserData>();
 
             return userData;

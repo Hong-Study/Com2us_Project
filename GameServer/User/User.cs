@@ -10,7 +10,7 @@ public class User
     public bool IsLogin { get; set; } = false;
     public Int32 RoomID { get; set; } = 0;
 
-    public Int64 UserID { get => Data.UserID; set => Data.UserID = value; }
+    public string UserID { get => Data.UserID; set => Data.UserID = value; }
     public Int32 Level { get => Data.Level; set => Data.Level = value; }
     public string NickName { get => Data.NickName; set => Data.NickName = value; }
     public Int32 Exp { get => Data.Exp; set => Data.Exp = value; }
@@ -48,7 +48,7 @@ public class User
 
     public void Logouted()
     {
-        this.UserID = 0;
+        this.UserID = "";
         this.IsLogin = false;
     }
 

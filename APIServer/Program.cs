@@ -3,7 +3,14 @@ using APIServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseUrls("http://0.0.0.0:5122");
+string? url = builder.Configuration.GetValue<string>("ServerUrl");
+if(url == null)
+{
+    Console.WriteLine("ServerUrl is not set in appsettings.json");
+    return;
+
+}
+builder.WebHost.UseUrls(url);
 
 // 서비스 등록
 builder.Services.AddScoped<IAuthService, AuthService>();

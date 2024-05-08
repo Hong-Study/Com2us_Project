@@ -17,7 +17,7 @@ public class AuthService : IAuthService
     }
 
     public record LoginResult(ErrorCode errorCode, UserGameData? gameData, string? gameServerAddress = null, Int32 gameServerPort = 0);
-    public async Task<LoginResult> LoginAsync(Int64 id, string token)
+    public async Task<LoginResult> LoginAsync(string id, string token)
     {
         string? url = _config.GetValue<string>("HiveServerUrl");
         if (url == null)
@@ -31,7 +31,7 @@ public class AuthService : IAuthService
         {
             VerifyLoginReq verifyLoginReq = new VerifyLoginReq
             {
-                UserId = id,
+                UserID = id,
                 Token = token
             };
 
@@ -81,7 +81,7 @@ public class AuthService : IAuthService
     }
 
     // 함수는 하나의 일만 하도록 수정하기
-    private async Task<UserGameData?> GetOrCreateUserGameData(Int64 id)
+    private async Task<UserGameData?> GetOrCreateUserGameData(string id)
     {
         bool isExist = await _authRepo.CheckUserAsync(id);
         if (!isExist)
@@ -95,7 +95,7 @@ public class AuthService : IAuthService
         return await _authRepo.GetUserGameDataAsync(id);
     }
 
-    private async Task<bool> CreateUserGameData(Int64 id)
+    private async Task<bool> CreateUserGameData(string id)
     {
         return await _authRepo.CreateUserAsync(new UserGameData
         {

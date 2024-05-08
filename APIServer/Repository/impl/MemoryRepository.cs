@@ -19,7 +19,6 @@ public class MemoryRepository : IMemoryRepository
 
     public async Task<bool> DeleteAccessToken(string userId)
     {
-        // RedisString<RdbAuthUserData> redis = new(_redisConn, key, LoginTimeSpan());
         string key = userId + _tokenKey;
         try
         {
