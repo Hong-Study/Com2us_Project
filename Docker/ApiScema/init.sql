@@ -1,7 +1,7 @@
 USE ApiDatabase;
 
 CREATE TABLE user_game_data(
-    user_id BIGINT PRIMARY KEY,
+    user_id VARCHAR(50) PRIMARY KEY,
     user_name VARCHAR(30) NOT NULL,
     level INT NOT NULL,
     exp INT NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE user_game_data(
 );
 
 CREATE TABLE user_attendance_data(
-    user_id BIGINT,
+    user_id VARCHAR(50) NOT NULL,
     attendance_date DATE NOT NULL,
     is_success BOOLEAN NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

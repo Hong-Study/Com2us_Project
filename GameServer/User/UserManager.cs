@@ -59,7 +59,7 @@ public class UserManager
             return;
         }
         
-        if (IsExistUser(sessionID))
+        if (IsExistSession(sessionID))
         {
             SendResponse<SConnectedRes>(sessionID, ErrorCode.ALREADY_EXIST_USER, PacketType.RES_S_CONNECT);
             return;
@@ -271,7 +271,7 @@ public class UserManager
         return _nowUserCount >= _maxUserCount;
     }
 
-    bool IsExistUser(string sessionID)
+    bool IsExistSession(string sessionID)
     {
         if (_users.Find(u => u.SessionID == sessionID) != null)
         {
@@ -281,7 +281,7 @@ public class UserManager
         return false;
     }
 
-    bool IsExistUser(Int64 userId)
+    bool IsExistUser(string userId)
     {
         if (_users.Find(u => u.UserID == userId) != null)
         {

@@ -1,5 +1,5 @@
 public interface IAuthService
 {
-    Task<AuthService.LoginResult> LoginAsync(Int64 id, string token);
+    Task<AuthService.LoginResult> LoginAsync(string id, string token);
     // Task<LogoutResponse> Logout(LogoutRequest request);
 }

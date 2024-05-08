@@ -4,7 +4,7 @@ namespace GameServer;
 
 public class RedisHandler
 {
-    public Func<Int64, string, Task<ErrorCode>> ValidataeTokenFunc = null!;
+    public Func<string, string, Task<ErrorCode>> ValidataeTokenFunc = null!;
 
     public Action<ServerPacketData> InnerSendFunc = null!;
     public Action<ServerPacketData> DatabaseSendFunc = null!;

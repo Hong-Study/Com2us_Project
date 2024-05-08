@@ -2,9 +2,14 @@ using ZLogger;
 
 var builder = WebApplication.CreateBuilder(args);
 
-IConfiguration config = builder.Configuration;
+string? url = builder.Configuration.GetValue<string>("ServerUrl");
+if(url == null)
+{
+    Console.WriteLine("ServerUrl is not set in appsettings.json");
+    return;
+}
 
-builder.WebHost.UseUrls("http://0.0.0.0:5241");
+builder.WebHost.UseUrls(url);
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IMemoryRepository, MemoryRepository>();
