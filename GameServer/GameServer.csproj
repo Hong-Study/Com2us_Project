@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PublishDir>..\Docker\Publish\GamePublish</PublishDir>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="SuperSocketLite" Version="0.17.0"/>

@@ -1,0 +1,51 @@
+services:
+  api-mysql:
+    image: mysql
+    container_name: api-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: test1234!
+      MYSQL_DATABASE: ApiDatabase
+    ports:
+      - "10002:3306"
+    volumes:
+      - ./ApiScema/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - game-network
+
+  api-redis:
+    image: redis
+    container_name: api-redis
+    ports:
+      - "10003:6379"
+    networks:
+      - game-network
+
+  api-service:
+    depends_on:
+      - api-mysql
+      - api-redis
+    build:
+      context: .
+      dockerfile: Dockerfile-API
+    container_name: api-server
+    ports:
+      - 5122:5122
+    networks:
+      - hive-network
+      - game-network
+
+  game-service:
+    depends_on:
+      - api-service
+    build:
+      context: .
+      dockerfile: Dockerfile-Game
+    container_name: game-server
+    ports:
+      - 7777:7777
+    networks:
+      - game-network
+
+networks:
+  hive-network:
+  game-network:
