@@ -35,6 +35,8 @@ public class DatabaseHandler
         InnerSendFunc(serverPacketData);
     }
 
+    // 비동기로 이미 작동하기 때문에 그냥 동기로 만들어도 된다.
+    // 누가 봐도 이게 더 이해하기 쉬울 것 같다. 는 코드를 작성해라.
     public async Task Handle_DB_UpdateWinLoseCount(string sessionID, IMessage message)
     {
         var packet = message as DBUpdateWinLoseCountReq;
