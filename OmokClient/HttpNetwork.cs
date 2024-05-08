@@ -30,23 +30,56 @@ public partial class mainForm
         _apiServer.Dispose();
     }
 
+    async Task HiveRegister(string email, string password)
+    {
+        HiveRegisterReq req = new HiveRegisterReq();
+        req.Email = email;
+        req.Password = password;
+
+        var response = await _hiveServer.PostAsJsonAsync("/api/register", req);
+        if (response.IsSuccessStatusCode)
+        {
+            var res = await response.Content.ReadFromJsonAsync<HiveRegisterRes>();
+            if (res.IsSuccess)
+            {
+                MessageBox.Show("Hive 회원가입 성공");
+            }
+            else
+            {
+                MessageBox.Show("Hive 회원가입 실패");
+            }
+        }
+        else
+        {
+            MessageBox.Show("Hive 회원가입 실패");
+        }
+    }
+
     async Task<bool> HiveLogin(string email, string password)
     {
         HiveLoginReq req = new HiveLoginReq();
         req.Email = email;
         req.Password = password;
+        try
+        {
+            var response = await _hiveServer.PostAsJsonAsync("/api/login", req);
+            if (response.IsSuccessStatusCode)
+            {
+                var res = await response.Content.ReadFromJsonAsync<HiveLoginRes>();
+                _userID = res.Id;
+                _authToken = res.Token;
 
-        var response = _hiveServer.PostAsJsonAsync("/api/login", req).Result;
-        if (response.IsSuccessStatusCode)
-        {
-            var res = await response.Content.ReadFromJsonAsync<HiveLoginRes>();
-            _userID = res.Id;
-            _authToken = res.Token;
-            return true;
+                return true;
+            }
+            else
+            {
+                MessageBox.Show("Hive 로그인 실패");
+                return false;
+            }
         }
-        else
+        catch (Exception e)
         {
-            MessageBox.Show("Hive 로그인 실패");
+            MessageBox.Show(e.Message);
             return false;
         }
     }
@@ -57,27 +90,36 @@ public partial class mainForm
         req.UserId = userId;
         req.Token = token;
 
-        var response = _apiServer.PostAsJsonAsync("/api/login", req).Result;
-        if (response.IsSuccessStatusCode)
+        try
         {
-            var res = await response.Content.ReadFromJsonAsync<ApiLoginRes>();
-            _myUserData.UserID = res.GameData.user_id;
-            _myUserData.NickName = res.GameData.user_name;
-            _myUserData.Level = res.GameData.level;
-            _myUserData.Exp = res.GameData.exp;
-            _myUserData.Gold = res.GameData.gold;
-            _myUserData.Win = res.GameData.win;
-            _myUserData.Lose = res.GameData.lose;
+            var response = await _apiServer.PostAsJsonAsync("/api/login", req);
+            if (response.IsSuccessStatusCode)
+            {
+                var res = await response.Content.ReadFromJsonAsync<ApiLoginRes>();
 
-            _gameServerAddress = res.GameServerAddress;
-            _gameServerPort = res.GameServerPort;
+                _myUserData.UserID = res.GameData.user_id;
+                _myUserData.NickName = res.GameData.user_name;
+                _myUserData.Level = res.GameData.level;
+                _myUserData.Exp = res.GameData.exp;
+                _myUserData.Gold = res.GameData.gold;
+                _myUserData.Win = res.GameData.win;
+                _myUserData.Lose = res.GameData.lose;
 
-            return true;
+                _gameServerAddress = res.GameServerAddress;
+                _gameServerPort = res.GameServerPort;
+
+                return true;
+            }
+            else
+            {
+                MessageBox.Show("API 로그인 실패");
+
+                return false;
+            }
         }
-        else
+        catch (Exception e)
         {
-            MessageBox.Show("API 로그인 실패");
-
+            MessageBox.Show(e.Message);
             return false;
         }
     }

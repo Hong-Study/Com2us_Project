@@ -15,7 +15,7 @@ public class VerifyLoginController : ControllerBase
     [HttpPost]
     public async Task<VerifyLoginRes> VerifyLogin(VerifyLoginReq request)
     {
-        _logger.LogInformation("VerifyLogin");
+        _logger.LogInformation($"VerifyLogin {request.UserId}");
 
         AuthService.VerifyLoginResult result = await _service.VerifyLoginAsync(request);
 

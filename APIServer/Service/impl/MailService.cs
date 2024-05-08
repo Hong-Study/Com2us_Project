@@ -10,19 +10,19 @@ public class MailService : IMailService
         _authRepo = authRepo;
     }
 
-    public record ReadMailAllResult(ErrorCodes errorCode, IEnumerable<MailData>? mails);
+    public record ReadMailAllResult(ErrorCode errorCode, IEnumerable<MailData>? mails);
     public async Task<ReadMailAllResult> ReadMailToAll(string userName)
     {
         var result = await _mailRepo.ReadMailToAll(userName);
         if (result == null)
         {
-            return FailedReadMailAll(ErrorCodes.FAILED_READ_MAIL);
+            return FailedReadMailAll(ErrorCode.FAILED_READ_MAIL);
         }
 
-        return new ReadMailAllResult(ErrorCodes.NONE, result);
+        return new ReadMailAllResult(ErrorCode.NONE, result);
     }
 
-    public record SendMailResult(ErrorCodes errorCode, bool isSuccess);
+    public record SendMailResult(ErrorCode errorCode, bool isSuccess);
     public async Task<SendMailResult> SendMail(string sendUserName, string recvUserName, string title, string content, Int32 itemId = 0, Int32 itemCount = 0)
     {
         MailData mailData = new MailData()
@@ -39,10 +39,10 @@ public class MailService : IMailService
         bool result = await _mailRepo.SendMail(mailData);
         if (!result)
         {
-            return FailedSendMail(ErrorCodes.FAILED_SEND_MAIL);
+            return FailedSendMail(ErrorCode.FAILED_SEND_MAIL);
         }
 
-        return new SendMailResult(ErrorCodes.NONE, true);
+        return new SendMailResult(ErrorCode.NONE, true);
     }
 
     public async Task<SendMailResult> SendMail(Int64 userId, string recvUserName, string title, string content, Int32 itemId = 0, Int32 itemCount = 0)
@@ -50,18 +50,18 @@ public class MailService : IMailService
         UserNameData? data = await _authRepo.GetUserNameDataAsync(userId);
         if(data == null)
         {
-            return FailedSendMail(ErrorCodes.NOT_FOUND_USER_NAME);
+            return FailedSendMail(ErrorCode.NOT_FOUND_USER_NAME);
         }
 
         return await SendMail(data.user_name, recvUserName, title, content, itemId, itemCount);
     }
 
-    public ReadMailAllResult FailedReadMailAll(ErrorCodes errorCode)
+    public ReadMailAllResult FailedReadMailAll(ErrorCode errorCode)
     {
         return new ReadMailAllResult(errorCode, null);
     }
 
-    public SendMailResult FailedSendMail(ErrorCodes errorCode)
+    public SendMailResult FailedSendMail(ErrorCode errorCode)
     {
         return new SendMailResult(errorCode, false);
     }

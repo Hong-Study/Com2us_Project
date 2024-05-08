@@ -17,8 +17,9 @@ public class HiveLoginReq
 public class HiveLoginRes : DefaultRes
 {
     public long Id { get; set; }
-    public string Token { get; set; } = null!;
+    public string Token { get; set; }
 }
+
 public class ApiLoginReq
 {
     public Int64 UserId { get; set; }
@@ -42,5 +43,17 @@ public class UserGameData
     public int gold { get; set; }
     public int win { get; set; }
     public int lose { get; set; }
-    public DateTime created_at { get; set; }
+    public DateTime? created_at { get; set; }
+}
+
+public class HiveRegisterReq
+{
+    public string Email { get; set; } = null!;
+
+    public string Password { get; set; } = null!;
+}
+
+public class HiveRegisterRes : DefaultRes
+{
+    public bool IsSuccess { get; set; }
 }

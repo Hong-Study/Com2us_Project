@@ -29,12 +29,11 @@
         private void InitializeComponent()
         {
             this.btnDisconnect = new System.Windows.Forms.Button();
-            this.btnConnect = new System.Windows.Forms.Button();
+            this.btnRegister = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.textBoxPort = new System.Windows.Forms.TextBox();
+            this.textBoxRegisterPW = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
-            this.checkBoxLocalHostIP = new System.Windows.Forms.CheckBox();
-            this.textBoxIP = new System.Windows.Forms.TextBox();
+            this.textBoxRegisterID = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.labelStatus = new System.Windows.Forms.Label();
             this.listBoxLog = new System.Windows.Forms.ListBox();
@@ -72,23 +71,22 @@
             this.btnDisconnect.UseVisualStyleBackColor = true;
             this.btnDisconnect.Click += new System.EventHandler(this.btnDisconnect_Click);
             // 
-            // btnConnect
+            // btnRegister
             // 
-            this.btnConnect.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btnConnect.Location = new System.Drawing.Point(420, 16);
-            this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(88, 26);
-            this.btnConnect.TabIndex = 28;
-            this.btnConnect.Text = "접속하기";
-            this.btnConnect.UseVisualStyleBackColor = true;
-            this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
+            this.btnRegister.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btnRegister.Location = new System.Drawing.Point(420, 16);
+            this.btnRegister.Name = "btnRegister";
+            this.btnRegister.Size = new System.Drawing.Size(88, 26);
+            this.btnRegister.TabIndex = 28;
+            this.btnRegister.Text = "회원가입";
+            this.btnRegister.UseVisualStyleBackColor = true;
+            this.btnRegister.Click += new System.EventHandler(this.btnRegister_ClickAsync);
             // 
             // groupBox5
             // 
-            this.groupBox5.Controls.Add(this.textBoxPort);
+            this.groupBox5.Controls.Add(this.textBoxRegisterPW);
             this.groupBox5.Controls.Add(this.label10);
-            this.groupBox5.Controls.Add(this.checkBoxLocalHostIP);
-            this.groupBox5.Controls.Add(this.textBoxIP);
+            this.groupBox5.Controls.Add(this.textBoxRegisterID);
             this.groupBox5.Controls.Add(this.label9);
             this.groupBox5.Location = new System.Drawing.Point(12, 12);
             this.groupBox5.Name = "groupBox5";
@@ -97,46 +95,34 @@
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Socket 더미 클라이언트 설정";
             // 
-            // textBoxPort
+            // textBoxRegisterPW
             // 
-            this.textBoxPort.Location = new System.Drawing.Point(225, 20);
-            this.textBoxPort.MaxLength = 6;
-            this.textBoxPort.Name = "textBoxPort";
-            this.textBoxPort.Size = new System.Drawing.Size(51, 21);
-            this.textBoxPort.TabIndex = 18;
-            this.textBoxPort.Text = "7777";
-            this.textBoxPort.WordWrap = false;
+            this.textBoxRegisterPW.Location = new System.Drawing.Point(260, 20);
+            this.textBoxRegisterPW.MaxLength = 20;
+            this.textBoxRegisterPW.Name = "textBoxRegisterPW";
+            this.textBoxRegisterPW.Size = new System.Drawing.Size(87, 21);
+            this.textBoxRegisterPW.TabIndex = 18;
+            this.textBoxRegisterPW.Text = "7777";
+            this.textBoxRegisterPW.WordWrap = false;
             // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(163, 24);
+            this.label10.Location = new System.Drawing.Point(180, 24);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(61, 12);
             this.label10.TabIndex = 17;
-            this.label10.Text = "포트 번호:";
+            this.label10.Text = "회원가입 PW";
             // 
-            // checkBoxLocalHostIP
+            // textBoxRegisterID
             // 
-            this.checkBoxLocalHostIP.AutoSize = true;
-            this.checkBoxLocalHostIP.Checked = true;
-            this.checkBoxLocalHostIP.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxLocalHostIP.Location = new System.Drawing.Point(282, 18);
-            this.checkBoxLocalHostIP.Name = "checkBoxLocalHostIP";
-            this.checkBoxLocalHostIP.Size = new System.Drawing.Size(103, 16);
-            this.checkBoxLocalHostIP.TabIndex = 15;
-            this.checkBoxLocalHostIP.Text = "localhost 사용";
-            this.checkBoxLocalHostIP.UseVisualStyleBackColor = true;
-            // 
-            // textBoxIP
-            // 
-            this.textBoxIP.Location = new System.Drawing.Point(68, 18);
-            this.textBoxIP.MaxLength = 6;
-            this.textBoxIP.Name = "textBoxIP";
-            this.textBoxIP.Size = new System.Drawing.Size(87, 21);
-            this.textBoxIP.TabIndex = 11;
-            this.textBoxIP.Text = "0.0.0.0";
-            this.textBoxIP.WordWrap = false;
+            this.textBoxRegisterID.Location = new System.Drawing.Point(80, 18);
+            this.textBoxRegisterID.MaxLength = 20;
+            this.textBoxRegisterID.Name = "textBoxRegisterID";
+            this.textBoxRegisterID.Size = new System.Drawing.Size(87, 21);
+            this.textBoxRegisterID.TabIndex = 11;
+            this.textBoxRegisterID.Text = "";
+            this.textBoxRegisterID.WordWrap = false;
             // 
             // label9
             // 
@@ -145,7 +131,7 @@
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(61, 12);
             this.label9.TabIndex = 10;
-            this.label9.Text = "서버 주소:";
+            this.label9.Text = "회원가입 ID";
             // 
             // labelStatus
             // 
@@ -392,7 +378,7 @@
             this.Controls.Add(this.labelStatus);
             this.Controls.Add(this.listBoxLog);
             this.Controls.Add(this.btnDisconnect);
-            this.Controls.Add(this.btnConnect);
+            this.Controls.Add(this.btnRegister);
             this.Controls.Add(this.groupBox5);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Name = "mainForm";
@@ -411,12 +397,11 @@
         #endregion
 
         private System.Windows.Forms.Button btnDisconnect;
-        private System.Windows.Forms.Button btnConnect;
+        private System.Windows.Forms.Button btnRegister;
         private System.Windows.Forms.GroupBox groupBox5;
-        private System.Windows.Forms.TextBox textBoxPort;
+        private System.Windows.Forms.TextBox textBoxRegisterPW;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.CheckBox checkBoxLocalHostIP;
-        private System.Windows.Forms.TextBox textBoxIP;
+        private System.Windows.Forms.TextBox textBoxRegisterID;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label labelStatus;
         private System.Windows.Forms.ListBox listBoxLog;
