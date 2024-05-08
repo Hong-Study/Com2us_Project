@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 public class LoginReq
 {
     [Required(ErrorMessage = "Id is required")]
-    public Int64 UserId { get; set; }
+    public string UserID { get; set; } = null!;
     
     [Required(ErrorMessage = "Token is required")]
     public string Token { get; set; } = null!;

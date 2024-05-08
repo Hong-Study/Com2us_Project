@@ -27,7 +27,7 @@ public class AuthService : IAuthService
 
         bool isSuccess = await _authRepo.CreateAccountAsync(new UserData
         {
-            email = registerReq.Email,
+            user_id = registerReq.Email,
             password = hashPassword
         });
 
@@ -41,7 +41,7 @@ public class AuthService : IAuthService
         return new RegisterResut(ErrorCode.NONE, true);
     }
 
-    public record LoginResult(ErrorCode ErrorCode, long Id, string? Token);
+    public record LoginResult(ErrorCode ErrorCode, string? userID, string? token);
     public async Task<LoginResult> LoginAsync(LoginReq loginReq)
     {
         UserData? userData = await _authRepo.GetAccountAsync(loginReq.Email);
@@ -80,7 +80,7 @@ public class AuthService : IAuthService
     public record VerifyLoginResult(ErrorCode ErrorCode, bool IsSuccess);
     public async Task<VerifyLoginResult> VerifyLoginAsync(VerifyLoginReq VerifyLoginReq)
     {
-        string? token = await _memoryRepo.GetAccessToken(VerifyLoginReq.UserId);
+        string? token = await _memoryRepo.GetAccessToken(VerifyLoginReq.UserID);
         if (token == null)
         {
             return FailedVerifyLogin(ErrorCode.NOT_LOGIN);
@@ -105,7 +105,7 @@ public class AuthService : IAuthService
     {
         _logger.LogError("FailedLogin : " + error.ToString());
 
-        return new LoginResult(error, 0, "");
+        return new LoginResult(error, null, null);
     }
 
     private RegisterResut FailedRegister(ErrorCode error)
@@ -113,5 +113,6 @@ public class AuthService : IAuthService
         _logger.LogError("FailedRegister : " + error.ToString());
 
         return new RegisterResut(error, false);
+
     }
 }

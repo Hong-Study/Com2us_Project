@@ -1,6 +1,6 @@
 public class UserGameData
 {
-    public Int64 user_id { get; set; }
+    public string user_id { get; set; } = null!;
     public string user_name { get; set; } = null!;
     public Int32 level { get; set; }
     public Int32 exp { get; set; }
@@ -12,7 +12,7 @@ public class UserGameData
 
 public class UserIdData
 {
-    public Int64 user_id { get; set; }
+    public string user_id { get; set; } = null!;
 }
 
 public class UserNameData

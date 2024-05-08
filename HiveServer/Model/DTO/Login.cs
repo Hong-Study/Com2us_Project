@@ -19,6 +19,6 @@ public class LoginReq
 
 public class LoginRes : DefaultRes
 {
-    public long Id { get; set; }
+    public string? UserID { get; set; }
     public string? Token { get; set; }
 }

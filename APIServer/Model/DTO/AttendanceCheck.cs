@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 public class AttendanceCheckReq
 {
     [Required(ErrorMessage = "Id is required")]
-    public Int32 UserId { get; set; }
+    public string UserID { get; set; } = null!;
     [Required(ErrorMessage = "Token is required")]
     public DateTime NowTime { get; set; }
 }

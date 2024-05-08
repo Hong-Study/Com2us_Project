@@ -8,7 +8,7 @@ public class AttendanceCheckRepository : DefaultDbConnection, IAttendanceCheckRe
         _logger = logger;
     }
 
-    public async Task<bool> DeleteAttendanceChcek(Int64 userId, DateTime data)
+    public async Task<bool> DeleteAttendanceChcek(string userId, DateTime data)
     {
         try
         {
@@ -31,7 +31,7 @@ public class AttendanceCheckRepository : DefaultDbConnection, IAttendanceCheckRe
         }
     }
 
-    public async Task<bool> IsAttendanceCheck(Int64 userId, DateTime date)
+    public async Task<bool> IsAttendanceCheck(string userId, DateTime date)
     {
         try
         {

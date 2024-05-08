@@ -36,6 +36,8 @@ services:
 
   game-service:
     depends_on:
+      - api-mysql
+      - api-redis
       - api-service
     build:
       context: .

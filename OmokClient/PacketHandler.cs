@@ -14,7 +14,7 @@ public partial class mainForm
     UserData _myUserData = new UserData();
     UserData _anotherUserData = new UserData();
 
-    Dictionary<Int64, UserData> _userList = new Dictionary<Int64, UserData>();
+    Dictionary<string, UserData> _userList = new Dictionary<string, UserData>();
 
     void InitPacketHandler()
     {

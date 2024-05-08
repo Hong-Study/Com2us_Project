@@ -39,7 +39,7 @@ public partial class SConnectedRes : IResMessage
 [MemoryPackable]
 public partial class CLoginReq : IMessage
 {
-    public Int64 UserID { get; set; }
+    public string UserID { get; set; } = null!;
     public string AuthToken { get; set; } = null!;
 }
 [MemoryPackable]
@@ -92,7 +92,7 @@ public partial class SRoomLeaveRes : IResMessage
 [MemoryPackable]
 public partial class SUserLeaveReq : IMessage
 {
-    public Int64 UserID { get; set; }
+    public string UserID { get; set; } = null!;
 }
 
 [MemoryPackable]
@@ -117,7 +117,7 @@ public partial class CGameReadyReq : IMessage
 public partial class SGameReadyRes : IResMessage
 {
     public ErrorCode ErrorCode { get; set; }
-    public Int64 UserID { get; set; }
+    public string UserID { get; set; } = null!;
     public bool IsReady { get; set; }
 }
 
@@ -125,7 +125,7 @@ public partial class SGameReadyRes : IResMessage
 public partial class SGameStartReq : IMessage
 {
     public bool IsStart { get; set; }
-    public Int64 StartPlayerID { get; set; }
+    public string StartPlayerID { get; set; } = null!;
 }
 [MemoryPackable]
 public partial class CGameStartRes : IResMessage
@@ -143,7 +143,7 @@ public partial class CGamePutReq : IMessage
 public partial class SGamePutRes : IResMessage
 {
     public ErrorCode ErrorCode { get; set; }
-    public Int64 UserID { get; set; }
+    public string UserID { get; set; } = null!;
     public Int32 PosX { get; set; }
     public Int32 PosY { get; set; }
 }
@@ -151,7 +151,7 @@ public partial class SGamePutRes : IResMessage
 [MemoryPackable]
 public partial class SGameEndReq : IMessage
 {
-    public Int64 WinUserID { get; set; }
+    public string WinUserID { get; set; } = null!;
 }
 [MemoryPackable]
 public partial class CGameEndRes : IResMessage
@@ -162,7 +162,7 @@ public partial class CGameEndRes : IResMessage
 [MemoryPackable]
 public partial class STurnChangeReq : IMessage
 {
-    public Int64 NextTurnUserID { get; set; }
+    public string NextTurnUserID { get; set; } = null!;
 }
 [MemoryPackable]
 public partial class CTurnChangeRes : IResMessage
@@ -184,7 +184,7 @@ public partial class CGameCancleRes : IResMessage
 [MemoryPackable]
 public partial class UserData
 {
-    public Int64 UserID { get; set; }
+    public string UserID { get; set; } = null!;
     public Int16 PlayerColor { get; set; }
     public string NickName { get; set; } = null!;
     public Int32 Level { get; set; }

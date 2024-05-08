@@ -45,16 +45,16 @@ public class MailService : IMailService
         return new SendMailResult(ErrorCode.NONE, true);
     }
 
-    public async Task<SendMailResult> SendMail(Int64 userId, string recvUserName, string title, string content, Int32 itemId = 0, Int32 itemCount = 0)
-    {
-        UserNameData? data = await _authRepo.GetUserNameDataAsync(userId);
-        if(data == null)
-        {
-            return FailedSendMail(ErrorCode.NOT_FOUND_USER_NAME);
-        }
+    // public async Task<SendMailResult> SendMail(string userId, string recvUserName, string title, string content, Int32 itemId = 0, Int32 itemCount = 0)
+    // {
+    //     UserNameData? data = await _authRepo.GetUserNameDataAsync(userId);
+    //     if(data == null)
+    //     {
+    //         return FailedSendMail(ErrorCode.NOT_FOUND_USER_NAME);
+    //     }
 
-        return await SendMail(data.user_name, recvUserName, title, content, itemId, itemCount);
-    }
+    //     return await SendMail(data.user_name, recvUserName, title, content, itemId, itemCount);
+    // }
 
     public ReadMailAllResult FailedReadMailAll(ErrorCode errorCode)
     {

@@ -13,12 +13,12 @@ public class AttendanceCheckController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<AttendanceCheckRes> Post([FromHeader(Name ="UserId")] Int64 userId,
+    public async Task<AttendanceCheckRes> Post([FromHeader(Name ="UserId")] string userID,
                                                 [FromBody] AttendanceCheckReq request)
     {
-        _logger.LogInformation($"AttendanceCheckController Post: {userId} -> {request.UserId}");
+        _logger.LogInformation($"AttendanceCheckController Post: {userID} -> {request.UserID}");
 
-        AttendanceService.AttendanceResult result = await _attendanceCheckService.AttendanceCheck(userId, request.NowTime);
+        AttendanceService.AttendanceResult result = await _attendanceCheckService.AttendanceCheck(userID, request.NowTime);
 
         return new AttendanceCheckRes
         {
