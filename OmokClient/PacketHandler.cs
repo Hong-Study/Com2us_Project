@@ -134,6 +134,7 @@ public partial class mainForm
             DevLog.Write("서버 연결 실패");
         }
     }
+
     public void Handle_S_Login(IMessage message)
     {
         SLoginRes packet = message as SLoginRes;
@@ -198,7 +199,8 @@ public partial class mainForm
 
         if (_userList.TryGetValue(packet.UserID, out UserData user))
         {
-            // MessageBox.Show($"{user.NickName}님이 퇴장하였습니다.");
+            DevLog.Write($"{user.NickName}님이 퇴장하였습니다.");
+            
             _userList.Remove(packet.UserID);
             listBoxRoomUserList.Items.Remove(user.NickName);
         }
