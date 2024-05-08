@@ -413,5 +413,7 @@ FodyWeavers.xsd
 .ionide
 
 00_bin_omok_client
+Publish
+*Publish
 
 # End of https://www.toptal.com/developers/gitignore/api/csharp,visualstudiocode

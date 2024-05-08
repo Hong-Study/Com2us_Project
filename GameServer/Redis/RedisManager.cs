@@ -7,7 +7,9 @@ namespace GameServer;
 
 public class RedisManager
 {
+    // 스레드 별로 커넥턴을 가지고 있는 것이 좋다.
     RedisHandler _handler;
+    
     Dictionary<Int16, Action<ServerPacketData>> _onRecv = new Dictionary<Int16, Action<ServerPacketData>>();
     Dictionary<Int16, Func<string, IMessage, Task>> _onHandler = new Dictionary<Int16, Func<string, IMessage, Task>>();
     List<Thread> _logicThreads = new List<Thread>();
