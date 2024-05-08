@@ -15,8 +15,8 @@ public class LoginController : ControllerBase
     [HttpPost]
     public async Task<LoginRes> Login([FromBody] LoginReq request)
     {
-        _logger.LogInformation("Login");
-        
+        _logger.LogInformation($"Login {request.Email}");
+
         AuthService.LoginResult result = await _service.LoginAsync(request);
 
         return new LoginRes()

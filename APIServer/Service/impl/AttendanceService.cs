@@ -8,7 +8,7 @@ public class AttendanceService : IAttendanceService
         _mailService = mailService;
     }
 
-    public record AttendanceResult(ErrorCodes errorCode, bool isSuccess);
+    public record AttendanceResult(ErrorCode errorCode, bool isSuccess);
     public async Task<AttendanceResult> AttendanceCheck(Int64 userId, DateTime nowTime)
     {
         // 서버와의 시간을 체크
@@ -19,14 +19,14 @@ public class AttendanceService : IAttendanceService
 
             if (clientDate != serverDate)
             {
-                return FailedAttendance(ErrorCodes.NOT_SAME_TIME);
+                return FailedAttendance(ErrorCode.NOT_SAME_TIME);
             }
 
             // 출석 여부를 체크한다.
             bool isAttendance = await _attendanceRepo.IsAttendanceCheck(userId, serverDate);
             if (isAttendance == true)
             {
-                return FailedAttendance(ErrorCodes.ALREADY_ATTENDANCE);
+                return FailedAttendance(ErrorCode.ALREADY_ATTENDANCE);
             }
 
             bool isSuccess = await _attendanceRepo.SetAttendanceCheck(new UserAttendanceData
@@ -38,20 +38,20 @@ public class AttendanceService : IAttendanceService
 
             if (isSuccess == false)
             {
-                return FailedAttendance(ErrorCodes.FAILED_ATTENDANCE);
+                return FailedAttendance(ErrorCode.FAILED_ATTENDANCE);
             }
 
             MailService.SendMailResult result = await _mailService.SendMail(userId, "GM", "출석 완료", "출석이 완료되었습니다.");
             if (result.isSuccess == false)
             {
-                return FailedAttendance(ErrorCodes.FAILED_SEND_MAIL);
+                return FailedAttendance(ErrorCode.FAILED_SEND_MAIL);
             }
 
-            return new AttendanceResult(ErrorCodes.NONE, true);
+            return new AttendanceResult(ErrorCode.NONE, true);
         }
         catch
         {
-            return FailedAttendance(ErrorCodes.FAILED_ATTENDANCE);
+            return FailedAttendance(ErrorCode.FAILED_ATTENDANCE);
         }
     }
 
@@ -60,7 +60,7 @@ public class AttendanceService : IAttendanceService
         return new DateTime(date.Year, date.Month, date.Day);
     }
 
-    public AttendanceResult FailedAttendance(ErrorCodes errorCode)
+    public AttendanceResult FailedAttendance(ErrorCode errorCode)
     {
         return new AttendanceResult(errorCode, false);
     }

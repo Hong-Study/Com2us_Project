@@ -7,6 +7,7 @@
 |   유저  로그인   | <input type="checkbox" checked> |
 | 게임 데이터 로드 | <input type="checkbox" checked> |
 |  유저 로그 아웃  |     <input type="checkbox">     |
+|    매칭 기능     |     <input type="checkbox">     |
 
 ### 메일 기능
 |     **기능**     |          **완료 여부**          |
@@ -23,3 +24,9 @@
 |       출석 체크        | <input type="checkbox" checked> |
 | 출석 체크 후 메일 전송 | <input type="checkbox" checked> |
 |     출석 정보 조회     |     <input type="checkbox">     |
+
+### 서버 관련 기능
+| **기능**  |      **완료 여부**      |
+| :-------: | :---------------------: |
+| 서버 생성 | <input type="checkbox"> |
+| 서버 종료 | <input type="checkbox"> |
