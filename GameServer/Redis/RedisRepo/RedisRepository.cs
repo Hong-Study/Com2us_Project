@@ -4,6 +4,11 @@ using Common;
 
 namespace GameServer;
 
+// Interface를 사용하는 이유를 다시 한번 생각해보아라
+// 굳이 필요가 없다.
+// 애자일론에서 굳이 미래를 예측하지 마라
+// 완전하게 할 수 있는 것에 집중해라
+
 public class RedisRepository : IRedisRepository
 {
     public RedisConnection _redisConn;

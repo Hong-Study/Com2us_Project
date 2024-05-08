@@ -4,6 +4,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 IConfiguration config = builder.Configuration;
 
+builder.WebHost.UseUrls("http://0.0.0.0:5241");
+
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IMemoryRepository, MemoryRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
