@@ -5,8 +5,8 @@ namespace GameServer;
 
 public class DatabaseHandler
 {
-    public Func<Int64, Task<UserRepository.GetUserGameDataResult>> GetUserGameDataAsync { get; set; } = null!;
-    public Func<Int64, Int32, Int32, Task<ErrorCode>> UpdateUserWinLoseAsync { get; set; } = null!;
+    public Func<string, Task<UserRepository.GetUserGameDataResult>> GetUserGameDataAsync { get; set; } = null!;
+    public Func<string, Int32, Int32, Task<ErrorCode>> UpdateUserWinLoseAsync { get; set; } = null!;
 
     public Action<ServerPacketData> InnerSendFunc = null!;
 

@@ -22,8 +22,8 @@ public class LoginController : ControllerBase
         return new LoginRes()
         {
             ErrorCode = result.ErrorCode,
-            Id = result.Id,
-            Token = result.Token
+            UserID = result.userID,
+            Token = result.token
         };
     }
 }

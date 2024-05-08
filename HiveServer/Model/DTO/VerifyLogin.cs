@@ -1,7 +1,6 @@
-
 public class VerifyLoginReq
 {
-    public Int64 UserId { get; set; }
+    public string UserID { get; set; } = null!;
     public string Token { get; set; } = null!;
 }
 

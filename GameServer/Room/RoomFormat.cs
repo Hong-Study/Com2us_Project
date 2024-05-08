@@ -3,7 +3,7 @@ namespace GameServer;
 public class RoomUser
 {
     public string SessionID { get; set; } = null!;
-    public Int64 UserID { get; set; }
+    public string UserID { get; set; } = null!;
     public bool IsReady { get; set; } = false;
     public BoardType PlayerColor { get; set; }
     public Int16 TimeoutCount { get; set; } = 0;
