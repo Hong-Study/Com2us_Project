@@ -86,8 +86,6 @@ namespace CSCommon
                 현재돌x좌표 = x;
                 현재돌y좌표 = y;
 
-                흑돌차례 = !흑돌차례;                   // 차례 변경
-
                 //바둑돌소리.Play();
             }
 
@@ -95,6 +93,11 @@ namespace CSCommon
             st.Push(new Point(x, y));
 
             return 돌두기_결과.Success;
+        }
+
+        public void 흑돌차례변경()
+        {
+            흑돌차례 = !흑돌차례;
         }
 
 
