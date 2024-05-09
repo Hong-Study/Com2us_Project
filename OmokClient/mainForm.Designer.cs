@@ -32,6 +32,8 @@
             this.btnRegister = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.textBoxRegisterPW = new System.Windows.Forms.TextBox();
+            this.textBoxIP = new System.Windows.Forms.TextBox();
+            this.btnIPSet = new System.Windows.Forms.Button();
             this.label10 = new System.Windows.Forms.Label();
             this.textBoxRegisterID = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
@@ -84,16 +86,39 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Controls.Add(this.textBoxIP);
             this.groupBox5.Controls.Add(this.textBoxRegisterPW);
             this.groupBox5.Controls.Add(this.label10);
             this.groupBox5.Controls.Add(this.textBoxRegisterID);
             this.groupBox5.Controls.Add(this.label9);
+            this.groupBox5.Controls.Add(this.btnIPSet);
             this.groupBox5.Location = new System.Drawing.Point(12, 12);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(403, 52);
+            this.groupBox5.Size = new System.Drawing.Size(403, 70);
             this.groupBox5.TabIndex = 27;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Socket 더미 클라이언트 설정";
+            // 
+            // ButtonIPSet
+            // 
+            this.btnIPSet.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btnIPSet.Location = new System.Drawing.Point(200, 40);
+            this.btnIPSet.Name = "btnIPSet";
+            this.btnIPSet.Size = new System.Drawing.Size(69, 26);
+            this.btnIPSet.TabIndex = 46;
+            this.btnIPSet.Text = "IP 설정";
+            this.btnIPSet.UseVisualStyleBackColor = true;
+            this.btnIPSet.Click += new System.EventHandler(this.button_IpSet);
+            // 
+            // textBoxIP
+            // 
+            this.textBoxIP.Location = new System.Drawing.Point(10, 40);
+            this.textBoxIP.MaxLength = 20;
+            this.textBoxIP.Name = "textBoxIP";
+            this.textBoxIP.Size = new System.Drawing.Size(87, 21);
+            this.textBoxIP.TabIndex = 18;
+            this.textBoxIP.Text = "127.0.0.1";
+            this.textBoxRegisterPW.WordWrap = false;
             // 
             // textBoxRegisterPW
             // 
@@ -155,7 +180,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 71);
+            this.label1.Location = new System.Drawing.Point(12, 101);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(46, 12);
             this.label1.TabIndex = 42;
@@ -163,7 +188,7 @@
             // 
             // textBoxUserID
             // 
-            this.textBoxUserID.Location = new System.Drawing.Point(62, 67);
+            this.textBoxUserID.Location = new System.Drawing.Point(62, 100);
             this.textBoxUserID.MaxLength = 20;
             this.textBoxUserID.Name = "textBoxUserID";
             this.textBoxUserID.Size = new System.Drawing.Size(87, 21);
@@ -173,7 +198,7 @@
             // 
             // textBoxUserPW
             // 
-            this.textBoxUserPW.Location = new System.Drawing.Point(220, 68);
+            this.textBoxUserPW.Location = new System.Drawing.Point(220, 100);
             this.textBoxUserPW.MaxLength = 20;
             this.textBoxUserPW.Name = "textBoxUserPW";
             this.textBoxUserPW.Size = new System.Drawing.Size(87, 21);
@@ -184,7 +209,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(162, 71);
+            this.label2.Location = new System.Drawing.Point(162, 105);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(56, 12);
             this.label2.TabIndex = 44;
@@ -193,7 +218,7 @@
             // button2
             // 
             this.button2.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.button2.Location = new System.Drawing.Point(317, 67);
+            this.button2.Location = new System.Drawing.Point(317, 96);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(69, 26);
             this.button2.TabIndex = 46;
@@ -226,7 +251,6 @@
             // 
             // button3
             // 
-
             this.button3.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.button3.Location = new System.Drawing.Point(391, 18);
             this.button3.Name = "button3";
@@ -399,6 +423,8 @@
         private System.Windows.Forms.Button btnDisconnect;
         private System.Windows.Forms.Button btnRegister;
         private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.TextBox textBoxIP;
+        private System.Windows.Forms.Button btnIPSet;
         private System.Windows.Forms.TextBox textBoxRegisterPW;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox textBoxRegisterID;

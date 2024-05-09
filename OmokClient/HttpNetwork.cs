@@ -12,14 +12,18 @@ public partial class mainForm
     HttpClient _hiveServer = new HttpClient();
     HttpClient _apiServer = new HttpClient();
 
-    string _hiveServerUrl = "http://localhost:5241";
-    string _apiServerUrl = "http://localhost:5122";
-
+    string _hiveServerUrl = "http://35.92.65.156:5241";
+    string _apiServerUrl = "http://35.92.65.156:5122";
+    string _socketServerUrl  = "";
     string _userID = "";
     string _authToken = "";
 
-    void InitHttpNetwork()
+    void InitHttpNetwork(string ip)
     {
+        _hiveServerUrl = $"http://{ip}:5241";
+        _apiServerUrl = $"http://{ip}:5122";
+        _socketServerUrl = ip;
+
         _hiveServer.BaseAddress = new Uri(_hiveServerUrl);
         _apiServer.BaseAddress = new Uri(_apiServerUrl);
     }
@@ -86,8 +90,6 @@ public partial class mainForm
 
     async Task<bool> ApiLogin(string userID, string token)
     {
-        MessageBox.Show($"{userID}");
-
         ApiLoginReq req = new ApiLoginReq();
         req.UserID = userID;
         req.Token = token;
@@ -109,7 +111,7 @@ public partial class mainForm
                 _myUserData.Win = res.GameData.win;
                 _myUserData.Lose = res.GameData.lose;
 
-                _gameServerAddress = "127.0.0.1";
+                _gameServerAddress = _socketServerUrl;
                 _gameServerPort = res.GameServerPort;
 
                 return true;
