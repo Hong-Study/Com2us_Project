@@ -22,7 +22,7 @@ namespace GameClient
 
             InitSocketNetwork();
 
-            btnDisconnect.Enabled = false;
+            InitHttpNetwork();
 
             InitPacketHandler();
 
@@ -37,15 +37,89 @@ namespace GameClient
 
         private async void btnRegister_ClickAsync(object sender, EventArgs e)
         {
-            string email = textBoxRegisterID.Text;
-            string password = textBoxRegisterPW.Text;
+            string hiveUrl = textBoxHiveIP.Text;
+            string email = textBoxHiveID.Text;
+            string password = textBoxHivePW.Text;
 
-            await HiveRegister(email, password);
+            if (hiveUrl.IsEmpty() || email.IsEmpty() || password.IsEmpty())
+            {
+                MessageBox.Show("Hive 정보를 입력하세요");
+                return;
+            }
+
+            DevLog.Write($"Hive 회원 가입 요청: {email}, {password}");
+
+            await HiveRegister(hiveUrl, email, password);
         }
 
-        private void btnDisconnect_Click(object sender, EventArgs e)
+        private async void btnHiveLogin_Click(object sender, EventArgs e)
         {
-            // SetDisconnectd();
+            string hiveUrl = textBoxHiveIP.Text;
+            string email = textBoxHiveID.Text;
+            string password = textBoxHivePW.Text;
+
+            if (hiveUrl.IsEmpty() || email.IsEmpty() || password.IsEmpty())
+            {
+                MessageBox.Show("Hive 정보를 입력하세요");
+                return;
+            }
+
+            DevLog.Write($"Hive 로그인 요청: {email}, {password}");
+
+            bool isSuccess = await HiveLogin(hiveUrl, email, password);
+            if (isSuccess == false)
+            {
+                DevLog.Write("Hive 로그인 요청 실패");
+                return;
+            }
+        }
+
+        private async void btnApiLogin_Click(object sender, EventArgs e)
+        {
+            string apiServerUrl = textBoxApiIP.Text;
+            string email = textBoxApiLoginID.Text;
+            string password = textBoxApiLoginPW.Text;
+
+            if (apiServerUrl.IsEmpty() || email.IsEmpty() || password.IsEmpty())
+            {
+                MessageBox.Show("API 정보를 입력하세요");
+                return;
+            }
+
+            DevLog.Write($"API 로그인 요청: {email}, {password}");
+
+            bool isSuccess = await ApiLogin(apiServerUrl, email, password);
+            if (isSuccess == false)
+            {
+                DevLog.Write("API 로그인 요청 실패");
+                return;
+            }
+        }
+
+        private void btnSocketConnect_Click(object sender, EventArgs e)
+        {
+            string ip = textBoxSocketIP.Text;
+            int port = Convert.ToInt32(textBoxSocketPort.Text);
+
+            ConnectGameServer(ip, port);
+        }
+
+        private void btnSocketLogin_Click(object sender, EventArgs e)
+        {
+            string userID = textBoxSocketID.Text;
+            string token = textBoxSocketToken.Text;
+
+            if (userID.IsEmpty() || token.IsEmpty())
+            {
+                MessageBox.Show("로그인 정보를 입력하세요");
+                return;
+            }
+
+            var loginReq = new CLoginReq();
+            loginReq.UserID = userID;
+            loginReq.AuthToken = token;
+
+            PostSendPacket(PacketType.REQ_C_LOGIN, loginReq);
         }
 
         void AddRoomUserList(string userID)
@@ -90,31 +164,6 @@ namespace GameClient
             }
         }
 
-        // 로그인 요청
-        private async void button2_ClickAsync(object sender, EventArgs e)
-        {
-            bool isSuccess = await HiveLogin(textBoxUserID.Text, textBoxUserPW.Text);
-            if (isSuccess == false)
-            {
-                return;
-            }
-
-            isSuccess = await ApiLogin(_userID, _authToken);
-            if (isSuccess == false)
-            {
-                return;
-            }
-
-            ConnectGameServer();
-
-            var loginReq = new CLoginReq();
-            loginReq.UserID = _userID;
-            loginReq.AuthToken = _authToken;
-
-            PostSendPacket(PacketType.REQ_C_LOGIN, loginReq);            
-            DevLog.Write($"로그인 요청:  {textBoxUserID.Text}, {textBoxUserPW.Text}");
-        }
-
         private void btn_RoomEnter_Click(object sender, EventArgs e)
         {
             var roomEnterReq = new CRoomEnterReq();
@@ -143,7 +192,7 @@ namespace GameClient
                 MessageBox.Show("채팅 메시지를 입력하세요");
                 return;
             }
-            
+
             var roomChatReq = new CRoomChatReq();
             roomChatReq.Message = textBoxRoomSendMsg.Text;
 
@@ -153,7 +202,6 @@ namespace GameClient
 
         private void btnMatching_Click(object sender, EventArgs e)
         {
-            //PostSendPacket(PACKET_ID.MATCH_USER_REQ, null);
             DevLog.Write($"매칭 요청");
         }
 
@@ -197,9 +245,9 @@ namespace GameClient
             AddUser("test2");
         }
 
-        private void button_IpSet(object sender, EventArgs e)
+        private void button_ApiLogin(object sender, EventArgs e)
         {
-            InitHttpNetwork(textBoxIP.Text);
+            // InitHttpNetwork(textBoxIP.Text);
 
             MessageBox.Show("IP 설정 완료");
         }

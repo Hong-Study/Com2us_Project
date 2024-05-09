@@ -79,4 +79,15 @@ public partial class PacketHandler
 
         LoginUserFunc(sessionID, packet.ErrorCode, packet.UserData);
     }
+
+    public void Handle_NTF_UpdateWinLoseCount(string sessionID, IMessage message)
+    {
+        NTFUserWinLoseUpdateRes? packet = message as NTFUserWinLoseUpdateRes;
+        if (packet == null)
+        {
+            return;
+        }
+
+        
+    }
 }

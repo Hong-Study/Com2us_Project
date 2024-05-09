@@ -67,6 +67,8 @@ public class PacketManager
         _onHandler.Add((Int16)InnerPacketType.NTF_ROOMS_CHECK, _handler.Handle_NTF_RoomsCheck);
         _onRecv.Add((Int16)InnerPacketType.NTF_RES_USER_LOGIN, Make<NTFUserLoginRes>);
         _onHandler.Add((Int16)InnerPacketType.NTF_RES_USER_LOGIN, _handler.Handle_NTF_UserLogin);
+        _onRecv.Add((Int16)InnerPacketType.NTF_RES_UPDATE_WIN_LOSE_COUNT, Make<NTFUserWinLoseUpdateRes>);
+        _onHandler.Add((Int16)InnerPacketType.NTF_RES_UPDATE_WIN_LOSE_COUNT, _handler.Handle_NTF_UpdateWinLoseCount);
     }
 
     public void SetUserDelegate(ref readonly UserManager userManager)
@@ -121,24 +123,16 @@ public class PacketManager
     {
         while (MainServer.IsRunning)
         {
-            // 멈출 때, Blocking 처리를 어떻게 할 지 고민해야 함.
-            try
-            {
-                TimeSpan timeOut = TimeSpan.FromSeconds(1);
-                ServerPacketData data = _msgBuffer.Receive(timeOut);
+            TimeSpan timeOut = TimeSpan.FromSeconds(1);
+            ServerPacketData data = _msgBuffer.Receive(timeOut);
 
-                if (_onRecv.TryGetValue(data.PacketType, out var action))
-                {
-                    action(data);
-                }
-                else
-                {
-                    Logger.Error($"Not found handler : {data.PacketType}");
-                }
-            }
-            catch(Exception e)
+            if (_onRecv.TryGetValue(data.PacketType, out var action))
             {
-                Logger.Error(e.Message);
+                action(data);
+            }
+            else
+            {
+                Logger.Error($"Not found handler : {data.PacketType}");
             }
         }
     }

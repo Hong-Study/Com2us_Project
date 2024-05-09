@@ -117,10 +117,12 @@ public class Room
         var userInfo = GetUserInfoFunc(sessionID)!;
         userInfo.LeaveRoom();
 
-        if (_game.IsStart)
         {
-            _game.GameEnd(true);
-            return;
+            var req = new SUserLeaveReq();
+            req.UserID = user.UserID;
+
+            byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_USER_LEAVE);
+            BroadCast(bytes, sessionID);
         }
 
         {
@@ -131,13 +133,12 @@ public class Room
             SendFunc(sessionID, bytes);
         }
 
+        if (_game.IsStart)
         {
-            var req = new SUserLeaveReq();
-            req.UserID = user.UserID;
-
-            byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_USER_LEAVE);
-            BroadCast(bytes, sessionID);
+            _game.LeaveGameEnd();
+            return;
         }
+
     }
 
     public void SendChat(string sessionID, string message)
@@ -189,6 +190,11 @@ public class Room
         byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_GAME_READY);
         BroadCast(bytes);
 
+        if(_users.Count < 2)
+        {
+            return;
+        }
+        
         bool isAllReady = true;
         foreach (var u in _users)
         {
@@ -259,10 +265,10 @@ public class Room
 
     void RoomClear()
     {
-        foreach(var user in _users)
+        foreach (var user in _users)
         {
             var userInfo = GetUserInfoFunc(user.SessionID);
-            if(userInfo == null)
+            if (userInfo == null)
             {
                 continue;
             }
@@ -288,7 +294,7 @@ public class Room
     {
         if (_game.IsStart)
         {
-            if(_users.Count < 2)
+            if (_users.Count < 2)
             {
                 _game.GameCancle();
             }
