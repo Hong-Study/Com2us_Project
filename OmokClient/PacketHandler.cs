@@ -301,8 +301,6 @@ public partial class mainForm
             MessageBox.Show($"에러 발생 {packet.ErrorCode}");
         }
 
-        System.Console.WriteLine($"돌 두기: {packet.PosX}, {packet.PosY}");
-
         플레이어_돌두기(true, packet.PosX, packet.PosY);
     }
 
@@ -319,6 +317,8 @@ public partial class mainForm
         {
             MessageBox.Show("당신의 차례입니다.");
             IsMyTurn = true;
+
+            
         }
         else
         {
