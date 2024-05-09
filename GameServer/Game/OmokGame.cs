@@ -71,9 +71,12 @@ public class OmokGame
         GameEnd();
     }
 
-    public void LeaveGameEnd()
+    public void LeaveGameEnd(string sessionID)
     {
-        CurrentPlayer = 0;
+        if (_users[CurrentPlayer].SessionID == sessionID)
+        {
+            CurrentPlayer = GetNextTurn();
+        }
 
         GameEnd();
     }
@@ -83,9 +86,7 @@ public class OmokGame
         var user = _users[CurrentPlayer];
 
         UpdateUserWinLoseCount(user.SessionID, true);
-
-        if (_users.Count == 2)
-            UpdateUserWinLoseCount(_users[GetNextTurn()].SessionID, false);
+        UpdateUserWinLoseCount(_users[GetNextTurn()].SessionID, false);
 
         SGameEndReq req = new SGameEndReq();
         req.WinUserID = user.UserID;
