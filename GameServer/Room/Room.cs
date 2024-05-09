@@ -257,8 +257,6 @@ public class Room
         return _users.Find(u => u.SessionID == sessionID);
     }
 
-    
-
     void RoomClear()
     {
         foreach(var user in _users)
@@ -290,10 +288,9 @@ public class Room
     {
         if (_game.IsStart)
         {
-            if(_users.Count != 2)
+            if(_users.Count < 2)
             {
                 _game.GameCancle();
-
             }
 
             TimeSpan ts = DateTime.Now - _gameStartTime;
