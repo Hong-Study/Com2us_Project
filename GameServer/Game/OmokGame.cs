@@ -64,17 +64,28 @@ public class OmokGame
         RoomClearFunc();
     }
 
-    public void GameEnd(bool isNextUserWin = false)
+    public void TimeoutGameEnd()
     {
-        if (isNextUserWin)
-        {
-            CurrentPlayer = GetNextTurn();
-        }
+        CurrentPlayer = GetNextTurn();
 
+        GameEnd();
+    }
+
+    public void LeaveGameEnd()
+    {
+        CurrentPlayer = 0;
+
+        GameEnd();
+    }
+
+    public void GameEnd()
+    {
         var user = _users[CurrentPlayer];
 
         UpdateUserWinLoseCount(user.SessionID, true);
-        UpdateUserWinLoseCount(_users[GetNextTurn()].SessionID, false);
+
+        if (_users.Count == 2)
+            UpdateUserWinLoseCount(_users[GetNextTurn()].SessionID, false);
 
         SGameEndReq req = new SGameEndReq();
         req.WinUserID = user.UserID;
@@ -138,9 +149,10 @@ public class OmokGame
             TimeoutTurnChange();
         }
     }
-    
+
     public void GameClear()
     {
+        // _users.Clear();
         Array.Clear(_gameBoard, 0, _gameBoard.Length);
 
         IsStart = false;
@@ -189,7 +201,7 @@ public class OmokGame
     {
         if (++_users[CurrentPlayer].TimeoutCount >= TimeoutCount)
         {
-            GameEnd(true);
+            TimeoutGameEnd();
 
             return;
         }
