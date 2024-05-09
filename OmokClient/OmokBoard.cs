@@ -36,7 +36,7 @@ namespace GameClient
         private bool AI모드 = true;
         // private CSCommon.OmokRule.돌종류 컴퓨터돌;
 
-        string MyPlayerName = "";        
+        string MyPlayerName = "";
         string 흑돌플레이어Name = "";
         string 백돌플레이어Name = "";
 

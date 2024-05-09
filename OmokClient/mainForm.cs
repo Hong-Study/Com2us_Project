@@ -22,8 +22,6 @@ namespace GameClient
 
             InitSocketNetwork();
 
-            InitHttpNetwork();
-
             btnDisconnect.Enabled = false;
 
             InitPacketHandler();
@@ -197,6 +195,13 @@ namespace GameClient
         {
             AddUser("test1");
             AddUser("test2");
+        }
+
+        private void button_IpSet(object sender, EventArgs e)
+        {
+            InitHttpNetwork(textBoxIP.Text);
+
+            MessageBox.Show("IP 설정 완료");
         }
 
         void AddUser(string userID)
