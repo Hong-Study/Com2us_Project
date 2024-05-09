@@ -20,9 +20,6 @@ public partial class mainForm
     ConcurrentQueue<byte[]> RecvPacketQueue = new ConcurrentQueue<byte[]>();
     ConcurrentQueue<byte[]> SendPacketQueue = new ConcurrentQueue<byte[]>();
 
-    string _gameServerAddress;
-    Int32  _gameServerPort;
-
     void InitSocketNetwork()
     {
         IsNetworkThreadRunning = true;
@@ -37,12 +34,12 @@ public partial class mainForm
         dispatcherUITimer.Start();
     }
 
-    void ConnectGameServer()
+    void ConnectGameServer(string ip, int port)
     {
-        if (Network.Connect(_gameServerAddress, _gameServerPort))
+        if (Network.Connect(ip, port))
         {
             labelStatus.Text = string.Format("{0}. 서버에 접속 중", DateTime.Now);
-            btnDisconnect.Enabled = true;
+            // btnDisconnect.Enabled = true;
 
             DevLog.Write($"서버에 접속 중", LOG_LEVEL.INFO);
         }
