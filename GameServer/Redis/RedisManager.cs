@@ -7,15 +7,14 @@ namespace GameServer;
 
 public class RedisManager
 {
-    // 스레드 별로 커넥턴을 가지고 있는 것이 좋다.
     RedisHandler _handler;
-    
-    Dictionary<Int16, Action<ServerPacketData>> _onRecv = new Dictionary<Int16, Action<ServerPacketData>>();
-    Dictionary<Int16, Func<string, IMessage, Task>> _onHandler = new Dictionary<Int16, Func<string, IMessage, Task>>();
+    RedisRepository _redis = null!;
+    string _connectionString = null!;
+
+    Dictionary<Int16, Action<ServerPacketData, RedisConnector>> _onRecv = new Dictionary<Int16, Action<ServerPacketData, RedisConnector>>();
+    Dictionary<Int16, Action<string, IMessage, RedisConnector>> _onHandler = new Dictionary<Int16, Action<string, IMessage, RedisConnector>>();
     List<Thread> _logicThreads = new List<Thread>();
     BufferBlock<ServerPacketData> _msgBuffer = new BufferBlock<ServerPacketData>();
-
-    RedisRepository _redis = null!;
 
     SuperSocket.SocketBase.Logging.ILog Logger = null!;
 
@@ -28,8 +27,10 @@ public class RedisManager
 
     public RedisManager(ref readonly ServerOption option)
     {
+        _connectionString = option.RedisConnectionString;
+
         _handler = new RedisHandler();
-        _redis = new RedisRepository(option.RedisConnectionString);
+        _redis = new RedisRepository();
 
         InitHandler();
 
@@ -78,6 +79,8 @@ public class RedisManager
 
     void Process()
     {
+        var redisConnector = new RedisConnector(_connectionString);
+
         while (MainServer.IsRunning)
         {
             // 멈출 때, Blocking 처리를 어떻게 할 지 고민해야 함.
@@ -86,10 +89,9 @@ public class RedisManager
                 TimeSpan timeOut = TimeSpan.FromSeconds(1);
                 ServerPacketData data = _msgBuffer.Receive(timeOut);
 
-                Action<ServerPacketData>? action = null;
-                if (_onRecv.TryGetValue(data.PacketType, out action))
+                if (_onRecv.TryGetValue(data.PacketType, out var action))
                 {
-                    action(data);
+                    action(data, redisConnector);
                 }
                 else
                 {
@@ -103,7 +105,7 @@ public class RedisManager
         }
     }
 
-    void Make<T>(ServerPacketData data) where T : IMessage, new()
+    void Make<T>(ServerPacketData data, RedisConnector connector) where T : IMessage, new()
     {
         var packet = MemoryPackSerializer.Deserialize<T>(data.Body);
         if (packet == null)
@@ -111,10 +113,9 @@ public class RedisManager
             return;
         }
 
-        Func<string, IMessage, Task>? action = null;
-        if (_onHandler.TryGetValue(data.PacketType, out action))
+        if (_onHandler.TryGetValue(data.PacketType, out var action))
         {
-            action(data.sessionID, packet);
+            action(data.sessionID, packet, connector);
         }
     }
 

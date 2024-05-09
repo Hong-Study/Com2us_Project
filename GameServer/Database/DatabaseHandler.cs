@@ -5,8 +5,8 @@ namespace GameServer;
 
 public class DatabaseHandler
 {
-    public Func<string, Task<UserRepository.GetUserGameDataResult>> GetUserGameDataAsync { get; set; } = null!;
-    public Func<string, Int32, Int32, Task<ErrorCode>> UpdateUserWinLoseAsync { get; set; } = null!;
+    public Func<DBConnector, string, DBRepository.GetUserGameDataResult> GetUserGameDataAsync { get; set; } = null!;
+    public Func<DBConnector, string, Int32, Int32, ErrorCode> UpdateUserWinLoseAsync { get; set; } = null!;
 
     public Action<ServerPacketData> InnerSendFunc = null!;
 
@@ -17,7 +17,7 @@ public class DatabaseHandler
         Logger = logger;
     }
 
-    public async Task Handle_DB_Login(string sessionID, IMessage message)
+    public void Handle_DB_Login(string sessionID, IMessage message, DBConnector connector)
     {
         var packet = message as DBUserLoginReq;
         if (packet == null)
@@ -25,7 +25,7 @@ public class DatabaseHandler
             return;
         }
 
-        var data = await GetUserGameDataAsync(packet.UserID);
+        var data = GetUserGameDataAsync(connector, packet.UserID);
 
         var res = new NTFUserLoginRes();
         res.ErrorCode = data.errorCode;
@@ -35,9 +35,7 @@ public class DatabaseHandler
         InnerSendFunc(serverPacketData);
     }
 
-    // 비동기로 이미 작동하기 때문에 그냥 동기로 만들어도 된다.
-    // 누가 봐도 이게 더 이해하기 쉬울 것 같다. 는 코드를 작성해라.
-    public async Task Handle_DB_UpdateWinLoseCount(string sessionID, IMessage message)
+    public void Handle_DB_UpdateWinLoseCount(string sessionID, IMessage message, DBConnector connector)
     {
         var packet = message as DBUpdateWinLoseCountReq;
         if (packet == null)
@@ -45,7 +43,7 @@ public class DatabaseHandler
             return;
         }
 
-        var errorCode = await UpdateUserWinLoseAsync(packet.UserID, packet.WinCount, packet.LoseCount);
+        var errorCode = UpdateUserWinLoseAsync(connector, packet.UserID, packet.WinCount, packet.LoseCount);
 
         var res = new NTFUserWinLoseUpdateRes();
         res.ErrorCode = errorCode;

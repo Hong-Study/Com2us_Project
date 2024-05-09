@@ -127,8 +127,7 @@ public class PacketManager
                 TimeSpan timeOut = TimeSpan.FromSeconds(1);
                 ServerPacketData data = _msgBuffer.Receive(timeOut);
 
-                Action<ServerPacketData>? action = null;
-                if (_onRecv.TryGetValue(data.PacketType, out action))
+                if (_onRecv.TryGetValue(data.PacketType, out var action))
                 {
                     action(data);
                 }
@@ -179,8 +178,7 @@ public class PacketManager
             return;
         }
 
-        Action<string, IMessage>? action = null;
-        if (_onHandler.TryGetValue(data.PacketType, out action))
+        if (_onHandler.TryGetValue(data.PacketType, out var action))
         {
             action(data.sessionID, packet);
         }
