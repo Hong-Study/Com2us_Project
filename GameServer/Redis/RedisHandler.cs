@@ -4,7 +4,7 @@ namespace GameServer;
 
 public class RedisHandler
 {
-    public Func<string, string, Task<ErrorCode>> ValidataeTokenFunc = null!;
+    public Func<string, string, RedisConnector, ErrorCode> ValidataeTokenFunc = null!;
 
     public Action<ServerPacketData> InnerSendFunc = null!;
     public Action<ServerPacketData> DatabaseSendFunc = null!;
@@ -16,7 +16,7 @@ public class RedisHandler
         Logger = logger;
     }
     
-    public async Task Handle_RD_UserLogin(string sessionID, IMessage message)
+    public void Handle_RD_UserLogin(string sessionID, IMessage message, RedisConnector connector)
     {
         var packet = message as RDUserLoginReq;
         if (packet == null)
@@ -24,7 +24,7 @@ public class RedisHandler
             return;
         }
 
-        var errorCode = await ValidataeTokenFunc(packet.UserID, packet.AuthToken);
+        var errorCode = ValidataeTokenFunc(packet.UserID, packet.AuthToken, connector);
 
         if(errorCode != ErrorCode.NONE)
         {

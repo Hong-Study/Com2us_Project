@@ -10,19 +10,23 @@ namespace GameServer;
 public class DatabaseManager
 {
     DatabaseHandler _handler;
-    IUserRepository _userRepository;
-    SuperSocket.SocketBase.Logging.ILog Logger = null!;
+    DBRepository _dbRepository = null!;
+    string _connectionString = null!;
 
-    Dictionary<Int16, Action<ServerPacketData>> _onRecv = new Dictionary<Int16, Action<ServerPacketData>>();
-    Dictionary<Int16, Func<string, IMessage, Task>> _onHandler = new Dictionary<Int16, Func<string, IMessage, Task>>();
+    // 어떻게 하면 하나로 묶어서 처리할 수 있을까?
+    Dictionary<Int16, Action<ServerPacketData, DBConnector>> _onRecv = new Dictionary<Int16, Action<ServerPacketData, DBConnector>>();
+    Dictionary<Int16, Action<string, IMessage, DBConnector>> _onHandler = new Dictionary<Int16, Action<string, IMessage, DBConnector>>();
     List<Thread> _logicThreads = new List<Thread>();
     BufferBlock<ServerPacketData> _msgBuffer = new BufferBlock<ServerPacketData>();
 
+    SuperSocket.SocketBase.Logging.ILog Logger = null!;
 
     public DatabaseManager(ref readonly ServerOption option)
     {
-        _userRepository = new UserRepository(option.DatabaseConnectionString);
+        _connectionString = option.DatabaseConnectionString;
+
         _handler = new DatabaseHandler();
+        _dbRepository = new DBRepository();
 
         InitHandler();
 
@@ -33,7 +37,6 @@ public class DatabaseManager
     {
         Logger = logger;
         _handler.InitLogger(logger);
-        _userRepository.InitLogger(logger);
     }
 
     public void InitHandler()
@@ -75,24 +78,24 @@ public class DatabaseManager
 
     void SetDelegate()
     {
-        _handler.GetUserGameDataAsync = _userRepository.GetUserGameDataAsync;
-        _handler.UpdateUserWinLoseAsync = _userRepository.UpdateUserWinLoseAsync;
+        _handler.GetUserGameDataAsync = _dbRepository.GetUserGameDataAsync;
+        _handler.UpdateUserWinLoseAsync = _dbRepository.UpdateUserWinLoseAsync;
     }
 
     void Process()
     {
+        var connector = new DBConnector(_connectionString);
+
         while (MainServer.IsRunning)
         {
-            // 멈출 때, Blocking 처리를 어떻게 할 지 고민해야 함.
             try
             {
                 TimeSpan timeOut = TimeSpan.FromSeconds(1);
                 ServerPacketData data = _msgBuffer.Receive(timeOut);
 
-                Action<ServerPacketData>? action = null;
-                if (_onRecv.TryGetValue(data.PacketType, out action))
+                if (_onRecv.TryGetValue(data.PacketType, out var action))
                 {
-                    action(data);
+                    action(data, connector);
                 }
                 else
                 {
@@ -106,7 +109,7 @@ public class DatabaseManager
         }
     }
 
-    void Make<T>(ServerPacketData data) where T : IMessage, new()
+    void Make<T>(ServerPacketData data, DBConnector connector) where T : IMessage, new()
     {
         var packet = MemoryPackSerializer.Deserialize<T>(data.Body);
         if (packet == null)
@@ -114,10 +117,9 @@ public class DatabaseManager
             return;
         }
 
-        Func<string, IMessage, Task>? action = null;
-        if (_onHandler.TryGetValue(data.PacketType, out action))
+        if (_onHandler.TryGetValue(data.PacketType, out var action))
         {
-            action(data.sessionID, packet);
+            action(data.sessionID, packet, connector);
         }
     }
 
