@@ -3,13 +3,11 @@ using SqlKata.Execution;
 
 namespace GameServer;
 
-public class UserRepository : DefaultDbConnection, IUserRepository
+public class DBRepository
 {
     SuperSocket.SocketBase.Logging.ILog Logger = null!;
 
-    public UserRepository(string connectionString) : base(connectionString)
-    {
-    }
+    public DBRepository() { }
 
     public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
     {
@@ -17,13 +15,13 @@ public class UserRepository : DefaultDbConnection, IUserRepository
     }
 
     public record GetUserGameDataResult(ErrorCode errorCode, UserData? userData);
-    public async Task<GetUserGameDataResult> GetUserGameDataAsync(string userId)
+    public GetUserGameDataResult GetUserGameDataAsync(DBConnector connector, string userId)
     {
         try
         {
-            UserGameData? result = await _queryFactory.Query("user_game_data")
+            UserGameData? result = connector.QueryFactory.Query("user_game_data")
                                             .Where("user_id", userId)
-                                            .FirstOrDefaultAsync<UserGameData>();
+                                            .FirstOrDefault<UserGameData>();
 
 
             if (result == null)
@@ -49,19 +47,17 @@ public class UserRepository : DefaultDbConnection, IUserRepository
         }
     }
 
-    public async Task<ErrorCode> UpdateUserWinLoseAsync(string userId, Int32 win, Int32 lose)
+    public ErrorCode UpdateUserWinLoseAsync(DBConnector connector, string userId, Int32 win, Int32 lose)
     {
-        NTFUserWinLoseUpdateRes res = new NTFUserWinLoseUpdateRes();
-
         try
         {
-            var result = await _queryFactory.Query("user_game_data")
-                .Where("user_id", userId)
-                .UpdateAsync(new
-                {
-                    win = win,
-                    lose = lose
-                });
+            var result = connector.QueryFactory.Query("user_game_data")
+                            .Where("user_id", userId)
+                            .Update(new
+                            {
+                                win = win,
+                                lose = lose
+                            });
 
             if (result == 0)
             {

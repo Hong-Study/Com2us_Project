@@ -272,7 +272,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     }
 
     public void PacketInnerSend(ServerPacketData data)
-    {
+    {        
         _packetManager.Distribute(data);
     }
 
