@@ -112,6 +112,12 @@ public class Room
             return;
         }
 
+        if (_game.IsStart)
+        {
+            _game.LeaveGameEnd(sessionID);
+            return;
+        }
+
         _users.Remove(user);
 
         var userInfo = GetUserInfoFunc(sessionID)!;
@@ -132,13 +138,6 @@ public class Room
             byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_ROOM_LEAVE);
             SendFunc(sessionID, bytes);
         }
-
-        if (_game.IsStart)
-        {
-            _game.LeaveGameEnd();
-            return;
-        }
-
     }
 
     public void SendChat(string sessionID, string message)
@@ -194,7 +193,7 @@ public class Room
         {
             return;
         }
-        
+
         bool isAllReady = true;
         foreach (var u in _users)
         {
