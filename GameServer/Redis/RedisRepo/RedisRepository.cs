@@ -24,7 +24,7 @@ public class RedisRepository
         {
             RedisString<string> redis = new(connector.RedisCon, key, TimeSpan.FromMinutes(30));
             var result = redis.GetAsync().Result;
-            if(result.Value == token)
+            if (result.Value == token)
             {
                 return ErrorCode.NONE;
             }
@@ -33,7 +33,7 @@ public class RedisRepository
         }
         catch (Exception ex)
         {
-            Logger.Error(ex.Message);
+            Logger.Error("Redis " + ex.Message);
             return ErrorCode.EXCEPTION_REDIS;
         }
     }

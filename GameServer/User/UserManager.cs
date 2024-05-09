@@ -58,7 +58,7 @@ public class UserManager
             SendResponse<SConnectedRes>(sessionID, ErrorCode.FULL_USER_COUNT, PacketType.RES_S_CONNECT);
             return;
         }
-        
+
         if (IsExistSession(sessionID))
         {
             SendResponse<SConnectedRes>(sessionID, ErrorCode.ALREADY_EXIST_USER, PacketType.RES_S_CONNECT);
@@ -80,7 +80,7 @@ public class UserManager
                     continue;
                 }
 
-                _users[_nowUserPos++].SessionID = sessionID;
+                _users[_nowUserPos++].SessionConnected(sessionID);
                 break;
             }
 
@@ -117,15 +117,17 @@ public class UserManager
     {
         if (errorCode != ErrorCode.NONE || data == null)
         {
-            SessionDisconnect(sessionID);
+            Logger.Error("LoginUser : Failed Login User");
             SendResponse<SLoginRes>(sessionID, errorCode, PacketType.RES_S_LOGIN);
+            SessionDisconnect(sessionID);
             return;
         }
 
         if (IsExistUser(data.UserID))
         {
-            SessionDisconnect(sessionID);
+            Logger.Error("LoginUser : Already Exist User");
             SendResponse<SLoginRes>(sessionID, ErrorCode.ALREADY_EXIST_USER, PacketType.RES_S_LOGIN);
+            SessionDisconnect(sessionID);
             return;
         }
 
@@ -134,6 +136,7 @@ public class UserManager
             var user = GetUserInfo(sessionID);
             if (user == null)
             {
+                Logger.Error("LoginUser : Not Exist User");
                 return;
             }
 

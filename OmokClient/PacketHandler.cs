@@ -316,14 +316,12 @@ public partial class mainForm
         if (packet.NextTurnUserID == _myUserData.UserID)
         {
             MessageBox.Show("당신의 차례입니다.");
-            IsMyTurn = true;
-
-            
+            TurnChange(true);
         }
         else
         {
             MessageBox.Show("상대방의 차례입니다.");
-            IsMyTurn = false;
+            TurnChange(false);
         }
     }
 

@@ -125,7 +125,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         }
         catch (Exception ex)
         {
-            MainLogger.Error(ex.Message);
+            MainLogger.Error("SendData " + ex.Message);
 
             session.SendEndWhenSendingTimeOut();
             session.Close();
@@ -160,7 +160,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         }
         catch (Exception ex)
         {
-            MainLogger.Error(ex.Message);
+            MainLogger.Error("CreateServer " + ex.Message);
         }
     }
 
@@ -272,7 +272,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     }
 
     public void PacketInnerSend(ServerPacketData data)
-    {        
+    {
         _packetManager.Distribute(data);
     }
 

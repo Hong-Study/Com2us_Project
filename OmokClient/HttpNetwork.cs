@@ -9,69 +9,74 @@ namespace GameClient;
 
 public partial class mainForm
 {
-    HttpClient _hiveServer = new HttpClient();
-    HttpClient _apiServer = new HttpClient();
 
-    string _hiveServerUrl = "http://35.92.65.156:5241";
-    string _apiServerUrl = "http://35.92.65.156:5122";
-    string _socketServerUrl  = "";
-    string _userID = "";
-    string _authToken = "";
-
-    void InitHttpNetwork(string ip)
+    void InitHttpNetwork()
     {
-        _hiveServerUrl = $"http://{ip}:5241";
-        _apiServerUrl = $"http://{ip}:5122";
-        _socketServerUrl = ip;
-
-        _hiveServer.BaseAddress = new Uri(_hiveServerUrl);
-        _apiServer.BaseAddress = new Uri(_apiServerUrl);
     }
 
     void HttpNetworkClose()
     {
-        _hiveServer.Dispose();
-        _apiServer.Dispose();
     }
 
-    async Task HiveRegister(string email, string password)
+    async Task HiveRegister(string url, string email, string password)
     {
+        HttpClient hiveServer = new HttpClient();
+        hiveServer.BaseAddress = new Uri(url);
+
         HiveRegisterReq req = new HiveRegisterReq();
         req.Email = email;
         req.Password = password;
 
-        var response = await _hiveServer.PostAsJsonAsync("/api/register", req);
-        if (response.IsSuccessStatusCode)
+        try
         {
-            var res = await response.Content.ReadFromJsonAsync<HiveRegisterRes>();
-            if (res.IsSuccess)
+            var response = await hiveServer.PostAsJsonAsync("/api/register", req);
+            if (response.IsSuccessStatusCode)
             {
-                MessageBox.Show("Hive 회원가입 성공");
+                var res = await response.Content.ReadFromJsonAsync<HiveRegisterRes>();
+                if (res.IsSuccess)
+                {
+                    MessageBox.Show("Hive 회원가입 성공");
+                }
+                else
+                {
+                    MessageBox.Show("Hive 회원가입 실패");
+                }
             }
             else
             {
                 MessageBox.Show("Hive 회원가입 실패");
             }
         }
-        else
+        catch (Exception e)
         {
-            MessageBox.Show("Hive 회원가입 실패");
+            MessageBox.Show(e.Message);
+        }
+        finally
+        {
+            hiveServer.Dispose();
         }
     }
 
-    async Task<bool> HiveLogin(string email, string password)
+    async Task<bool> HiveLogin(string url, string email, string password)
     {
+        HttpClient hiveServer = new HttpClient();
+        hiveServer.BaseAddress = new Uri(url);
+
         HiveLoginReq req = new HiveLoginReq();
         req.Email = email;
         req.Password = password;
         try
         {
-            var response = await _hiveServer.PostAsJsonAsync("/api/login", req);
+            var response = await hiveServer.PostAsJsonAsync("/api/login", req);
             if (response.IsSuccessStatusCode)
             {
                 var res = await response.Content.ReadFromJsonAsync<HiveLoginRes>();
-                _userID = res.UserID;
-                _authToken = res.Token;
+
+                textBoxApiLoginID.Text = res.UserID;
+                textBoxApiLoginPW.Text = res.Token;
+
+                textBoxSocketID.Text = res.UserID;
+                textBoxSocketToken.Text = res.Token;
 
                 return true;
             }
@@ -86,18 +91,25 @@ public partial class mainForm
             MessageBox.Show(e.Message);
             return false;
         }
+        finally
+        {
+            hiveServer.Dispose();
+        }
     }
 
-    async Task<bool> ApiLogin(string userID, string token)
+    async Task<bool> ApiLogin(string url, string userID, string token)
     {
+        HttpClient apiServer = new HttpClient();
+        apiServer.BaseAddress = new Uri(url);
+
         ApiLoginReq req = new ApiLoginReq();
         req.UserID = userID;
         req.Token = token;
 
         try
         {
-            var response = await _apiServer.PostAsJsonAsync("/api/login", req);
-            if (response.IsSuccessStatusCode)   
+            var response = await apiServer.PostAsJsonAsync("/api/login", req);
+            if (response.IsSuccessStatusCode)
             {
                 var res = await response.Content.ReadFromJsonAsync<ApiLoginRes>();
 
@@ -111,8 +123,8 @@ public partial class mainForm
                 _myUserData.Win = res.GameData.win;
                 _myUserData.Lose = res.GameData.lose;
 
-                _gameServerAddress = _socketServerUrl;
-                _gameServerPort = res.GameServerPort;
+                textBoxSocketIP.Text = res.GameServerAddress;
+                textBoxSocketPort.Text = res.GameServerPort.ToString();
 
                 return true;
             }
@@ -127,6 +139,10 @@ public partial class mainForm
         {
             MessageBox.Show(e.Message);
             return false;
+        }
+        finally
+        {
+            apiServer.Dispose();
         }
     }
 }
