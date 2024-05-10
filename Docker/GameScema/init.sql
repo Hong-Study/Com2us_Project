@@ -1,4 +1,4 @@
-USE ApiDatabase;
+USE GameDatabase;
 
 CREATE TABLE user_game_data(
     user_id VARCHAR(50) PRIMARY KEY,
