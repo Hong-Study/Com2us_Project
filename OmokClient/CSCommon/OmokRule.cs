@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using GameClient;
 
 namespace CSCommon
 {
@@ -54,7 +55,7 @@ namespace CSCommon
 
         public bool Is흑돌차례()
         {
-            return ((CurTuenCount % 2) == 1);
+            return 흑돌차례;
         }
 
         public 돌두기_결과 돌두기(int x, int y)
@@ -95,11 +96,10 @@ namespace CSCommon
             return 돌두기_결과.Success;
         }
 
-        public void 흑돌차례변경()
+        public void 흑돌차례변경(bool isTurn)
         {
-            흑돌차례 = !흑돌차례;
+            흑돌차례 = isTurn;
         }
-
 
         void 한수무르기()
         {

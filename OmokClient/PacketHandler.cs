@@ -257,10 +257,12 @@ public partial class mainForm
             if (packet.StartPlayerID == _myUserData.UserID)
             {
                 isMyTurn = true;
+                _myUserData.PlayerColor = 1;
             }
             else
             {
                 isMyTurn = false;
+                _myUserData.PlayerColor = 2;
             }
 
             DevLog.Write($"게임 시작: {isMyTurn} {_myUserData.NickName} {_anotherUserData.NickName}");
