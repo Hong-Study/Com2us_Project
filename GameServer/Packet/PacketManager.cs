@@ -123,16 +123,22 @@ public class PacketManager
     {
         while (MainServer.IsRunning)
         {
-            TimeSpan timeOut = TimeSpan.FromSeconds(1);
-            ServerPacketData data = _msgBuffer.Receive(timeOut);
-
-            if (_onRecv.TryGetValue(data.PacketType, out var action))
+            try
             {
-                action(data);
+                TimeSpan timeOut = TimeSpan.FromSeconds(1);
+                ServerPacketData data = _msgBuffer.Receive(timeOut);
+                
+                if (_onRecv.TryGetValue(data.PacketType, out var action))
+                {
+                    action(data);
+                }
+                else
+                {
+                    Logger.Error($"Not found handler : {data.PacketType}");
+                }
             }
-            else
+            catch (TimeoutException)
             {
-                Logger.Error($"Not found handler : {data.PacketType}");
             }
         }
     }

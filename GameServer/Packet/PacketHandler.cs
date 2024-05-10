@@ -82,6 +82,19 @@ public partial class PacketHandler
             return null;
         }
 
+        if(user.IsLogin == false)
+        {
+            Logger.Error($"GetUser : User{sessionID} is not login");
+
+            T pkt = new T();
+            pkt.ErrorCode = ErrorCode.NOT_LOGIN_USER;
+
+            byte[] bytes = PacketManager.PacketSerialized(pkt, packetType);
+            SendFunc(sessionID, bytes);
+
+            return null;
+        }
+        
         var room = GetRoomFunc(user.RoomID);
         if (room == null)
         {
