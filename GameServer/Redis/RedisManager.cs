@@ -98,7 +98,7 @@ public class RedisManager
                     Logger.Error($"Not found handler : {data.PacketType}");
                 }
             }
-            catch
+            catch(TimeoutException)
             {
 
             }

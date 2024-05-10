@@ -138,7 +138,7 @@
             // textBoxHiveIP
             // 
             this.textBoxHiveIP.Location = new System.Drawing.Point(55, 23);
-            this.textBoxHiveIP.MaxLength = 20;
+            this.textBoxHiveIP.MaxLength = 50;
             this.textBoxHiveIP.Name = "textBoxHiveIP";
             this.textBoxHiveIP.Size = new System.Drawing.Size(140, 21);
             this.textBoxHiveIP.TabIndex = 18;
@@ -157,7 +157,7 @@
             // textBoxApiIP
             // 
             this.textBoxApiIP.Location = new System.Drawing.Point(55, 60);
-            this.textBoxApiIP.MaxLength = 20;
+            this.textBoxApiIP.MaxLength = 50;
             this.textBoxApiIP.Name = "textBoxApiIP";
             this.textBoxApiIP.Size = new System.Drawing.Size(140, 21);
             this.textBoxApiIP.TabIndex = 18;
@@ -176,7 +176,7 @@
             // textBoxHivePW
             // 
             this.textBoxHivePW.Location = new System.Drawing.Point(250, 38);
-            this.textBoxHivePW.MaxLength = 20;
+            this.textBoxHivePW.MaxLength = 30;
             this.textBoxHivePW.Name = "textBoxHivePW";
             this.textBoxHivePW.Size = new System.Drawing.Size(120, 21);
             this.textBoxHivePW.TabIndex = 18;
@@ -195,7 +195,7 @@
             // textBoxHiveID
             // 
             this.textBoxHiveID.Location = new System.Drawing.Point(250, 18);
-            this.textBoxHiveID.MaxLength = 20;
+            this.textBoxHiveID.MaxLength = 30;
             this.textBoxHiveID.Name = "textBoxHiveID";
             this.textBoxHiveID.Size = new System.Drawing.Size(120, 21);
             this.textBoxHiveID.TabIndex = 11;
@@ -233,7 +233,7 @@
             // textBoxApiLoginPW
             // 
             this.textBoxApiLoginPW.Location = new System.Drawing.Point(250, 82);
-            this.textBoxApiLoginPW.MaxLength = 20;
+            this.textBoxApiLoginPW.MaxLength = 100;
             this.textBoxApiLoginPW.Name = "textBoxApiLoginPW";
             this.textBoxApiLoginPW.Size = new System.Drawing.Size(120, 21);
             this.textBoxApiLoginPW.TabIndex = 18;
