@@ -273,16 +273,25 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
     public void PacketInnerSend(ServerPacketData data)
     {
-        _packetManager.Distribute(data);
+        if (data.PacketType > (Int16)InnerPacketType.INNER_PACKET_START && data.PacketType < (Int16)InnerPacketType.INNER_PACKET_END)
+        {
+            _packetManager.Distribute(data);
+        }
     }
 
     public void PacketDatabaseSend(ServerPacketData data)
     {
-        _databaseManager.Distribute(data);
+        if (data.PacketType > (Int16)DatabaseType.DB_PACKET_START && data.PacketType < (Int16)DatabaseType.DB_PACKET_END)
+        {
+            _databaseManager.Distribute(data);
+        }
     }
 
     public void PacketRedisSend(ServerPacketData data)
     {
-        _redisManager.Distribute(data);
+        if (data.PacketType > (Int16)RedisType.REDIS_PACKET_START && data.PacketType < (Int16)RedisType.REDIS_PACKET_END)
+        {
+            _redisManager.Distribute(data);
+        }
     }
 }

@@ -102,9 +102,8 @@ public class DatabaseManager
                     Logger.Error($"Not found handler : {data.PacketType}");
                 }
             }
-            catch
+            catch (TimeoutException)
             {
-
             }
         }
     }
