@@ -86,8 +86,6 @@ public partial class PacketHandler
         if (packet == null)
         {
             return;
-        }
-
-        
+        }    
     }
 }

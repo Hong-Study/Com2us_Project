@@ -25,4 +25,6 @@ public enum ErrorCode : Int16
     NOT_FOUND_USER_NAME = 211,
 
     INTERNAL_SERVER_ERROR = 500,
+
+    MATCHING_FAIL = 1000,
 }

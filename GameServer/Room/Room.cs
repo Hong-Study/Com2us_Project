@@ -105,6 +105,8 @@ public class Room
 
     public void LeaveRoom(string sessionID)
     {
+        // 매칭 후 성공하여 방으로 들어왔지만, 레디를 하지 않고 나가는 상황에 따른 처리로 변경해야됨.
+
         var user = GetRoomUser(sessionID);
         if (user == null)
         {
@@ -124,19 +126,19 @@ public class Room
         userInfo.LeaveRoom();
 
         {
-            var req = new SUserLeaveReq();
-            req.UserID = user.UserID;
-
-            byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_USER_LEAVE);
-            BroadCast(bytes, sessionID);
-        }
-
-        {
             var res = new SRoomLeaveRes();
             res.ErrorCode = ErrorCode.NONE;
 
             byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_ROOM_LEAVE);
             SendFunc(sessionID, bytes);
+        }
+
+        {
+            var req = new SUserLeaveReq();
+            req.UserID = user.UserID;
+
+            byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_USER_LEAVE);
+            BroadCast(bytes, sessionID);
         }
     }
 
@@ -189,7 +191,7 @@ public class Room
         byte[] bytes = PacketManager.PacketSerialized(res, PacketType.RES_S_GAME_READY);
         BroadCast(bytes);
 
-        if(_users.Count < 2)
+        if (_users.Count < 2)
         {
             return;
         }
@@ -219,6 +221,11 @@ public class Room
         }
 
         _game.GamePut(sessionID, x, y);
+    }
+
+    public RoomUser? GetRoomUser(string sessionID)
+    {
+        return _users.Find(u => u.SessionID == sessionID);
     }
 
     void GameStart()
@@ -257,9 +264,9 @@ public class Room
         }
     }
 
-    public RoomUser? GetRoomUser(string sessionID)
+    public bool IsUsing()
     {
-        return _users.Find(u => u.SessionID == sessionID);
+        return _users.Count > 0;
     }
 
     void RoomClear()

@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.Extensions.Options;
 
 public class AuthService : IAuthService
 {
@@ -6,14 +7,16 @@ public class AuthService : IAuthService
     IMemoryRepository _memoryRepo;
     IConfiguration _config;
     HttpClient _client = new HttpClient();
-
+    SocketConfig _socketConfig;
     public AuthService(IConfiguration config
                         , IAuthRepository authRepository
-                        , IMemoryRepository memoryRepository)
+                        , IMemoryRepository memoryRepository
+                        , IOptions<SocketConfig> socketConfig)
     {
         _config = config;
         _authRepo = authRepository;
         _memoryRepo = memoryRepository;
+        _socketConfig = socketConfig.Value;
     }
 
     public record LoginResult(ErrorCode errorCode, UserGameData? gameData, string? gameServerAddress = null, Int32 gameServerPort = 0);
@@ -65,7 +68,7 @@ public class AuthService : IAuthService
                 return FailedLogin(ErrorCode.ERROR_USER_GAME_DATA);
             }
 
-            return new LoginResult(ErrorCode.NONE, gameData, "127.0.0.1", 7777);
+            return new LoginResult(ErrorCode.NONE, gameData, _socketConfig.IP, _socketConfig.Port);
 
         }
         catch(Exception e)
@@ -108,4 +111,10 @@ public class AuthService : IAuthService
             lose = 0
         });
     }
+}
+
+public class SocketConfig
+{
+    public string IP { get; set; } = null!;
+    public Int32 Port { get; set; }
 }

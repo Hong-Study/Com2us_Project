@@ -11,6 +11,7 @@ public enum InnerPacketType : Int16
     NTF_ROOMS_CHECK = 3005,
     NTF_RES_USER_LOGIN = 3006,
     NTF_RES_UPDATE_WIN_LOSE_COUNT = 3007,
+    // NTF_REQ_MATCHING = 3008,
 
     INNER_PACKET_END = 3999,
 }

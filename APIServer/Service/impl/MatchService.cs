@@ -1,28 +1,56 @@
 using System.Collections.Concurrent;
+using System.Net;
 
 public class MatchService : IMatchService
 {
-    ConcurrentDictionary<string, GameServerInfo> gameServers = new ConcurrentDictionary<string, GameServerInfo>();
+    HttpClient _httpClient = new HttpClient();
 
-    public void AddGameServer(string address, Int32 port)
+    ILogger<MatchService> _logger;
+    string _matchServerAddress = "";
+
+    public MatchService(ILogger<MatchService> logger, IConfiguration configuration)
     {
-        GameServerInfo gameServerInfo = new GameServerInfo();
-        gameServerInfo.GameServerAddress = address;
-        gameServerInfo.GameServerPort = port;
+        _logger = logger;
+        _matchServerAddress = configuration["MatchServerUrl"]!;
 
-        string key = gameServerInfo.GameServerAddress + ":" + gameServerInfo.GameServerPort;
-        gameServers.TryAdd(key, gameServerInfo);
+        _httpClient.BaseAddress = new Uri(_matchServerAddress);
     }
 
-    public void RemoveGameServer(string serverKey)
+    public async Task<MatchingRes> RequestMatching(MatchingReq req)
     {
-        gameServers.TryRemove(serverKey, out _);
+        var httpResponse = await _httpClient.PostAsJsonAsync("api/RequestMatching", req);
+        if(httpResponse.StatusCode != HttpStatusCode.OK)
+        {
+            _logger.LogError("RequestMatching failed");
+            return new MatchingRes(){ErrorCode = ErrorCode.NONE};
+        }
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<MatchingRes>();
+        if(response == null)
+        {
+            _logger.LogError("RequestMatching failed");
+            return new MatchingRes(){ErrorCode = ErrorCode.NONE};
+        }
+        
+        return response;
     }
 
-    public record MatchMachkingResult(ErrorCode errorCode, string? gameServerAddress = null, Int32 gameServerPort = 0);
-    public MatchMachkingResult GetGameServer(string serverKey)
+    public async Task<CheckMatchingRes> CheckMatching(CheckMatchingReq req)
     {
-        gameServers.TryGetValue(serverKey, out GameServerInfo? gameServerInfo);
-        return new MatchMachkingResult(ErrorCode.NONE, gameServerInfo?.GameServerAddress, gameServerInfo?.GameServerPort ?? 0);
+        var httpResponse = await _httpClient.PostAsJsonAsync("api/RequestMatching", req);
+        if(httpResponse.StatusCode != HttpStatusCode.OK)
+        {
+            _logger.LogError("RequestMatching failed");
+            return new CheckMatchingRes(){ErrorCode = ErrorCode.NONE};
+        }
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<CheckMatchingRes>();
+        if(response == null)
+        {
+            _logger.LogError("RequestMatching failed");
+            return new CheckMatchingRes(){ErrorCode = ErrorCode.NONE};
+        }
+
+        return response;
     }
 }

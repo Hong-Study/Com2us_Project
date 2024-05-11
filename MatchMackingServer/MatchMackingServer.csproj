@@ -9,5 +9,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
     <PackageReference Include="CloudStructures" Version="3.3.0"/>
     <PackageReference Include="ZLogger" Version="2.4.1"/>
+    <ProjectReference Include="..\thirdparty\GameCommon\Defines.csproj"/>
   </ItemGroup>
 </Project>
