@@ -2,13 +2,18 @@ using ZLogger;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string? url = builder.Configuration.GetValue<string>("ServerUrl");
+IConfiguration configuration = builder.Configuration;
+builder.Services.Configure<MatchingConfig>(configuration.GetSection(nameof(MatchingConfig)));
+
+string? url = configuration.GetValue<string>("ServerUrl");
 if(url == null)
 {
     Console.WriteLine("ServerUrl is not set in appsettings.json");
     return;
 }
 builder.WebHost.UseUrls(url);
+
+builder.Services.AddSingleton<IMatchWoker, MatchWoker>();
 
 builder.Services.AddControllers();
 

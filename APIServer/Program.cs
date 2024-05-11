@@ -3,12 +3,14 @@ using APIServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string? url = builder.Configuration.GetValue<string>("ServerUrl");
+var Configuration = builder.Configuration;
+builder.Services.Configure<SocketConfig>(Configuration.GetSection("SocketConfig"));
+
+string? url = Configuration.GetValue<string>("ServerUrl");
 if(url == null)
 {
     Console.WriteLine("ServerUrl is not set in appsettings.json");
     return;
-
 }
 builder.WebHost.UseUrls(url);
 

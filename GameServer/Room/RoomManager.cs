@@ -9,9 +9,18 @@ public class RoomManager
     Int32 _nowRoomCheckCount = 0;
 
     List<Room> _roomPool = new List<Room>();
+    List<UsingRoomInfo> _roomUsingInfoList = new List<UsingRoomInfo>();
+
+    Int32 _emptyRoomFindCount = 0;
+
+    public static bool IsExistEmptyRoom { get => Interlocked.CompareExchange(ref _isExistEmptyRoom, 1, 1) == 1; }
+    static Int32 _isExistEmptyRoom = 1;
+    Int32 _roomUsingCount = 0;
 
     SuperSocket.SocketBase.Logging.ILog Logger = null!;
-    
+
+    object _lock = new object();
+
     public RoomManager(ref readonly ServerOption option)
     {
         _maxRoomCount = option.MaxRoomCount;
@@ -20,6 +29,7 @@ public class RoomManager
         for (Int32 i = 1; i <= _maxRoomCount; i++)
         {
             _roomPool.Add(new Room(i));
+            _roomUsingInfoList.Add(new UsingRoomInfo() { RoomID = i, RoomState = RoomState.Empty });
         }
     }
 
@@ -30,6 +40,96 @@ public class RoomManager
         {
             room.InitLogger(logger);
         }
+    }
+
+    public UsingRoomInfo? GetEmptyRoom()
+    {
+        lock (_lock)
+        {
+            foreach (var roomInfo in _roomUsingInfoList)
+            {
+                if (roomInfo.RoomState == RoomState.Empty)
+                {
+                    return roomInfo;
+                }
+            }
+
+            Interlocked.Exchange(ref _isExistEmptyRoom, 0);
+
+            return null;
+        }
+    }
+
+    public RoomState GetRoomState(Int32 roomID)
+    {
+        lock (_lock)
+        {
+            if (roomID < 1 || roomID > _maxRoomCount)
+            {
+                return RoomState.Empty;
+            }
+
+            return _roomUsingInfoList[roomID - 1].RoomState;
+        }
+    }
+
+    public bool SetRoomStateEmpty(Int32 roomID)
+    {
+        lock (_lock)
+        {
+            if (roomID < 1 || roomID > _maxRoomCount)
+            {
+                return false;
+            }
+
+            _roomUsingInfoList[roomID - 1].RoomState = RoomState.Empty;
+        }
+
+        Interlocked.Add(ref _roomUsingCount, 1);
+
+        return true;
+    }
+
+    public bool SetRoomStatePlaying(Int32 roomID)
+    {
+        lock (_lock)
+        {
+            if (roomID < 1 || roomID > _maxRoomCount)
+            {
+                return false;
+            }
+
+            if (_roomUsingInfoList[roomID - 1].RoomState != RoomState.Waiting)
+            {
+                return false;
+            }
+
+            _roomUsingInfoList[roomID - 1].RoomState = RoomState.Playing;
+        }
+
+        return true;
+    }
+
+    public bool SetRoomStateWaiting(Int32 roomID)
+    {
+        lock (_lock)
+        {
+            if (roomID < 1 || roomID > _maxRoomCount)
+            {
+                return false;
+            }
+
+            if (_roomUsingInfoList[roomID - 1].RoomState != RoomState.Empty)
+            {
+                return false;
+            }
+
+            _roomUsingInfoList[roomID - 1].RoomState = RoomState.Waiting;
+        }
+
+        Interlocked.Add(ref _roomUsingCount, 1);
+
+        return true;
     }
 
     public Room? GetRoom(Int32 roomID)
@@ -59,6 +159,26 @@ public class RoomManager
         }
     }
 
+    public void AddUsingRoomCount()
+    {
+        _roomUsingCount++;
+
+        if (_roomUsingCount == _maxRoomCount)
+        {
+            Interlocked.Exchange(ref _isExistEmptyRoom, 0);
+        }
+    }
+
+    public void SubUsingRoomCount()
+    {
+        _roomUsingCount--;
+
+        if (_roomUsingCount < _maxRoomCount)
+        {
+            Interlocked.Exchange(ref _isExistEmptyRoom, 1);
+        }
+    }
+
     public void RoomsCheck()
     {
         Int32 maxCount = _nowRoomCheckCount + _maxRoomCheckCount;
@@ -77,4 +197,18 @@ public class RoomManager
             _nowRoomCheckCount = 0;
         }
     }
+}
+
+public class UsingRoomInfo
+{
+    public Int32 RoomID { get; set; }
+    public RoomState RoomState { get; set; } = RoomState.Empty;
+}
+
+public enum RoomState
+{
+    NONE = 0,
+    Empty,
+    Waiting,
+    Playing
 }

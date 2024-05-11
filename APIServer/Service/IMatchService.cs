@@ -1,5 +1,5 @@
 public interface IMatchService
 {
-    void AddGameServer(string address, Int32 port);
-    void RemoveGameServer(string serverKey);
+    public Task<MatchingRes> RequestMatching(MatchingReq req);
+    public Task<CheckMatchingRes> CheckMatching(CheckMatchingReq req);
 }
