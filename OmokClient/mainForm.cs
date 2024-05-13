@@ -12,6 +12,7 @@ namespace GameClient
     {
         System.Windows.Forms.Timer _timer = new System.Windows.Forms.Timer();
         bool _isMatching = false;
+        bool _isMatchingSuccess = false;
 
         public mainForm()
         {
@@ -205,7 +206,7 @@ namespace GameClient
             DevLog.Write($"방 채팅 요청");
         }
 
-        private async void btnMatching_Click(object sender, EventArgs e)
+        private async void btn_Matching_Click(object sender, EventArgs e)
         {
             string apiServerUrl = textBoxApiIP.Text;
             string userID = textBoxSocketID.Text;
@@ -224,16 +225,46 @@ namespace GameClient
                 return;
             }
 
-            if(res.ErrorCode != ErrorCode.NONE)
+            if (res.ErrorCode != ErrorCode.NONE)
             {
                 DevLog.Write("매칭 실패");
                 return;
             }
 
             DevLog.Write("매칭 시작");
-            _isMatching = false;
+            _isMatching = true;
 
             _timer.Start();
+        }
+
+        private async void btn_MatchingCancle_Click(object sender, EventArgs e)
+        {
+            string apiServerUrl = textBoxApiIP.Text;
+            string userID = textBoxSocketID.Text;
+            string authToken = textBoxSocketToken.Text;
+
+            if (userID.IsEmpty() || authToken.IsEmpty())
+            {
+                MessageBox.Show("로그인 먼저 진행해주세요");
+                return;
+            }
+
+            var res = await ApiCancletMatch(apiServerUrl, userID, authToken);
+            if (res == null)
+            {
+                DevLog.Write("매칭 취소 실패");
+                return;
+            }
+
+            if (res.ErrorCode != ErrorCode.NONE)
+            {
+                DevLog.Write("매칭 취소 실패");
+                return;
+            }
+            DevLog.Write("매칭 취소 성공");
+            _isMatching = false;
+
+            _timer.Stop();
         }
 
         private void listBoxRoomChatMsg_SelectedIndexChanged(object sender, EventArgs e)
@@ -250,7 +281,13 @@ namespace GameClient
         {
             DevLog.Write("매칭 요청 중");
 
-            if(_isMatching)
+            if (_isMatching == false)
+            {
+                _timer.Stop();
+                return;
+            }
+
+            if(_isMatchingSuccess)
             {
                 _timer.Stop();
                 return;
@@ -273,10 +310,10 @@ namespace GameClient
                 return;
             }
 
-            if(res.ErrorCode == ErrorCode.NONE)
+            if (res.ErrorCode == ErrorCode.NONE)
             {
                 DevLog.Write("매칭 성공");
-                _isMatching = true;
+                _isMatchingSuccess = true;
 
                 textBoxSocketIP.Text = res.ServerAddress;
                 textBoxSocketPort.Text = res.Port.ToString();
@@ -288,7 +325,7 @@ namespace GameClient
             else
             {
                 DevLog.Write("매칭 실패");
-                _isMatching = false;
+                _isMatchingSuccess = false;
                 _timer.Start();
             }
         }
@@ -305,7 +342,7 @@ namespace GameClient
             DevLog.Write($"put stone 요청 : x  [ {x} ], y: [ {y} ] ");
         }
 
-        private void btn_GameStartClick(object sender, EventArgs e)
+        private void btn_GameReady_Click(object sender, EventArgs e)
         {
             var gameReadyReq = new CGameReadyReq
             {

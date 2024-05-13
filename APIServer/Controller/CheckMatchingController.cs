@@ -13,7 +13,7 @@ public class CheckMatchingController
     }
 
     [HttpPost]
-    public async Task<CheckMatchingRes> CheckMatching(CheckMatchingReq req)
+    public async Task<CheckMatchingRes> Post(CheckMatchingReq req)
     {
         return await _matchService.CheckMatching(req);
     }

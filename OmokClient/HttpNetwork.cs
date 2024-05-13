@@ -183,6 +183,41 @@ public partial class mainForm
             apiServer.Dispose();
         }
     }
+    async Task<CancleMatchingRes> ApiCancletMatch(string url, string userID, string token)
+    {
+        HttpClient apiServer = new HttpClient();
+        apiServer.BaseAddress = new Uri(url);
+
+        CancleMatchingReq req = new CancleMatchingReq();
+        req.UserID = userID;
+
+        apiServer.DefaultRequestHeaders.Add("Authorization", $"{token}");
+        apiServer.DefaultRequestHeaders.Add("UserID", $"{userID}");
+
+        try
+        {
+            var response = await apiServer.PostAsJsonAsync("/api/canclematching", req);
+            if (response.IsSuccessStatusCode)
+            {
+                var res = await response.Content.ReadFromJsonAsync<CancleMatchingRes>();
+                return res;
+            }
+            else
+            {
+                MessageBox.Show($"{response.StatusCode} 매칭 요청 실패");
+                return null;
+            }
+        }
+        catch (Exception e)
+        {
+            MessageBox.Show(e.Message);
+            return null;
+        }
+        finally
+        {
+            apiServer.Dispose();
+        }
+    }
 
     async Task<CheckMatchingRes> ApiCheckMatch(string url, string userID, string token)
     {

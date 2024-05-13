@@ -43,6 +43,33 @@ public class MatchService : IMatchService
         }
     }
 
+    public async Task<CancleMatchingRes> CancleMatching(CancleMatchingReq req)
+    {
+        try
+        {   
+            var httpResponse = await _httpClient.PostAsJsonAsync("api/canclematching", req);
+            if (httpResponse.StatusCode != HttpStatusCode.OK)
+            {
+                _logger.LogError("CancleMatching failed");
+                return new CancleMatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+            }
+
+            var response = await httpResponse.Content.ReadFromJsonAsync<CancleMatchingRes>();
+            if (response == null)
+            {
+                _logger.LogError("CancleMatching failed");
+                return new CancleMatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+            }
+
+            return response;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "CancleMatching failed");
+            return new CancleMatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+        }
+    }
+
     public async Task<CheckMatchingRes> CheckMatching(CheckMatchingReq req)
     {
         try
