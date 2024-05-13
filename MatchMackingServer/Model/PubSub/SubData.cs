@@ -1,5 +1,6 @@
 public class CompleteMatchingData
 {
+    public Int64 MatchID { get; set; }
     public string FirstUserID { get; set; } = null!;
     public string SecondUserID { get; set; } = null!;
     public MatchingServerInfo ServerInfo { get; set; } = null!;

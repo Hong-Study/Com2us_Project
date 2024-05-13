@@ -128,6 +128,13 @@ public partial class mainForm
         if (packet.ErrorCode == (Int16)ErrorCode.NONE)
         {
             DevLog.Write("서버 연결 성공");
+
+            CLoginReq loginPacket = new CLoginReq();
+            loginPacket.UserID = textBoxSocketID.Text;
+            loginPacket.AuthToken = textBoxSocketToken.Text;
+
+            byte[] bytes = PacketSerialized(loginPacket, PacketType.REQ_C_LOGIN);
+            Network.Send(bytes);
         }
         else
         {
@@ -146,6 +153,12 @@ public partial class mainForm
         if (packet.ErrorCode == (Int16)ErrorCode.NONE)
         {
             DevLog.Write("로그인 성공");
+
+            CRoomEnterReq roomEnterPacket = new CRoomEnterReq();
+            roomEnterPacket.RoomNumber = Convert.ToInt32(textBoxRoomNumber.Text);
+
+            byte[] bytes = PacketSerialized(roomEnterPacket, PacketType.REQ_C_ROOM_ENTER);
+            Network.Send(bytes);
         }
         else
         {
@@ -200,7 +213,7 @@ public partial class mainForm
         if (_userList.TryGetValue(packet.UserID, out UserData user))
         {
             DevLog.Write($"{user.NickName}님이 퇴장하였습니다.");
-            
+
             _userList.Remove(packet.UserID);
             listBoxRoomUserList.Items.Remove(user.NickName);
         }

@@ -11,46 +11,62 @@ public class MatchService : IMatchService
     public MatchService(ILogger<MatchService> logger, IConfiguration configuration)
     {
         _logger = logger;
-        _matchServerAddress = configuration["MatchServerUrl"]!;
 
+        _matchServerAddress = configuration["MatchServerUrl"]!;
         _httpClient.BaseAddress = new Uri(_matchServerAddress);
     }
 
     public async Task<MatchingRes> RequestMatching(MatchingReq req)
     {
-        var httpResponse = await _httpClient.PostAsJsonAsync("api/RequestMatching", req);
-        if(httpResponse.StatusCode != HttpStatusCode.OK)
+        try
         {
-            _logger.LogError("RequestMatching failed");
-            return new MatchingRes(){ErrorCode = ErrorCode.NONE};
-        }
+            var httpResponse = await _httpClient.PostAsJsonAsync("api/requestmatching", req);
+            if (httpResponse.StatusCode != HttpStatusCode.OK)
+            {
+                _logger.LogError("RequestMatching failed");
+                return new MatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+            }
 
-        var response = await httpResponse.Content.ReadFromJsonAsync<MatchingRes>();
-        if(response == null)
-        {
-            _logger.LogError("RequestMatching failed");
-            return new MatchingRes(){ErrorCode = ErrorCode.NONE};
+            var response = await httpResponse.Content.ReadFromJsonAsync<MatchingRes>();
+            if (response == null)
+            {
+                _logger.LogError("RequestMatching failed");
+                return new MatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+            }
+
+            return response;
         }
-        
-        return response;
+        catch (Exception e)
+        {
+            _logger.LogError(e, "RequestMatching failed");
+            return new MatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+        }
     }
 
     public async Task<CheckMatchingRes> CheckMatching(CheckMatchingReq req)
     {
-        var httpResponse = await _httpClient.PostAsJsonAsync("api/RequestMatching", req);
-        if(httpResponse.StatusCode != HttpStatusCode.OK)
+        try
         {
-            _logger.LogError("RequestMatching failed");
-            return new CheckMatchingRes(){ErrorCode = ErrorCode.NONE};
-        }
+            var httpResponse = await _httpClient.PostAsJsonAsync("api/checkmatching", req);
+            if (httpResponse.StatusCode != HttpStatusCode.OK)
+            {
+                _logger.LogError("CheckMaching failed");
+                return new CheckMatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+            }
 
-        var response = await httpResponse.Content.ReadFromJsonAsync<CheckMatchingRes>();
-        if(response == null)
+            var response = await httpResponse.Content.ReadFromJsonAsync<CheckMatchingRes>();
+            if (response == null)
+            {
+                _logger.LogError("CheckMaching failed");
+                return new CheckMatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+            }
+
+            return response;
+        }
+        catch (Exception e)
         {
-            _logger.LogError("RequestMatching failed");
-            return new CheckMatchingRes(){ErrorCode = ErrorCode.NONE};
+            _logger.LogError(e, "CheckMaching failed");
+            return new CheckMatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
         }
-
-        return response;
     }
 }

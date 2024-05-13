@@ -16,6 +16,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     PacketManager _packetManager;
     DatabaseManager _databaseManager;
     RedisManager _redisManager;
+    MatchManager _matchManager;
     #endregion
 
     ServerOption _serverOption;
@@ -48,6 +49,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _userManager = new UserManager(ref _serverOption);
         _databaseManager = new DatabaseManager(ref _serverOption);
         _redisManager = new RedisManager(ref _serverOption);
+        _matchManager = new MatchManager(ref _serverOption);
         _packetManager = new PacketManager();
     }
 
@@ -175,6 +177,8 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _packetManager.SetUserDelegate(ref _userManager);
         _packetManager.SetRoomDelegate(ref _roomManager);
 
+        _matchManager.SetRoomDelegate(ref _roomManager);
+
         MainServer mainServer = this;
         _packetManager.SetMainDelegate(ref mainServer);
 
@@ -191,6 +195,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _packetManager.Start(1);
         _databaseManager.Start(1);
         _redisManager.Start(1);
+        _matchManager.Start();
     }
 
     void StartTimer()

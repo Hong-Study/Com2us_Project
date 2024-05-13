@@ -12,6 +12,7 @@ public partial class PacketHandler
     public Action HeartHeatCheckFunc = null!;
     public Action<string> ReceivePongFunc = null!;
 
+    public Func<Int32, RoomState> GetRoomStateFunc = null!;
     public Func<Int32, Room?> GetRoomFunc = null!;
     public Action RoomCheckFunc = null!;
 

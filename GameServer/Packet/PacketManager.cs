@@ -86,6 +86,7 @@ public class PacketManager
     {
         _handler.GetRoomFunc = roomManager.GetRoom;
         _handler.RoomCheckFunc = roomManager.RoomsCheck;
+        _handler.GetRoomStateFunc = roomManager.GetRoomState;
     }
 
     public void SetMainDelegate(ref readonly MainServer server)

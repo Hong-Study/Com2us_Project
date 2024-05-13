@@ -1,5 +1,4 @@
-
-using System.ComponentModel.DataAnnotations;
+using Common;
 
 public class MatchingReq
 {
@@ -8,7 +7,6 @@ public class MatchingReq
 
 public class MatchingRes
 {
-    [Required]
     public ErrorCode ErrorCode { get; set; } = ErrorCode.NONE;
 }
 
@@ -21,7 +19,7 @@ public class CheckMatchingReq
 public class CheckMatchingRes
 {
     public ErrorCode ErrorCode { get; set; } = ErrorCode.NONE;
-    public string? ServerAddress { get; set; }
+    public string ServerAddress { get; set; }
     public int Port { get; set; } = 0;
     public int RoomNumber { get; set; } = 0;
 }

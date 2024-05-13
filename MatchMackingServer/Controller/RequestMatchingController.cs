@@ -1,11 +1,8 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 
-using Common;
-
 [ApiController]
-[Route("[controller]")]
-public class RequestMatchingController
+[Route("api/[controller]")]
+public class RequestMatchingController : ControllerBase
 {
     IMatchWoker _matchWorker;
     public RequestMatchingController(IMatchWoker matchWorker)

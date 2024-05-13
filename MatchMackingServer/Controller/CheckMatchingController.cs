@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Common;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class CheckMatchingController : ControllerBase
 {
     IMatchWoker _matchWorker;
@@ -22,12 +22,16 @@ public class CheckMatchingController : ControllerBase
         //TODO: 결과를 담아서 보낸다
         if (result == false)
         {
-            response.ErrorCode = ErrorCode.MATCH_FAILED;
+            response.ErrorCode = ErrorCode.MATCHING_FAIL;
+        }
+        else if (completeMatchingData == null)
+        {
+            response.ErrorCode = ErrorCode.MATCHING_FAIL;
         }
         else
         {
             response.ErrorCode = ErrorCode.NONE;
-            response.ServerAddress = completeMatchingData!.ServerAddress;
+            response.ServerAddress = completeMatchingData.ServerAddress;
             response.Port = completeMatchingData.Port;
             response.RoomNumber = completeMatchingData.RoomNumber;
         }

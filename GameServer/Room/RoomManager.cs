@@ -6,12 +6,10 @@ public class RoomManager
 {
     Int32 _maxRoomCount;
     Int32 _maxRoomCheckCount = 0;
-    Int32 _nowRoomCheckCount = 0;
+    Int32 _nowRoomCheckCount = 1;
 
     List<Room> _roomPool = new List<Room>();
     List<UsingRoomInfo> _roomUsingInfoList = new List<UsingRoomInfo>();
-
-    Int32 _emptyRoomFindCount = 0;
 
     public static bool IsExistEmptyRoom { get => Interlocked.CompareExchange(ref _isExistEmptyRoom, 1, 1) == 1; }
     static Int32 _isExistEmptyRoom = 1;
@@ -26,6 +24,7 @@ public class RoomManager
         _maxRoomCount = option.MaxRoomCount;
         _maxRoomCheckCount = option.MaxRoomCheckCount;
 
+        _roomPool.Add(new Room(0));
         for (Int32 i = 1; i <= _maxRoomCount; i++)
         {
             _roomPool.Add(new Room(i));
@@ -50,6 +49,7 @@ public class RoomManager
             {
                 if (roomInfo.RoomState == RoomState.Empty)
                 {
+                    Interlocked.Exchange(ref _isExistEmptyRoom, 1);
                     return roomInfo;
                 }
             }
@@ -90,7 +90,7 @@ public class RoomManager
         return true;
     }
 
-    public bool SetRoomStatePlaying(Int32 roomID)
+    public bool SetRoomStateMathcing(Int32 roomID)
     {
         lock (_lock)
         {
@@ -99,12 +99,7 @@ public class RoomManager
                 return false;
             }
 
-            if (_roomUsingInfoList[roomID - 1].RoomState != RoomState.Waiting)
-            {
-                return false;
-            }
-
-            _roomUsingInfoList[roomID - 1].RoomState = RoomState.Playing;
+            _roomUsingInfoList[roomID - 1].RoomState = RoomState.Mathcing;
         }
 
         return true;
@@ -182,11 +177,11 @@ public class RoomManager
     public void RoomsCheck()
     {
         Int32 maxCount = _nowRoomCheckCount + _maxRoomCheckCount;
-        if (maxCount > _roomPool.Count)
+        if (maxCount > _maxRoomCount)
         {
-            maxCount = _roomPool.Count;
+            maxCount = _maxRoomCount + 1;
         }
-
+        
         for (; _nowRoomCheckCount < maxCount; _nowRoomCheckCount++)
         {
             _roomPool[_nowRoomCheckCount].RoomCheck();
@@ -194,7 +189,7 @@ public class RoomManager
 
         if (_nowRoomCheckCount >= _maxRoomCount)
         {
-            _nowRoomCheckCount = 0;
+            _nowRoomCheckCount = 1;
         }
     }
 }
@@ -210,5 +205,5 @@ public enum RoomState
     NONE = 0,
     Empty,
     Waiting,
-    Playing
+    Mathcing
 }
