@@ -199,7 +199,7 @@
             this.textBoxHiveID.Name = "textBoxHiveID";
             this.textBoxHiveID.Size = new System.Drawing.Size(120, 21);
             this.textBoxHiveID.TabIndex = 11;
-            this.textBoxHiveID.Text = "test@naver.com";
+            this.textBoxHiveID.Text = "test12@naver.com";
             this.textBoxHiveID.WordWrap = false;
             // 
             // labelHiveID

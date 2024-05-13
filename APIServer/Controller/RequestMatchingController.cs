@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
-public class RequestMatchingController
+public class RequestMatchingController : ControllerBase
 {
     ILogger<RequestMatchingController> _logger;
     IMatchService _matchService;

@@ -3,12 +3,14 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <PublishDir>..\Docker\Publish\MatchPublish</PublishDir>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.3"/>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
     <PackageReference Include="CloudStructures" Version="3.3.0"/>
     <PackageReference Include="ZLogger" Version="2.4.1"/>
+    <PackageReference Include="MemoryPack" Version="1.21.1"/>
     <ProjectReference Include="..\thirdparty\GameCommon\Defines.csproj"/>
   </ItemGroup>
 </Project>
