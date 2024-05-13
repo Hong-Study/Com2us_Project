@@ -10,6 +10,16 @@ public class MatchingRes
     public ErrorCode ErrorCode { get; set; } = ErrorCode.NONE;
 }
 
+public class CancleMatchingReq
+{
+    public string UserID { get; set; } = null!;
+}
+
+public class CancleMatchingRes
+{
+    public ErrorCode ErrorCode { get; set; } = ErrorCode.NONE;
+}
+
 public class CheckMatchingReq
 {
     public string UserID { get; set; } = null!;

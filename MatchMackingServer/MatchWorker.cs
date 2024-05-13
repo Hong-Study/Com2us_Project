@@ -11,7 +11,7 @@ using CloudStructures.Structures;
 public interface IMatchWoker : IDisposable
 {
     public ErrorCode AddUser(string userID);
-
+    public ErrorCode RemoveUser(string userID);
     public (bool, MatchingServerInfo?) GetCompleteMatching(string userID);
 }
 
@@ -20,7 +20,7 @@ public class MatchWoker : IMatchWoker
     ILogger<MatchWoker> _logger = null!;
 
     System.Threading.Thread? _reqWorker = null;
-    ConcurrentQueue<string> _reqQueue = new();
+    List<string> _reqList = new();
 
     System.Threading.Thread? _completeWorker = null;
 
@@ -36,11 +36,13 @@ public class MatchWoker : IMatchWoker
 
     RedisConnection _redisPubConnection = null!;
     RedisList<string> _redisMatchList;
-    ISubscriber _redisPubscriber = null!;
+    // ISubscriber _redisPubscriber = null!;
 
     string _redisAddress = "";
-    RedisChannel _matchingRedisPubChannel;
+    // RedisChannel _matchingRedisPubChannel;
     // RedisChannel _matchingRedisSubChannel;
+
+    object _lock = new object();
 
     public MatchWoker(IOptions<MatchingConfig> matchingConfig, ILogger<MatchWoker> logger)
     {
@@ -82,14 +84,31 @@ public class MatchWoker : IMatchWoker
 
     public ErrorCode AddUser(string userID)
     {
-        if(_reqQueue.FirstOrDefault(x => x == userID) != null)
+        lock (_lock)
         {
-            return ErrorCode.MATCHING_ALEARY_MATCHED;
+            if (_reqList.Find(x => x == userID) != null)
+            {
+                return ErrorCode.MATCHING_ALEARY_MATCHED;
+            }
+
+            _reqList.Add(userID);
         }
 
-        _reqQueue.Enqueue(userID);
-
         return ErrorCode.NONE;
+    }
+
+    public ErrorCode RemoveUser(string userID)
+    {
+        lock (_lock)
+        {
+            if (_reqList.Find(x => x == userID) != null)
+            {
+                _reqList.Remove(userID);
+                return ErrorCode.NONE;
+            }
+        }
+
+        return ErrorCode.MATCHING_NOT_FOUND_USER;
     }
 
     public (bool, MatchingServerInfo?) GetCompleteMatching(string userID)
@@ -109,24 +128,22 @@ public class MatchWoker : IMatchWoker
         {
             try
             {
-                if (_reqQueue.Count < 2)
+                string user1 = "";
+                string user2 = "";
+                lock (_lock)
                 {
-                    System.Threading.Thread.Sleep(1);
-                    continue;
+                    if (_reqList.Count() < 2)
+                    {
+                        System.Threading.Thread.Sleep(1);
+                        continue;
+                    }
+                    user1 = _reqList.First();
+                    _reqList.RemoveAt(0);
+                    user2 = _reqList.First();
+                    _reqList.RemoveAt(0);
                 }
 
                 //TODO: 큐에서 2명을 가져온다. 두명을 매칭시킨다
-                if (!_reqQueue.TryDequeue(out string? user1))
-                {
-                    continue;
-                }
-
-                if (!_reqQueue.TryDequeue(out string? user2))
-                {
-                    _reqQueue.Enqueue(user1);
-                    continue;
-                }
-
                 Int64 id = Interlocked.Increment(ref _matchID);
 
                 MatchingUserData matchingUserData = new()
@@ -187,90 +204,90 @@ public class MatchWoker : IMatchWoker
     }
 
 
-    void RunMatchingPubSub()
-    {
-        while (true)
-        {
-            try
-            {
-                if (_reqQueue.Count < 2)
-                {
-                    System.Threading.Thread.Sleep(1);
-                    continue;
-                }
+    // void RunMatchingPubSub()
+    // {
+    //     while (true)
+    //     {
+    //         try
+    //         {
+    //             if (_reqQueue.Count < 2)
+    //             {
+    //                 System.Threading.Thread.Sleep(1);
+    //                 continue;
+    //             }
 
-                //TODO: 큐에서 2명을 가져온다. 두명을 매칭시킨다
-                if (!_reqQueue.TryDequeue(out string? user1))
-                {
-                    continue;
-                }
+    //             //TODO: 큐에서 2명을 가져온다. 두명을 매칭시킨다
+    //             if (!_reqQueue.TryDequeue(out string? user1))
+    //             {
+    //                 continue;
+    //             }
 
-                if (!_reqQueue.TryDequeue(out string? user2))
-                {
-                    _reqQueue.Enqueue(user1);
-                    continue;
-                }
+    //             if (!_reqQueue.TryDequeue(out string? user2))
+    //             {
+    //                 _reqQueue.Enqueue(user1);
+    //                 continue;
+    //             }
 
-                //TODO: Redis의 Pub/Sub을 이용해서 매칭된 유저들을 게임서버에 전달한다.
-                Int64 id = Interlocked.Increment(ref _matchID);
+    //             //TODO: Redis의 Pub/Sub을 이용해서 매칭된 유저들을 게임서버에 전달한다.
+    //             Int64 id = Interlocked.Increment(ref _matchID);
 
-                MatchingUserData matchingUserData = new()
-                {
-                    FirstUserID = user1,
-                    SecondUserID = user2,
-                };
+    //             MatchingUserData matchingUserData = new()
+    //             {
+    //                 FirstUserID = user1,
+    //                 SecondUserID = user2,
+    //             };
 
-                MatchingData matchingData = new()
-                {
-                    Type = PublishType.Matching,
-                    MatchID = id,
-                    MatchingUserData = matchingUserData,
-                };
+    //             MatchingData matchingData = new()
+    //             {
+    //                 Type = PublishType.Matching,
+    //                 MatchID = id,
+    //                 MatchingUserData = matchingUserData,
+    //             };
 
-                _redisPubscriber.Publish(_matchingRedisPubChannel, JsonSerializer.Serialize(matchingData));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "RunMatching Error");
-            }
-        }
-    }
+    //             _redisPubscriber.Publish(_matchingRedisPubChannel, JsonSerializer.Serialize(matchingData));
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             _logger.LogError(ex, "RunMatching Error");
+    //         }
+    //     }
+    // }
 
-    void RunMatchingCompletePubSub(RedisChannel channel, RedisValue value)
-    {
-        try
-        {
-            if (value.HasValue == false)
-                return;
+    // void RunMatchingCompletePubSub(RedisChannel channel, RedisValue value)
+    // {
+    //     try
+    //     {
+    //         if (value.HasValue == false)
+    //             return;
 
-            var data = JsonSerializer.Deserialize<CompleteMatchingData>(value!);
-            if (data == null)
-                return;
+    //         var data = JsonSerializer.Deserialize<CompleteMatchingData>(value!);
+    //         if (data == null)
+    //             return;
 
-            //TODO: 매칭 결과를 _completeDic에 넣는다
-            // 2명이 하므로 각각 유저를 대상으로 총 2개를 _completeDic에 넣어야 한다
-            if (_completeDic.ContainsKey(data.FirstUserID) || _completeDic.ContainsKey(data.SecondUserID))
-            {
-                return;
-            }
+    //         //TODO: 매칭 결과를 _completeDic에 넣는다
+    //         // 2명이 하므로 각각 유저를 대상으로 총 2개를 _completeDic에 넣어야 한다
+    //         if (_completeDic.ContainsKey(data.FirstUserID) || _completeDic.ContainsKey(data.SecondUserID))
+    //         {
+    //             return;
+    //         }
 
-            MatchingData publishData = new()
-            {
-                Type = PublishType.Complete,
-                MatchID = data.MatchID,
-                MatchingServerInfo = data.ServerInfo,
-            };
+    //         MatchingData publishData = new()
+    //         {
+    //             Type = PublishType.Complete,
+    //             MatchID = data.MatchID,
+    //             MatchingServerInfo = data.ServerInfo,
+    //         };
 
-            _redisPubscriber.Publish(_matchingRedisPubChannel, JsonSerializer.Serialize(publishData));
+    //         _redisPubscriber.Publish(_matchingRedisPubChannel, JsonSerializer.Serialize(publishData));
 
-            _completeDic.TryAdd(data.FirstUserID, data.ServerInfo);
-            _completeDic.TryAdd(data.SecondUserID, data.ServerInfo);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "RunMatchingComplete Error");
-        }
-    }
+    //         _completeDic.TryAdd(data.FirstUserID, data.ServerInfo);
+    //         _completeDic.TryAdd(data.SecondUserID, data.ServerInfo);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "RunMatchingComplete Error");
+    //     }
+    // }
 
     public void Dispose()
     {

@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -14,7 +13,7 @@ public class RequestMatchingController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<MatchingRes> RequestMatching(MatchingReq req)
+    public async Task<MatchingRes> Post(MatchingReq req)
     {
         return await _matchService.RequestMatching(req);
     }

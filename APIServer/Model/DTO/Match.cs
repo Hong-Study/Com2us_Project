@@ -1,4 +1,3 @@
-
 using System.ComponentModel.DataAnnotations;
 
 public class MatchingReq
@@ -12,11 +11,22 @@ public class MatchingRes
     public ErrorCode ErrorCode { get; set; } = ErrorCode.NONE;
 }
 
-public class CheckMatchingReq
+public class CancleMatchingReq
 {
     public string UserID { get; set; } = null!;
 }
 
+public class CancleMatchingRes
+{
+    [Required]
+    public ErrorCode ErrorCode { get; set; } = ErrorCode.NONE;
+}
+
+
+public class CheckMatchingReq
+{
+    public string UserID { get; set; } = null!;
+}
 
 public class CheckMatchingRes
 {
