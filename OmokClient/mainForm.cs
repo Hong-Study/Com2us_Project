@@ -1,6 +1,7 @@
 ﻿using Common;
 using System;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 #pragma warning disable CA1416
@@ -58,7 +59,23 @@ namespace GameClient
             await HiveRegister(hiveUrl, email, password);
         }
 
+        private async void btnLogin_CLick(object sender, EventArgs e)
+        {
+            await HiveLogin();
+            await ApiLogin();
+        }
+
         private async void btnHiveLogin_Click(object sender, EventArgs e)
+        {
+            await HiveLogin();
+        }
+
+        private async void btnApiLogin_Click(object sender, EventArgs e)
+        {
+            await ApiLogin();
+        }
+
+        async Task HiveLogin()
         {
             string hiveUrl = textBoxHiveIP.Text;
             string email = textBoxHiveID.Text;
@@ -80,8 +97,9 @@ namespace GameClient
             }
         }
 
-        private async void btnApiLogin_Click(object sender, EventArgs e)
+        async Task ApiLogin()
         {
+
             string apiServerUrl = textBoxApiIP.Text;
             string email = textBoxApiLoginID.Text;
             string password = textBoxApiLoginPW.Text;
@@ -287,7 +305,7 @@ namespace GameClient
                 return;
             }
 
-            if(_isMatchingSuccess)
+            if (_isMatchingSuccess)
             {
                 _timer.Stop();
                 return;
