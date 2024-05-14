@@ -104,9 +104,10 @@
             this.btnHiveLogin.Name = "btnHiveLogin";
             this.btnHiveLogin.Size = new System.Drawing.Size(88, 26);
             this.btnHiveLogin.TabIndex = 29;
-            this.btnHiveLogin.Text = "Hive 로그인";
+            this.btnHiveLogin.Text = "로그인";
             this.btnHiveLogin.UseVisualStyleBackColor = true;
-            this.btnHiveLogin.Click += new System.EventHandler(this.btnHiveLogin_Click);
+            this.btnHiveLogin.Click += new System.EventHandler(this.btnLogin_CLick);
+            // this.btnHiveLogin.Click += new System.EventHandler(this.btnHiveLogin_Click);
             // 
             // btnApiLogin
             // 
@@ -118,6 +119,7 @@
             this.btnApiLogin.Text = "Api 로그인";
             this.btnApiLogin.UseVisualStyleBackColor = true;
             this.btnApiLogin.Click += new System.EventHandler(this.btnApiLogin_Click);
+            this.btnApiLogin.Visible = false;
             // 
             // groupBox5
             // 
@@ -225,6 +227,7 @@
             this.textBoxApiLoginID.TabIndex = 18;
             this.textBoxApiLoginID.Text = "";
             this.textBoxApiLoginID.WordWrap = false;
+            this.textBoxApiLoginID.Enabled = false;
             // 
             // labelApiLoginID
             // 
@@ -244,6 +247,7 @@
             this.textBoxApiLoginPW.TabIndex = 18;
             this.textBoxApiLoginPW.Text = "";
             this.textBoxApiLoginPW.WordWrap = false;
+            this.textBoxApiLoginPW.Enabled = false;
             // 
             // labelApiLoginPW
             // 
@@ -253,6 +257,7 @@
             this.labelApiLoginPW.Size = new System.Drawing.Size(61, 12);
             this.labelApiLoginPW.TabIndex = 10;
             this.labelApiLoginPW.Text = "API PW";
+            this.labelApiLoginPW.Visible = true;
             // 
             // labelStatus
             // 
@@ -301,6 +306,7 @@
             this.textBoxSocketPort.TabIndex = 18;
             this.textBoxSocketPort.Text = "";
             this.textBoxSocketPort.WordWrap = false;
+            this.textBoxSocketPort.Enabled = false;
             // 
             // labelSocketPort
             // 
@@ -320,6 +326,7 @@
             this.btnSocketConnect.Text = "Connect";
             this.btnSocketConnect.UseVisualStyleBackColor = true;
             this.btnSocketConnect.Click += new System.EventHandler(this.btnSocketConnect_Click);
+            this.btnSocketConnect.Visible = false;
             //
             // labelSocketID
             // 
@@ -339,6 +346,7 @@
             this.textBoxSocketID.TabIndex = 43;
             this.textBoxSocketID.Text = "";
             this.textBoxSocketID.WordWrap = false;
+            this.textBoxSocketID.Enabled = false;
             //
             // textBoxSocketToken
             // 
@@ -349,6 +357,7 @@
             this.textBoxSocketToken.TabIndex = 45;
             this.textBoxSocketToken.Text = "";
             this.textBoxSocketToken.WordWrap = false;
+            this.textBoxSocketToken.Enabled = false;
             // 
             // labelSocketToken
             // 
@@ -369,6 +378,7 @@
             this.btnSocketLogin.Text = "Login";
             this.btnSocketLogin.UseVisualStyleBackColor = true;
             this.btnSocketLogin.Click += new System.EventHandler(this.btnSocketLogin_Click);
+            this.btnSocketLogin.Visible = false;
             // 
             // Room
             // 

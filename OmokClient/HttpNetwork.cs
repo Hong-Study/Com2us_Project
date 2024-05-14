@@ -132,7 +132,6 @@ public partial class mainForm
             else
             {
                 MessageBox.Show("API 로그인 실패");
-
                 return false;
             }
         }
@@ -155,6 +154,7 @@ public partial class mainForm
         MatchingReq req = new MatchingReq();
         req.UserID = userID;
 
+        DevLog.Write($"ApiRequestMatch {userID} {token}");
         apiServer.DefaultRequestHeaders.Add("Authorization", $"{token}");
         apiServer.DefaultRequestHeaders.Add("UserID", $"{userID}");
 
@@ -164,12 +164,12 @@ public partial class mainForm
             if (response.IsSuccessStatusCode)
             {
                 var res = await response.Content.ReadFromJsonAsync<MatchingRes>();
-
                 return res;
             }
             else
             {
-                MessageBox.Show($"{response.StatusCode} 매칭 요청 실패");
+                var res = await response.Content.ReadAsStringAsync();
+                MessageBox.Show($"{res} 매칭 요청 실패");
                 return null;
             }
         }
@@ -236,7 +236,6 @@ public partial class mainForm
             if (response.IsSuccessStatusCode)
             {
                 var res = await response.Content.ReadFromJsonAsync<CheckMatchingRes>();
-
                 return res;
             }
             else
