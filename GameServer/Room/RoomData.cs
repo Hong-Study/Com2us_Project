@@ -15,3 +15,17 @@ public enum BoardType : Int16
     Black = 1,
     White = 2,
 }
+
+public class UsingRoomInfo
+{
+    public Int32 RoomID { get; set; }
+    public RoomState RoomState { get; set; } = RoomState.Empty;
+}
+
+public enum RoomState
+{
+    NONE = 0,
+    Empty,
+    Waiting,
+    Mathcing
+}

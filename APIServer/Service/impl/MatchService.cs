@@ -1,28 +1,99 @@
 using System.Collections.Concurrent;
+using System.Net;
 
 public class MatchService : IMatchService
 {
-    ConcurrentDictionary<string, GameServerInfo> gameServers = new ConcurrentDictionary<string, GameServerInfo>();
+    HttpClient _httpClient = new HttpClient();
 
-    public void AddGameServer(string address, Int32 port)
+    ILogger<MatchService> _logger;
+    string _matchServerAddress = "";
+
+    public MatchService(ILogger<MatchService> logger, IConfiguration configuration)
     {
-        GameServerInfo gameServerInfo = new GameServerInfo();
-        gameServerInfo.GameServerAddress = address;
-        gameServerInfo.GameServerPort = port;
+        _logger = logger;
 
-        string key = gameServerInfo.GameServerAddress + ":" + gameServerInfo.GameServerPort;
-        gameServers.TryAdd(key, gameServerInfo);
+        _matchServerAddress = configuration["MatchServerUrl"]!;
+        _httpClient.BaseAddress = new Uri(_matchServerAddress);
     }
 
-    public void RemoveGameServer(string serverKey)
+    public async Task<MatchingRes> RequestMatching(MatchingReq req)
     {
-        gameServers.TryRemove(serverKey, out _);
+        try
+        {
+            var httpResponse = await _httpClient.PostAsJsonAsync("api/requestmatching", req);
+            if (httpResponse.StatusCode != HttpStatusCode.OK)
+            {
+                _logger.LogError("RequestMatching failed");
+                return new MatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+            }
+
+            var response = await httpResponse.Content.ReadFromJsonAsync<MatchingRes>();
+            if (response == null)
+            {
+                _logger.LogError("RequestMatching failed");
+                return new MatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+            }
+
+            return response;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "RequestMatching failed");
+            return new MatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+        }
     }
 
-    public record MatchMachkingResult(ErrorCode errorCode, string? gameServerAddress = null, Int32 gameServerPort = 0);
-    public MatchMachkingResult GetGameServer(string serverKey)
+    public async Task<CancleMatchingRes> CancleMatching(CancleMatchingReq req)
     {
-        gameServers.TryGetValue(serverKey, out GameServerInfo? gameServerInfo);
-        return new MatchMachkingResult(ErrorCode.NONE, gameServerInfo?.GameServerAddress, gameServerInfo?.GameServerPort ?? 0);
+        try
+        {   
+            var httpResponse = await _httpClient.PostAsJsonAsync("api/canclematching", req);
+            if (httpResponse.StatusCode != HttpStatusCode.OK)
+            {
+                _logger.LogError("CancleMatching failed");
+                return new CancleMatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+            }
+
+            var response = await httpResponse.Content.ReadFromJsonAsync<CancleMatchingRes>();
+            if (response == null)
+            {
+                _logger.LogError("CancleMatching failed");
+                return new CancleMatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+            }
+
+            return response;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "CancleMatching failed");
+            return new CancleMatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+        }
+    }
+
+    public async Task<CheckMatchingRes> CheckMatching(CheckMatchingReq req)
+    {
+        try
+        {
+            var httpResponse = await _httpClient.PostAsJsonAsync("api/checkmatching", req);
+            if (httpResponse.StatusCode != HttpStatusCode.OK)
+            {
+                _logger.LogError("CheckMaching failed");
+                return new CheckMatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+            }
+
+            var response = await httpResponse.Content.ReadFromJsonAsync<CheckMatchingRes>();
+            if (response == null)
+            {
+                _logger.LogError("CheckMaching failed");
+                return new CheckMatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+            }
+
+            return response;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "CheckMaching failed");
+            return new CheckMatchingRes() { ErrorCode = ErrorCode.MATCHING_SERVER_ERROR };
+        }
     }
 }

@@ -11,9 +11,16 @@ namespace GameClient
     [SupportedOSPlatform("windows10.0.177630")]
     public partial class mainForm : Form
     {
+        System.Windows.Forms.Timer _timer = new System.Windows.Forms.Timer();
+        bool _isMatching = false;
+        bool _isMatchingSuccess = false;
+
         public mainForm()
         {
             InitializeComponent();
+
+            _timer.Tick += new EventHandler(SendCheckMachingReq);
+            _timer.Interval = 1000;
         }
 
         private void mainForm_Load(object sender, EventArgs e)
@@ -52,7 +59,23 @@ namespace GameClient
             await HiveRegister(hiveUrl, email, password);
         }
 
+        private async void btnLogin_CLick(object sender, EventArgs e)
+        {
+            await HiveLogin();
+            await ApiLogin();
+        }
+
         private async void btnHiveLogin_Click(object sender, EventArgs e)
+        {
+            await HiveLogin();
+        }
+
+        private async void btnApiLogin_Click(object sender, EventArgs e)
+        {
+            await ApiLogin();
+        }
+
+        async Task HiveLogin()
         {
             string hiveUrl = textBoxHiveIP.Text;
             string email = textBoxHiveID.Text;
@@ -74,8 +97,9 @@ namespace GameClient
             }
         }
 
-        private async void btnApiLogin_Click(object sender, EventArgs e)
+        async Task ApiLogin()
         {
+
             string apiServerUrl = textBoxApiIP.Text;
             string email = textBoxApiLoginID.Text;
             string password = textBoxApiLoginPW.Text;
@@ -200,9 +224,65 @@ namespace GameClient
             DevLog.Write($"방 채팅 요청");
         }
 
-        private void btnMatching_Click(object sender, EventArgs e)
+        private async void btn_Matching_Click(object sender, EventArgs e)
         {
-            DevLog.Write($"매칭 요청");
+            string apiServerUrl = textBoxApiIP.Text;
+            string userID = textBoxSocketID.Text;
+            string authToken = textBoxSocketToken.Text;
+
+            if (userID.IsEmpty() || authToken.IsEmpty())
+            {
+                MessageBox.Show("로그인 먼저 진행해주세요");
+                return;
+            }
+
+            var res = await ApiRequestMatch(apiServerUrl, userID, authToken);
+            if (res == null)
+            {
+                DevLog.Write("매칭 실패");
+                return;
+            }
+
+            if (res.ErrorCode != ErrorCode.NONE)
+            {
+                DevLog.Write("매칭 실패");
+                return;
+            }
+
+            DevLog.Write("매칭 시작");
+            _isMatching = true;
+
+            _timer.Start();
+        }
+
+        private async void btn_MatchingCancle_Click(object sender, EventArgs e)
+        {
+            string apiServerUrl = textBoxApiIP.Text;
+            string userID = textBoxSocketID.Text;
+            string authToken = textBoxSocketToken.Text;
+
+            if (userID.IsEmpty() || authToken.IsEmpty())
+            {
+                MessageBox.Show("로그인 먼저 진행해주세요");
+                return;
+            }
+
+            var res = await ApiCancletMatch(apiServerUrl, userID, authToken);
+            if (res == null)
+            {
+                DevLog.Write("매칭 취소 실패");
+                return;
+            }
+
+            if (res.ErrorCode != ErrorCode.NONE)
+            {
+                DevLog.Write("매칭 취소 실패");
+                return;
+            }
+            DevLog.Write("매칭 취소 성공");
+            _isMatching = false;
+
+            _timer.Stop();
         }
 
         private void listBoxRoomChatMsg_SelectedIndexChanged(object sender, EventArgs e)
@@ -215,6 +295,58 @@ namespace GameClient
 
         }
 
+        async void SendCheckMachingReq(object sender, EventArgs e)
+        {
+            DevLog.Write("매칭 요청 중");
+
+            if (_isMatching == false)
+            {
+                _timer.Stop();
+                return;
+            }
+
+            if (_isMatchingSuccess)
+            {
+                _timer.Stop();
+                return;
+            }
+
+            string apiServerUrl = textBoxApiIP.Text;
+            string userID = textBoxSocketID.Text;
+            string authToken = textBoxSocketToken.Text;
+
+            if (userID.IsEmpty() || authToken.IsEmpty())
+            {
+                MessageBox.Show("로그인 먼저 진행해주세요");
+                return;
+            }
+
+            var res = await ApiCheckMatch(apiServerUrl, userID, authToken);
+            if (res == null)
+            {
+                DevLog.Write("매칭 중");
+                return;
+            }
+
+            if (res.ErrorCode == ErrorCode.NONE)
+            {
+                DevLog.Write("매칭 성공");
+                _isMatchingSuccess = true;
+
+                textBoxSocketIP.Text = res.ServerAddress;
+                textBoxSocketPort.Text = res.Port.ToString();
+                textBoxRoomNumber.Text = res.RoomNumber.ToString();
+
+                ConnectGameServer(res.ServerAddress, res.Port);
+                _timer.Stop();
+            }
+            else
+            {
+                DevLog.Write("매칭 실패");
+                _isMatchingSuccess = false;
+                _timer.Start();
+            }
+        }
 
         void SendPacketOmokPut(int x, int y)
         {
@@ -228,7 +360,7 @@ namespace GameClient
             DevLog.Write($"put stone 요청 : x  [ {x} ], y: [ {y} ] ");
         }
 
-        private void btn_GameStartClick(object sender, EventArgs e)
+        private void btn_GameReady_Click(object sender, EventArgs e)
         {
             var gameReadyReq = new CGameReadyReq
             {

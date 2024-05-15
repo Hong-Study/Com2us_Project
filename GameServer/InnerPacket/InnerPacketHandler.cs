@@ -87,7 +87,33 @@ public partial class PacketHandler
         {
             return;
         }
+    }
 
-        
+    public void Handle_NTF_MatchingRoom(string sessionID, IMessage message)
+    {
+        NTFMatchingReq? packet = message as NTFMatchingReq;
+        if (packet == null)
+        {
+            return;
+        }
+
+        var room = GetRoomFunc(packet.RoomID);
+        if (room == null)
+        {
+            return;
+        }
+
+        room.SetGameMatching(packet.FirstUserID, packet.SecondUserID);
+    }
+
+    public void Handle_NTF_UserDisconnected(string sessionID, IMessage message)
+    {
+        var session = GetSessionFunc(sessionID);
+        if(session == null)
+        {
+            return;
+        }
+
+        session.Close();
     }
 }

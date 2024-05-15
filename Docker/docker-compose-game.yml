@@ -34,6 +34,19 @@ services:
       - hive-network
       - game-network
 
+  match-service:
+    depends_on:
+      - game-mysql
+      - game-redis
+    build:
+      context: .
+      dockerfile: Dockerfile-Match
+    container_name: match-server
+    ports:
+      - 7000:7000
+    networks:
+      - game-network
+
   game-service:
     depends_on:
       - game-mysql

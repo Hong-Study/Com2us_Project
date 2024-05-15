@@ -24,6 +24,8 @@ public class MemoryRepository : IMemoryRepository
         {
             RedisString<string> redis = new(_redisConn, key, TimeSpanUtils.LoginTimeSpan());
             bool IsSuccess = await redis.DeleteAsync();
+
+            
             return IsSuccess;
         }
         catch (Exception e)
