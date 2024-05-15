@@ -79,12 +79,6 @@ public class MatchRedisRepository
             return;
         }
 
-        if (matchingData.MatchingUserData == null)
-        {
-            Logger.Error("MatchingUserData is null");
-            return;
-        }
-
         var emptyRoomInfo = GetEmptyRoom();
         if (emptyRoomInfo == null)
         {
@@ -99,16 +93,16 @@ public class MatchRedisRepository
 
         NTFMatchingReq req = new NTFMatchingReq();
         req.RoomID = emptyRoomInfo.RoomID;
-        req.FirstUserID = matchingData.MatchingUserData.FirstUserID;
-        req.SecondUserID = matchingData.MatchingUserData.SecondUserID;
+        req.FirstUserID = matchingData.FirstUserID;
+        req.SecondUserID = matchingData.SecondUserID;
 
         var data = PacketManager.MakeInnerPacket("", req, InnerPacketType.NTF_REQ_MATCHING_ROOM);
         _sendInnerFunc(data);
 
         var completeMatchingData = new CompleteMatchingData();
         completeMatchingData.MatchID = matchingData.MatchID;
-        completeMatchingData.FirstUserID = matchingData.MatchingUserData.FirstUserID;
-        completeMatchingData.SecondUserID = matchingData.MatchingUserData.SecondUserID;
+        completeMatchingData.FirstUserID = matchingData.FirstUserID;
+        completeMatchingData.SecondUserID = matchingData.SecondUserID;
         completeMatchingData.ServerInfo = new MatchingServerInfo()
         {
             ServerAddress = _serverAddress,

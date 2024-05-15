@@ -125,17 +125,12 @@ public class MatchWoker : IMatchWoker
 
                 Int64 id = Interlocked.Increment(ref _matchID);
 
-                MatchingUserData matchingUserData = new()
-                {
-                    FirstUserID = user1,
-                    SecondUserID = user2,
-                };
-
                 MatchingData matchingData = new()
                 {
                     Type = PublishType.Matching,
                     MatchID = id,
-                    MatchingUserData = matchingUserData,
+                    FirstUserID = user1,
+                    SecondUserID = user2
                 };
 
                 await _redisMatchList.LeftPushAsync(JsonSerializer.Serialize(matchingData));
