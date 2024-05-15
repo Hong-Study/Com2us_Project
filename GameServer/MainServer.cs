@@ -16,6 +16,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
     PacketManager _packetManager;
     DatabaseManager _databaseManager;
     RedisManager _redisManager;
+    MatchManager _matchManager;
     #endregion
 
     ServerOption _serverOption;
@@ -48,6 +49,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _userManager = new UserManager(ref _serverOption);
         _databaseManager = new DatabaseManager(ref _serverOption);
         _redisManager = new RedisManager(ref _serverOption);
+        _matchManager = new MatchManager(ref _serverOption);
         _packetManager = new PacketManager();
     }
 
@@ -104,6 +106,9 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
         base.Stop();
         IsRunning = false;
+
+
+        _matchManager.Stop();
 
         MainLogger.Info("OnStopped - end");
     }
@@ -171,6 +176,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _userManager.InitLogger(MainLogger);
         _databaseManager.InitLogger(MainLogger);
         _redisManager.InitLogger(MainLogger);
+        _matchManager.InitLogger(MainLogger);
 
         _packetManager.SetUserDelegate(ref _userManager);
         _packetManager.SetRoomDelegate(ref _roomManager);
@@ -178,7 +184,11 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         MainServer mainServer = this;
         _packetManager.SetMainDelegate(ref mainServer);
 
-        _roomManager.SetDelegate(SendData, _userManager.GetUserInfo, PacketDatabaseSend);
+        _matchManager.InitUsingRoomList(ref _roomManager);
+        _matchManager.SetMainDelegate(ref mainServer);
+
+        _roomManager.SetDelegate(SendData, _userManager.GetUserInfo
+                                , PacketDatabaseSend, PacketInnerSend, PacketMatchSend);
         _roomManager.SetDefaultSetting(option.OmokGameTurnTimeoutSeconds
                                     , option.OmokGameTurnTimeoutCount
                                     , option.OmokGameMaxGameTimeMinute);
@@ -191,6 +201,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _packetManager.Start(1);
         _databaseManager.Start(1);
         _redisManager.Start(1);
+        _matchManager.Start();
     }
 
     void StartTimer()
@@ -292,6 +303,14 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         if (data.PacketType > (Int16)RedisType.REDIS_PACKET_START && data.PacketType < (Int16)RedisType.REDIS_PACKET_END)
         {
             _redisManager.Distribute(data);
+        }
+    }
+
+    public void PacketMatchSend(ServerPacketData data)
+    {
+        if (data.PacketType > (Int16)MatchInnerType.MATCH_PACKET_START && data.PacketType < (Int16)MatchInnerType.MATCH_PACKET_END)
+        {
+            _matchManager.Distribute(data);
         }
     }
 }

@@ -25,7 +25,6 @@ public class TokenCheckMiddleware
             return;
         }
         
-
         string token = context.Request.Headers["Authorization"]!;
         string id = context.Request.Headers["UserId"]!;
 

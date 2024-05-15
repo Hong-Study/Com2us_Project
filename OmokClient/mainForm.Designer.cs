@@ -64,16 +64,21 @@
             this.btnSocketLogin = new System.Windows.Forms.Button();
 
             this.Room = new System.Windows.Forms.GroupBox();
-            this.button3 = new System.Windows.Forms.Button();
-            this.btnMatching = new System.Windows.Forms.Button();
+            this.btn_GameReady = new System.Windows.Forms.Button();
+            this.btn_Matching = new System.Windows.Forms.Button();
+            this.btn_MatchingCancle = new System.Windows.Forms.Button();
+
             this.GameStartBtn = new System.Windows.Forms.Button();
             this.btnRoomChat = new System.Windows.Forms.Button();
+
             this.textBoxRoomSendMsg = new System.Windows.Forms.TextBox();
             this.listBoxRoomChatMsg = new System.Windows.Forms.ListBox();
             this.listBoxRoomUserList = new System.Windows.Forms.ListBox();
-            this.btn_RoomLeave = new System.Windows.Forms.Button();
-            this.btn_RoomEnter = new System.Windows.Forms.Button();
+
             this.textBoxRoomNumber = new System.Windows.Forms.TextBox();
+            this.btn_RoomEnter = new System.Windows.Forms.Button();
+            this.btn_RoomLeave = new System.Windows.Forms.Button();
+
             this.label3 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
@@ -99,9 +104,10 @@
             this.btnHiveLogin.Name = "btnHiveLogin";
             this.btnHiveLogin.Size = new System.Drawing.Size(88, 26);
             this.btnHiveLogin.TabIndex = 29;
-            this.btnHiveLogin.Text = "Hive 로그인";
+            this.btnHiveLogin.Text = "로그인";
             this.btnHiveLogin.UseVisualStyleBackColor = true;
-            this.btnHiveLogin.Click += new System.EventHandler(this.btnHiveLogin_Click);
+            this.btnHiveLogin.Click += new System.EventHandler(this.btnLogin_CLick);
+            // this.btnHiveLogin.Click += new System.EventHandler(this.btnHiveLogin_Click);
             // 
             // btnApiLogin
             // 
@@ -113,6 +119,7 @@
             this.btnApiLogin.Text = "Api 로그인";
             this.btnApiLogin.UseVisualStyleBackColor = true;
             this.btnApiLogin.Click += new System.EventHandler(this.btnApiLogin_Click);
+            this.btnApiLogin.Visible = false;
             // 
             // groupBox5
             // 
@@ -199,7 +206,7 @@
             this.textBoxHiveID.Name = "textBoxHiveID";
             this.textBoxHiveID.Size = new System.Drawing.Size(120, 21);
             this.textBoxHiveID.TabIndex = 11;
-            this.textBoxHiveID.Text = "test@naver.com";
+            this.textBoxHiveID.Text = "test12@naver.com";
             this.textBoxHiveID.WordWrap = false;
             // 
             // labelHiveID
@@ -220,6 +227,7 @@
             this.textBoxApiLoginID.TabIndex = 18;
             this.textBoxApiLoginID.Text = "";
             this.textBoxApiLoginID.WordWrap = false;
+            this.textBoxApiLoginID.Enabled = false;
             // 
             // labelApiLoginID
             // 
@@ -239,6 +247,7 @@
             this.textBoxApiLoginPW.TabIndex = 18;
             this.textBoxApiLoginPW.Text = "";
             this.textBoxApiLoginPW.WordWrap = false;
+            this.textBoxApiLoginPW.Enabled = false;
             // 
             // labelApiLoginPW
             // 
@@ -248,6 +257,7 @@
             this.labelApiLoginPW.Size = new System.Drawing.Size(61, 12);
             this.labelApiLoginPW.TabIndex = 10;
             this.labelApiLoginPW.Text = "API PW";
+            this.labelApiLoginPW.Visible = true;
             // 
             // labelStatus
             // 
@@ -296,6 +306,7 @@
             this.textBoxSocketPort.TabIndex = 18;
             this.textBoxSocketPort.Text = "";
             this.textBoxSocketPort.WordWrap = false;
+            this.textBoxSocketPort.Enabled = false;
             // 
             // labelSocketPort
             // 
@@ -315,6 +326,7 @@
             this.btnSocketConnect.Text = "Connect";
             this.btnSocketConnect.UseVisualStyleBackColor = true;
             this.btnSocketConnect.Click += new System.EventHandler(this.btnSocketConnect_Click);
+            this.btnSocketConnect.Visible = false;
             //
             // labelSocketID
             // 
@@ -334,6 +346,7 @@
             this.textBoxSocketID.TabIndex = 43;
             this.textBoxSocketID.Text = "";
             this.textBoxSocketID.WordWrap = false;
+            this.textBoxSocketID.Enabled = false;
             //
             // textBoxSocketToken
             // 
@@ -344,6 +357,7 @@
             this.textBoxSocketToken.TabIndex = 45;
             this.textBoxSocketToken.Text = "";
             this.textBoxSocketToken.WordWrap = false;
+            this.textBoxSocketToken.Enabled = false;
             // 
             // labelSocketToken
             // 
@@ -364,19 +378,22 @@
             this.btnSocketLogin.Text = "Login";
             this.btnSocketLogin.UseVisualStyleBackColor = true;
             this.btnSocketLogin.Click += new System.EventHandler(this.btnSocketLogin_Click);
+            this.btnSocketLogin.Visible = false;
             // 
             // Room
             // 
             this.Room.Controls.Add(this.button1);
-            this.Room.Controls.Add(this.button3);
-            this.Room.Controls.Add(this.btnMatching);
+            this.Room.Controls.Add(this.btn_GameReady);
+            this.Room.Controls.Add(this.btn_Matching);
+            this.Room.Controls.Add(this.btn_MatchingCancle);
+
             this.Room.Controls.Add(this.GameStartBtn);
             this.Room.Controls.Add(this.btnRoomChat);
             this.Room.Controls.Add(this.textBoxRoomSendMsg);
             this.Room.Controls.Add(this.listBoxRoomChatMsg);
             this.Room.Controls.Add(this.listBoxRoomUserList);
             this.Room.Controls.Add(this.btn_RoomLeave);
-            this.Room.Controls.Add(this.btn_RoomEnter);
+
             this.Room.Controls.Add(this.textBoxRoomNumber);
             this.Room.Controls.Add(this.label3);
             this.Room.Location = new System.Drawing.Point(14, defaultY + 119);
@@ -388,27 +405,59 @@
             this.Room.TabStop = false;
             this.Room.Text = "Room";
             // 
-            // button3
+            // textBoxRoomNumber
             // 
-            this.button3.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.button3.Location = new System.Drawing.Point(391, 18);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(91, 28);
-            this.button3.TabIndex = 57;
-            this.button3.Text = "Game Ready";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.textBoxRoomNumber.Location = new System.Drawing.Point(98, 20);
+            this.textBoxRoomNumber.MaxLength = 6;
+            this.textBoxRoomNumber.Name = "textBoxRoomNumber";
+            this.textBoxRoomNumber.Size = new System.Drawing.Size(38, 21);
+            this.textBoxRoomNumber.TabIndex = 44;
+            this.textBoxRoomNumber.Text = "1";
+            this.textBoxRoomNumber.WordWrap = false;
             // 
-            // btnMatching
+            // btn_MatchingCancle
             // 
-            this.btnMatching.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btnMatching.Location = new System.Drawing.Point(296, 18);
-            this.btnMatching.Name = "btnMatching";
-            this.btnMatching.Size = new System.Drawing.Size(78, 28);
-            this.btnMatching.TabIndex = 54;
-            this.btnMatching.Text = "Matching";
-            this.btnMatching.UseVisualStyleBackColor = true;
-            this.btnMatching.Click += new System.EventHandler(this.btnMatching_Click);
+            this.btn_MatchingCancle.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btn_MatchingCancle.Location = new System.Drawing.Point(230, 18);
+            this.btn_MatchingCancle.Name = "btn_MatchingCancle";
+            this.btn_MatchingCancle.Size = new System.Drawing.Size(80, 28);
+            this.btn_MatchingCancle.TabIndex = 48;
+            this.btn_MatchingCancle.Text = "매칭 취소";
+            this.btn_MatchingCancle.UseVisualStyleBackColor = true;
+            this.btn_MatchingCancle.Click += new System.EventHandler(this.btn_MatchingCancle_Click);
+            // 
+            // btn_RoomLeave
+            // 
+            this.btn_RoomLeave.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btn_RoomLeave.Location = new System.Drawing.Point(410, 18);
+            this.btn_RoomLeave.Name = "btn_RoomLeave";
+            this.btn_RoomLeave.Size = new System.Drawing.Size(80, 28);
+            this.btn_RoomLeave.TabIndex = 48;
+            this.btn_RoomLeave.Text = "방 나가기";
+            this.btn_RoomLeave.UseVisualStyleBackColor = true;
+            this.btn_RoomLeave.Click += new System.EventHandler(this.btn_RoomLeave_Click);
+            // 
+            // btn_Matching
+            // 
+            this.btn_Matching.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btn_Matching.Location = new System.Drawing.Point(144, 18);
+            this.btn_Matching.Name = "btn_Matching";
+            this.btn_Matching.Size = new System.Drawing.Size(80, 28);
+            this.btn_Matching.TabIndex = 57;
+            this.btn_Matching.Text = "매칭 시작";
+            this.btn_Matching.UseVisualStyleBackColor = true;
+            this.btn_Matching.Click += new System.EventHandler(this.btn_Matching_Click);
+            // 
+            // btn_GameReady
+            // 
+            this.btn_GameReady.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btn_GameReady.Location = new System.Drawing.Point(318, 18);
+            this.btn_GameReady.Name = "btn_GameReady";
+            this.btn_GameReady.Size = new System.Drawing.Size(92, 28);
+            this.btn_GameReady.TabIndex = 54;
+            this.btn_GameReady.Text = "Game Ready";
+            this.btn_GameReady.UseVisualStyleBackColor = true;
+            this.btn_GameReady.Click += new System.EventHandler(this.btn_GameReady_Click);
             // 
             // GameStartBtn
             // 
@@ -419,7 +468,7 @@
             this.GameStartBtn.TabIndex = 55;
             this.GameStartBtn.Text = "dummy - GameStart";
             this.GameStartBtn.UseVisualStyleBackColor = true;
-            this.GameStartBtn.Click += new System.EventHandler(this.btn_GameStartClick);
+            this.GameStartBtn.Click += new System.EventHandler(this.btn_GameReady_Click);
             // 
             // btnRoomChat
             // 
@@ -462,38 +511,6 @@
             this.listBoxRoomUserList.Name = "listBoxRoomUserList";
             this.listBoxRoomUserList.Size = new System.Drawing.Size(123, 136);
             this.listBoxRoomUserList.TabIndex = 49;
-            // 
-            // btn_RoomLeave
-            // 
-            this.btn_RoomLeave.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_RoomLeave.Location = new System.Drawing.Point(216, 18);
-            this.btn_RoomLeave.Name = "btn_RoomLeave";
-            this.btn_RoomLeave.Size = new System.Drawing.Size(66, 26);
-            this.btn_RoomLeave.TabIndex = 48;
-            this.btn_RoomLeave.Text = "Leave";
-            this.btn_RoomLeave.UseVisualStyleBackColor = true;
-            this.btn_RoomLeave.Click += new System.EventHandler(this.btn_RoomLeave_Click);
-            // 
-            // btn_RoomEnter
-            // 
-            this.btn_RoomEnter.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btn_RoomEnter.Location = new System.Drawing.Point(144, 18);
-            this.btn_RoomEnter.Name = "btn_RoomEnter";
-            this.btn_RoomEnter.Size = new System.Drawing.Size(66, 26);
-            this.btn_RoomEnter.TabIndex = 47;
-            this.btn_RoomEnter.Text = "Enter";
-            this.btn_RoomEnter.UseVisualStyleBackColor = true;
-            this.btn_RoomEnter.Click += new System.EventHandler(this.btn_RoomEnter_Click);
-            // 
-            // textBoxRoomNumber
-            // 
-            this.textBoxRoomNumber.Location = new System.Drawing.Point(98, 20);
-            this.textBoxRoomNumber.MaxLength = 6;
-            this.textBoxRoomNumber.Name = "textBoxRoomNumber";
-            this.textBoxRoomNumber.Size = new System.Drawing.Size(38, 21);
-            this.textBoxRoomNumber.TabIndex = 44;
-            this.textBoxRoomNumber.Text = "1";
-            this.textBoxRoomNumber.WordWrap = false;
             // 
             // label3
             // 
@@ -581,7 +598,7 @@
         private System.Windows.Forms.TextBox textBoxSocketIP;
         private System.Windows.Forms.Label labelSocketIP;
         private System.Windows.Forms.TextBox textBoxSocketPort;
-        private System.Windows.Forms.Label labelSocketPort; 
+        private System.Windows.Forms.Label labelSocketPort;
         private System.Windows.Forms.Button btnSocketConnect;
 
         private System.Windows.Forms.TextBox textBoxHivePW;
@@ -604,11 +621,12 @@
         private System.Windows.Forms.TextBox textBoxRoomSendMsg;
         private System.Windows.Forms.ListBox listBoxRoomChatMsg;
         private System.Windows.Forms.ListBox listBoxRoomUserList;
-        private System.Windows.Forms.Button btnMatching;
+        private System.Windows.Forms.Button btn_Matching;
+        private System.Windows.Forms.Button btn_MatchingCancle;
         private System.Windows.Forms.Button GameStartBtn;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btn_GameReady;
     }
 }
 

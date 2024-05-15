@@ -4,6 +4,8 @@ namespace GameServer;
 
 public partial class PacketHandler
 {
+    public Func<string, ClientSession> GetSessionFunc = null!;
+
     public Action<string> AddUserFunc = null!;
     public Action<string> RemoveUserFunc = null!;
     public Action<string, ErrorCode, UserData?> LoginUserFunc = null!;
@@ -70,9 +72,9 @@ public partial class PacketHandler
     {
         var user = GetUserFunc(sessionID);
         if (user == null)
-        {   
+        {
             Logger.Error($"GetUser : User{sessionID} is not exist");
-            
+
             T pkt = new T();
             pkt.ErrorCode = ErrorCode.NOT_EXIST_USER;
 
@@ -82,7 +84,7 @@ public partial class PacketHandler
             return null;
         }
 
-        if(user.IsLogin == false)
+        if (user.IsLogin == false)
         {
             Logger.Error($"GetUser : User{sessionID} is not login");
 
@@ -94,7 +96,7 @@ public partial class PacketHandler
 
             return null;
         }
-        
+
         var room = GetRoomFunc(user.RoomID);
         if (room == null)
         {
@@ -105,7 +107,7 @@ public partial class PacketHandler
 
             byte[] bytes = PacketManager.PacketSerialized(pkt, packetType);
             SendFunc(sessionID, bytes);
-            
+
             return null;
         }
 

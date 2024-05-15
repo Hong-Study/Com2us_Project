@@ -3,12 +3,14 @@ using APIServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string? url = builder.Configuration.GetValue<string>("ServerUrl");
+var Configuration = builder.Configuration;
+builder.Services.Configure<SocketConfig>(Configuration.GetSection("SocketConfig"));
+
+string? url = Configuration.GetValue<string>("ServerUrl");
 if(url == null)
 {
     Console.WriteLine("ServerUrl is not set in appsettings.json");
     return;
-
 }
 builder.WebHost.UseUrls(url);
 
@@ -16,12 +18,14 @@ builder.WebHost.UseUrls(url);
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
-builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddScoped<IMatchService, MatchService>();
 
 SettingLogger();
 
 // 레포지토리 등록
 builder.Services.AddSingleton<IMemoryRepository, MemoryRepository>();
+builder.Services.AddSingleton<RedisLockRepository>();
+
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAttendanceCheckRepository, AttendanceCheckRepository>();
 builder.Services.AddScoped<IMailRepository, MailRepository>();
@@ -34,6 +38,8 @@ ILoggerFactory loggerFactory = app.Services.GetRequiredService<ILoggerFactory>()
 LogManager.SetLoggerFactory(loggerFactory, "Global");
 
 app.UseMiddleware<TokenCheckMiddleware>();
+
+app.UseMiddleware<RequestOneCheckMiddleware>();
 
 app.MapControllers();
 

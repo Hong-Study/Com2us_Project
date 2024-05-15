@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Common;
 using CSCommon;
 
 namespace GameClient;
@@ -131,7 +132,6 @@ public partial class mainForm
             else
             {
                 MessageBox.Show("API 로그인 실패");
-
                 return false;
             }
         }
@@ -139,6 +139,115 @@ public partial class mainForm
         {
             MessageBox.Show(e.Message);
             return false;
+        }
+        finally
+        {
+            apiServer.Dispose();
+        }
+    }
+
+    async Task<MatchingRes> ApiRequestMatch(string url, string userID, string token)
+    {
+        HttpClient apiServer = new HttpClient();
+        apiServer.BaseAddress = new Uri(url);
+
+        MatchingReq req = new MatchingReq();
+        req.UserID = userID;
+
+        DevLog.Write($"ApiRequestMatch {userID} {token}");
+        apiServer.DefaultRequestHeaders.Add("Authorization", $"{token}");
+        apiServer.DefaultRequestHeaders.Add("UserID", $"{userID}");
+
+        try
+        {
+            var response = await apiServer.PostAsJsonAsync("/api/requestmatching", req);
+            if (response.IsSuccessStatusCode)
+            {
+                var res = await response.Content.ReadFromJsonAsync<MatchingRes>();
+                return res;
+            }
+            else
+            {
+                var res = await response.Content.ReadAsStringAsync();
+                MessageBox.Show($"{res} 매칭 요청 실패");
+                return null;
+            }
+        }
+        catch (Exception e)
+        {
+            MessageBox.Show(e.Message);
+            return null;
+        }
+        finally
+        {
+            apiServer.Dispose();
+        }
+    }
+    async Task<CancleMatchingRes> ApiCancletMatch(string url, string userID, string token)
+    {
+        HttpClient apiServer = new HttpClient();
+        apiServer.BaseAddress = new Uri(url);
+
+        CancleMatchingReq req = new CancleMatchingReq();
+        req.UserID = userID;
+
+        apiServer.DefaultRequestHeaders.Add("Authorization", $"{token}");
+        apiServer.DefaultRequestHeaders.Add("UserID", $"{userID}");
+
+        try
+        {
+            var response = await apiServer.PostAsJsonAsync("/api/canclematching", req);
+            if (response.IsSuccessStatusCode)
+            {
+                var res = await response.Content.ReadFromJsonAsync<CancleMatchingRes>();
+                return res;
+            }
+            else
+            {
+                MessageBox.Show($"{response.StatusCode} 매칭 요청 실패");
+                return null;
+            }
+        }
+        catch (Exception e)
+        {
+            MessageBox.Show(e.Message);
+            return null;
+        }
+        finally
+        {
+            apiServer.Dispose();
+        }
+    }
+
+    async Task<CheckMatchingRes> ApiCheckMatch(string url, string userID, string token)
+    {
+        HttpClient apiServer = new HttpClient();
+        apiServer.BaseAddress = new Uri(url);
+
+        CheckMatchingReq req = new CheckMatchingReq();
+        req.UserID = userID;
+
+        apiServer.DefaultRequestHeaders.Add("Authorization", $"{token}");
+        apiServer.DefaultRequestHeaders.Add("UserID", $"{userID}");
+
+        try
+        {
+            var response = await apiServer.PostAsJsonAsync("/api/checkmatching", req);
+            if (response.IsSuccessStatusCode)
+            {
+                var res = await response.Content.ReadFromJsonAsync<CheckMatchingRes>();
+                return res;
+            }
+            else
+            {
+                MessageBox.Show("매칭 확인 실패");
+                return null;
+            }
+        }
+        catch (Exception e)
+        {
+            MessageBox.Show(e.Message);
+            return null;
         }
         finally
         {

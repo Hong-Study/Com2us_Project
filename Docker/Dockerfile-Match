@@ -1,0 +1,10 @@
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+EXPOSE 7000
+
+ENV ASPNETCORE_URLS=http://*:7000
+
+RUN chmod 777 /var
+
+COPY ./Publish/MatchPublish .
+ENTRYPOINT ["dotnet", "MatchMackingServer.dll"]

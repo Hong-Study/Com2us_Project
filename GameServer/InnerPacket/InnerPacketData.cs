@@ -49,3 +49,17 @@ public partial class NTFUserWinLoseUpdateRes : IResMessage
 {
     public ErrorCode ErrorCode { get; set; }
 }
+
+[MemoryPackable]
+public partial class NTFMatchingReq : IMessage
+{
+    public Int32 RoomID { get; set; }
+    public string FirstUserID { get; set; } = null!;
+    public string SecondUserID { get; set; } = null!;
+}
+
+[MemoryPackable]
+public partial class NTFUserDisconnectedReq : IMessage
+{
+    public string SessionID { get; set; } = null!;
+}

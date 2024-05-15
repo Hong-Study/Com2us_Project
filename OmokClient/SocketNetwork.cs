@@ -159,6 +159,9 @@ public partial class mainForm
 
         EndGame();
 
+        _isMatching = false;
+        _isMatchingSuccess = false;
+
         labelStatus.Text = "서버 접속이 끊어짐";
 
         Network.Close();
