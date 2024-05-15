@@ -20,10 +20,10 @@ public class RequestOneCheckMiddleware
 
         string id = context.Request.Headers["UserId"]!;
 
-        if (await _lockRepo.LockAsync(id))
+        if (await _lockRepo.LockAsync(id) == false)
         {
             context.Response.StatusCode = 401;
-            await context.Response.WriteAsync("Request One Time");
+            await context.Response.WriteAsync("Request Only One Time");
             return;
         }
 

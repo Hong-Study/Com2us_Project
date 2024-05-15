@@ -39,7 +39,7 @@ LogManager.SetLoggerFactory(loggerFactory, "Global");
 
 app.UseMiddleware<TokenCheckMiddleware>();
 
-// app.UseMiddleware<RequestOneCheckMiddleware>();
+app.UseMiddleware<RequestOneCheckMiddleware>();
 
 app.MapControllers();
 

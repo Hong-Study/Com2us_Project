@@ -69,6 +69,11 @@ public class PacketManager
         _onHandler.Add((Int16)InnerPacketType.NTF_RES_USER_LOGIN, _handler.Handle_NTF_UserLogin);
         _onRecv.Add((Int16)InnerPacketType.NTF_RES_UPDATE_WIN_LOSE_COUNT, Make<NTFUserWinLoseUpdateRes>);
         _onHandler.Add((Int16)InnerPacketType.NTF_RES_UPDATE_WIN_LOSE_COUNT, _handler.Handle_NTF_UpdateWinLoseCount);
+
+        _onRecv.Add((Int16)InnerPacketType.NTF_REQ_MATCHING_ROOM, Make<NTFMatchingReq>);
+        _onHandler.Add((Int16)InnerPacketType.NTF_REQ_MATCHING_ROOM, _handler.Handle_NTF_MatchingRoom);
+        _onRecv.Add((Int16)InnerPacketType.NTF_USER_DISCONNECTED, Make<NTFUserDisconnectedReq>);
+        _onHandler.Add((Int16)InnerPacketType.NTF_USER_DISCONNECTED, _handler.Handle_NTF_UserDisconnected);
     }
 
     public void SetUserDelegate(ref readonly UserManager userManager)
@@ -86,7 +91,6 @@ public class PacketManager
     {
         _handler.GetRoomFunc = roomManager.GetRoom;
         _handler.RoomCheckFunc = roomManager.RoomsCheck;
-        _handler.GetRoomStateFunc = roomManager.GetRoomState;
     }
 
     public void SetMainDelegate(ref readonly MainServer server)
@@ -95,6 +99,7 @@ public class PacketManager
         _handler.InnerSendFunc = server.PacketInnerSend;
         _handler.DatabaseSendFunc = server.PacketDatabaseSend;
         _handler.RedisSendFunc = server.PacketRedisSend;
+        _handler.GetSessionFunc = server.GetSessionByID;
     }
 
     public void Distribute(ServerPacketData data)
@@ -155,7 +160,7 @@ public class PacketManager
             bodyDataSize = (Int16)bodyData.Length;
         }
 
-        var packetSize = (Int16)(bodyDataSize + PacketDef.PACKET_HEADER_SIZE);
+        var packetSize = (Int16)(bodyDataSize + PacketDef.PACKET_HEADER_SIZE);  
 
         var dataSource = new byte[packetSize];
 
