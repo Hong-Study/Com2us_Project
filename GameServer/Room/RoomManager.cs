@@ -69,11 +69,12 @@ public class RoomManager
         }
     }
 
-    public void SetDefaultSetting(Int32 turnTimeoutSecond, Int32 timeoutCount, Int32 maxGameTimeMinute)
+    public void SetDefaultSetting(Int32 turnTimeoutSecond, Int32 timeoutCount
+                                , Int32 maxGameTimeMinute, Int32 maxMatchingWaitingTimeSecond)
     {
         foreach (var room in _roomPool)
         {
-            room.InitDefaultSetting(turnTimeoutSecond, timeoutCount, maxGameTimeMinute);
+            room.InitDefaultSetting(turnTimeoutSecond, timeoutCount, maxGameTimeMinute, maxMatchingWaitingTimeSecond);
         }
     }
 

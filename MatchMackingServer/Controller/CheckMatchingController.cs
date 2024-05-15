@@ -19,7 +19,6 @@ public class CheckMatchingController : ControllerBase
 
         (var result, var completeMatchingData) = _matchWorker.GetCompleteMatching(request.UserID);
 
-        //TODO: 결과를 담아서 보낸다
         if (result == false)
         {
             response.ErrorCode = ErrorCode.MATCHING_FAIL;
