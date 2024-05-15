@@ -19,8 +19,11 @@ public class Room
 
     OmokGame _game;
 
+    DateTime _roomMatchingTime;
     DateTime _gameStartTime;
+
     TimeSpan _maxGameTime;
+    TimeSpan _maxMatchingWaitingTime;
 
     public Room(Int32 roomId)
     {
@@ -34,13 +37,16 @@ public class Room
         State = RoomState.Mathcing;
         _matchingUsers.Add(firstUserID);
         _matchingUsers.Add(secondUserID);
+        _roomMatchingTime = DateTime.Now;
     }
 
-    public void InitDefaultSetting(Int32 turnTimeoutSecond, Int32 timeoutCount, Int32 MaxGameTimeMinute)
+    public void InitDefaultSetting(Int32 turnTimeoutSecond, Int32 timeoutCount
+                                    , Int32 maxGameTimeMinute, Int32 maxMatchingWaitingTimeSecond)
     {
         _game.TimeoutCount = timeoutCount;
         _game.TurnTimeoutSecond = turnTimeoutSecond;
-        _maxGameTime = new TimeSpan(0, MaxGameTimeMinute, 0);
+        _maxGameTime = new TimeSpan(0, maxGameTimeMinute, 0);
+        _maxMatchingWaitingTime = new TimeSpan(0, 0, maxMatchingWaitingTimeSecond);
     }
 
     public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
@@ -316,17 +322,17 @@ public class Room
             DisconnectRoomUser(user);
         }
 
-        SendEmptyRoom();
-
-        State = RoomState.Empty;
+        SetEmptyRoom();
 
         _users.Clear();
         _matchingUsers.Clear();
         _game.GameClear();
     }
 
-    void SendEmptyRoom()
+    void SetEmptyRoom()
     {
+        State = RoomState.Empty;
+        
         MakeEmptyRoomReq req = new MakeEmptyRoomReq();
         req.RoomID = RoomID;
 
@@ -361,6 +367,20 @@ public class Room
             }
 
             _game.TurnTimeoutCheck();
+        }
+
+        if (State == RoomState.Mathcing)
+        {
+            if (_users.Count == 2)
+            {
+                return;
+            }
+
+            TimeSpan ts = DateTime.Now - _roomMatchingTime;
+            if (ts > _maxMatchingWaitingTime)
+            {
+                RoomClear();
+            }
         }
     }
 }
