@@ -71,9 +71,7 @@ public class MatchRedisRepository
     }
 
     async Task OnMatchingHandle(string result)
-    {
-        System.Console.WriteLine("OnMatchingHandle : " + result);
-        
+    {        
         var matchingData = JsonSerializer.Deserialize<MatchingData>(result);
         if (matchingData == null)
         {

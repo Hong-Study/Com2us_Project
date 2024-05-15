@@ -87,11 +87,11 @@ public class MatchWoker : IMatchWoker
         lock (_lock)
         {
             if (_reqList.Find(x => x == userID) != null)
-            {   
+            {
                 return ErrorCode.MATCHING_ALEARY_MATCHED;
             }
             _logger.LogInformation($"AddUser: {userID}");
-            
+
             _reqList.Add(userID);
         }
 
@@ -186,6 +186,8 @@ public class MatchWoker : IMatchWoker
                 var data = JsonSerializer.Deserialize<CompleteMatchingData>(result.Value);
                 if (data == null)
                     return;
+
+                System.Console.WriteLine($"CompleteMatchingList 호출: {data.FirstUserID}, {data.SecondUserID}");
 
                 //TODO: 매칭 결과를 _completeDic에 넣는다
                 // 2명이 하므로 각각 유저를 대상으로 총 2개를 _completeDic에 넣어야 한다

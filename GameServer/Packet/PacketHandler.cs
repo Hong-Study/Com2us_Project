@@ -72,9 +72,9 @@ public partial class PacketHandler
     {
         var user = GetUserFunc(sessionID);
         if (user == null)
-        {   
+        {
             Logger.Error($"GetUser : User{sessionID} is not exist");
-            
+
             T pkt = new T();
             pkt.ErrorCode = ErrorCode.NOT_EXIST_USER;
 
@@ -84,7 +84,7 @@ public partial class PacketHandler
             return null;
         }
 
-        if(user.IsLogin == false)
+        if (user.IsLogin == false)
         {
             Logger.Error($"GetUser : User{sessionID} is not login");
 
@@ -96,7 +96,7 @@ public partial class PacketHandler
 
             return null;
         }
-        
+
         var room = GetRoomFunc(user.RoomID);
         if (room == null)
         {
@@ -106,8 +106,8 @@ public partial class PacketHandler
             pkt.ErrorCode = ErrorCode.NOT_EXIST_ROOM;
 
             byte[] bytes = PacketManager.PacketSerialized(pkt, packetType);
-        SendFunc(sessionID, bytes);
-            
+            SendFunc(sessionID, bytes);
+
             return null;
         }
 

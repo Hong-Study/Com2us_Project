@@ -15,6 +15,7 @@ public class Room
     Func<string, User?> GetUserInfoFunc = null!;
 
     Action<ServerPacketData> SendInnerFunc = null!;
+    Action<ServerPacketData> MatchInnerFunc = null!;
 
     OmokGame _game;
 
@@ -50,11 +51,13 @@ public class Room
 
     public void SetDelegate(Func<string, byte[], bool> sendFunc, Func<string, User?> getUserInfoFunc
                             , Action<ServerPacketData> databaseSendFunc
-                            , Action<ServerPacketData> sendInnerFunc)
+                            , Action<ServerPacketData> sendInnerFunc
+                            , Action<ServerPacketData> matchInnerFunc)
     {
         SendFunc = sendFunc;
         GetUserInfoFunc = getUserInfoFunc;
         SendInnerFunc = sendInnerFunc;
+        MatchInnerFunc = matchInnerFunc;
 
         _game.SendFunc = SendFunc;
         _game.DatabaseSendFunc = databaseSendFunc;
@@ -158,6 +161,11 @@ public class Room
 
             byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_USER_LEAVE);
             BroadCast(bytes, sessionID);
+        }
+
+        if (_users.Count == 0)
+        {
+            RoomClear();
         }
 
         DisconnectRoomUser(user);
@@ -308,11 +316,22 @@ public class Room
             DisconnectRoomUser(user);
         }
 
+        SendEmptyRoom();
+
         State = RoomState.Empty;
 
         _users.Clear();
         _matchingUsers.Clear();
         _game.GameClear();
+    }
+
+    void SendEmptyRoom()
+    {
+        MakeEmptyRoomReq req = new MakeEmptyRoomReq();
+        req.RoomID = RoomID;
+
+        var packet = MatchManager.MakeInnerPacket(MatchInnerType.MAKE_EMPTY_ROOM, req);
+        MatchInnerFunc(packet);
     }
 
     void SendFailedResponse<T>(string sessionID, ErrorCode errorCode, PacketType packetType) where T : IResMessage, new()

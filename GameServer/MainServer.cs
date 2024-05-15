@@ -187,7 +187,8 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _matchManager.InitUsingRoomList(ref _roomManager);
         _matchManager.SetMainDelegate(ref mainServer);
 
-        _roomManager.SetDelegate(SendData, _userManager.GetUserInfo, PacketDatabaseSend, PacketInnerSend);
+        _roomManager.SetDelegate(SendData, _userManager.GetUserInfo
+                                , PacketDatabaseSend, PacketInnerSend, PacketMatchSend);
         _roomManager.SetDefaultSetting(option.OmokGameTurnTimeoutSeconds
                                     , option.OmokGameTurnTimeoutCount
                                     , option.OmokGameMaxGameTimeMinute);
@@ -302,6 +303,14 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         if (data.PacketType > (Int16)RedisType.REDIS_PACKET_START && data.PacketType < (Int16)RedisType.REDIS_PACKET_END)
         {
             _redisManager.Distribute(data);
+        }
+    }
+
+    public void PacketMatchSend(ServerPacketData data)
+    {
+        if (data.PacketType > (Int16)MatchInnerType.MATCH_PACKET_START && data.PacketType < (Int16)MatchInnerType.MATCH_PACKET_END)
+        {
+            _matchManager.Distribute(data);
         }
     }
 }

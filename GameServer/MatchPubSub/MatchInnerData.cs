@@ -4,7 +4,12 @@ using MemoryPack;
 public enum MatchInnerType
 {
     NONE = 0,
-    MAKE_EMPTY_ROOM = 2,
+
+    MATCH_PACKET_START = 5000,
+
+    MAKE_EMPTY_ROOM = 5001,
+
+    MATCH_PACKET_END = 5999,
 }
 
 [MemoryPackable]

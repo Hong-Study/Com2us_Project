@@ -15,27 +15,19 @@ public partial class PacketHandler
 
         var user = GetUserFunc(sessionID);
         if (user == null)
-        {   
+        {
             Logger.Error($"GetUser : User{sessionID} is not exist");
-            
-            SRoomEnterRes pkt = new SRoomEnterRes();
-            pkt.ErrorCode = ErrorCode.NOT_EXIST_USER;
 
-            byte[] bytes = PacketManager.PacketSerialized(pkt, PacketType.RES_S_ROOM_ENTER);
-            SendFunc(sessionID, bytes);
+            SendFailEnterRoomRes(sessionID, ErrorCode.NOT_EXIST_USER);
 
             return;
         }
 
-        if(user.RoomID != 0)
+        if (user.RoomID != 0)
         {
             Logger.Error($"GetUser : User{sessionID} is already in room");
-            
-            SRoomEnterRes pkt = new SRoomEnterRes();
-            pkt.ErrorCode = ErrorCode.ALREADY_IN_ROOM;
 
-            byte[] bytes = PacketManager.PacketSerialized(pkt, PacketType.RES_S_ROOM_ENTER);
-            SendFunc(sessionID, bytes);
+            SendFailEnterRoomRes(sessionID, ErrorCode.ALREADY_IN_ROOM);
 
             return;
         }
@@ -45,12 +37,8 @@ public partial class PacketHandler
         {
             Logger.Error($"GetRoom : Room({user.UserID}) is not exist");
 
-            SRoomEnterRes pkt = new SRoomEnterRes();
-            pkt.ErrorCode = ErrorCode.NOT_EXIST_ROOM;
+            SendFailEnterRoomRes(sessionID, ErrorCode.NOT_EXIST_ROOM);
 
-            byte[] bytes = PacketManager.PacketSerialized(pkt, PacketType.RES_S_ROOM_ENTER);
-            SendFunc(sessionID, bytes);
-            
             return;
         }
 
@@ -87,6 +75,20 @@ public partial class PacketHandler
         {
             room.SendChat(sessionID, packet.Message);
         }
+    }
 
+    void SendFailEnterRoomRes(string sessionID, ErrorCode errorCode)
+    {
+        SRoomEnterRes pkt = new SRoomEnterRes();
+        pkt.ErrorCode = errorCode;
+
+        byte[] bytes = PacketManager.PacketSerialized(pkt, PacketType.RES_S_ROOM_ENTER);
+        SendFunc(sessionID, bytes);
+
+        var session = GetSessionFunc(sessionID);
+        if (session != null)
+        {
+            session.Close();
+        }
     }
 }
