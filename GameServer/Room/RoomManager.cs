@@ -60,11 +60,12 @@ public class RoomManager
 
     public void SetDelegate(Func<string, byte[], bool> SendFunc, Func<string, User?> GetUserInfoFunc
                             , Action<ServerPacketData> databaseSendFunc
-                            , Action<ServerPacketData> sendInnerFunc)
+                            , Action<ServerPacketData> sendInnerFunc
+                            , Action<ServerPacketData> matchInnerFunc)
     {
         foreach (var room in _roomPool)
         {
-            room.SetDelegate(SendFunc, GetUserInfoFunc, databaseSendFunc, sendInnerFunc);
+            room.SetDelegate(SendFunc, GetUserInfoFunc, databaseSendFunc, sendInnerFunc, matchInnerFunc);
         }
     }
 

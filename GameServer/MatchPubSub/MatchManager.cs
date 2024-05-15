@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Threading.Tasks.Dataflow;
 using CloudStructures.Structures;
+using Common;
 using MemoryPack;
 using StackExchange.Redis;
 
@@ -67,7 +68,7 @@ public class MatchManager
                 if (message.PacketType == (Int16)MatchInnerType.MAKE_EMPTY_ROOM)
                 {
                     var data = MemoryPackSerializer.Deserialize<MakeEmptyRoomReq>(message.Body);
-                    if(data == null)
+                    if (data == null)
                     {
                         Logger.Error("MakeEmptyRoomReq Deserialize Fail");
                         continue;
@@ -85,5 +86,11 @@ public class MatchManager
                 Logger.Error(ex.Message);
             }
         }
+    }
+
+    public static ServerPacketData MakeInnerPacket<T>(MatchInnerType type, T message)
+    {
+        byte[] body = MemoryPackSerializer.Serialize(message);
+        return new ServerPacketData("", body, (Int16)type);
     }
 }
