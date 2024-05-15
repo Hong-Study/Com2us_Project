@@ -35,6 +35,8 @@ public class ServerOption
     public Int32 OmokGameTurnTimeoutCount { get; set; }
     public Int32 OmokGameMaxGameTimeMinute { get; set; }
 
+    public Int32 MaxMatchingWaitingTimeSeconds { get; set; }
+
     public string RedisPubKey { get; set; } = null!;
     public string RedisSubKey { get; set; } = null!;
 }    
