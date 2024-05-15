@@ -87,10 +87,11 @@ public class MatchWoker : IMatchWoker
         lock (_lock)
         {
             if (_reqList.Find(x => x == userID) != null)
-            {
+            {   
                 return ErrorCode.MATCHING_ALEARY_MATCHED;
             }
-
+            _logger.LogInformation($"AddUser: {userID}");
+            
             _reqList.Add(userID);
         }
 
@@ -116,6 +117,7 @@ public class MatchWoker : IMatchWoker
         //TODO: _completeDic에서 검색해서 있으면 반환한다.
         if (_completeDic.TryGetValue(userID, out MatchingServerInfo? data))
         {
+            _completeDic.Remove(userID, out _);
             return (true, data);
         }
 
@@ -137,6 +139,7 @@ public class MatchWoker : IMatchWoker
                         System.Threading.Thread.Sleep(1);
                         continue;
                     }
+
                     user1 = _reqList.First();
                     _reqList.RemoveAt(0);
                     user2 = _reqList.First();
@@ -191,7 +194,7 @@ public class MatchWoker : IMatchWoker
                     return;
                 }
 
-                System.Console.WriteLine("CompleteMatchingList 호출");
+                System.Console.WriteLine($"CompleteMatchingList 호출: {data.FirstUserID}, {data.SecondUserID}");
 
                 _completeDic.TryAdd(data.FirstUserID, data.ServerInfo);
                 _completeDic.TryAdd(data.SecondUserID, data.ServerInfo);

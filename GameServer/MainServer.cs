@@ -107,6 +107,9 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         base.Stop();
         IsRunning = false;
 
+
+        _matchManager.Stop();
+
         MainLogger.Info("OnStopped - end");
     }
 
@@ -173,16 +176,18 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _userManager.InitLogger(MainLogger);
         _databaseManager.InitLogger(MainLogger);
         _redisManager.InitLogger(MainLogger);
+        _matchManager.InitLogger(MainLogger);
 
         _packetManager.SetUserDelegate(ref _userManager);
         _packetManager.SetRoomDelegate(ref _roomManager);
 
-        _matchManager.SetRoomDelegate(ref _roomManager);
-
         MainServer mainServer = this;
         _packetManager.SetMainDelegate(ref mainServer);
 
-        _roomManager.SetDelegate(SendData, _userManager.GetUserInfo, PacketDatabaseSend);
+        _matchManager.InitUsingRoomList(ref _roomManager);
+        _matchManager.SetMainDelegate(ref mainServer);
+
+        _roomManager.SetDelegate(SendData, _userManager.GetUserInfo, PacketDatabaseSend, PacketInnerSend);
         _roomManager.SetDefaultSetting(option.OmokGameTurnTimeoutSeconds
                                     , option.OmokGameTurnTimeoutCount
                                     , option.OmokGameMaxGameTimeMinute);

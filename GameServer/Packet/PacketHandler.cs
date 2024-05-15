@@ -4,6 +4,8 @@ namespace GameServer;
 
 public partial class PacketHandler
 {
+    public Func<string, ClientSession> GetSessionFunc = null!;
+
     public Action<string> AddUserFunc = null!;
     public Action<string> RemoveUserFunc = null!;
     public Action<string, ErrorCode, UserData?> LoginUserFunc = null!;
@@ -12,7 +14,6 @@ public partial class PacketHandler
     public Action HeartHeatCheckFunc = null!;
     public Action<string> ReceivePongFunc = null!;
 
-    public Func<Int32, RoomState> GetRoomStateFunc = null!;
     public Func<Int32, Room?> GetRoomFunc = null!;
     public Action RoomCheckFunc = null!;
 
@@ -105,7 +106,7 @@ public partial class PacketHandler
             pkt.ErrorCode = ErrorCode.NOT_EXIST_ROOM;
 
             byte[] bytes = PacketManager.PacketSerialized(pkt, packetType);
-            SendFunc(sessionID, bytes);
+        SendFunc(sessionID, bytes);
             
             return null;
         }

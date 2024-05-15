@@ -4,7 +4,7 @@ using StackExchange.Redis;
 
 public class RedisLockRepository
 {
-    public RedisConnection _redisConn;
+    RedisConnection _redisConn;
     TimeSpan _lockTime;
     public string _tokenKey = "_lock";
     public RedisLockRepository(IConfiguration config)
@@ -18,22 +18,22 @@ public class RedisLockRepository
         RedisConfig redisConfig = new("default", connectionString);
         _redisConn = new RedisConnection(redisConfig);
 
-        _lockTime = TimeSpan.FromMinutes(1);
+        _lockTime = TimeSpan.FromSeconds(10);
     }
 
     public async Task<bool> LockAsync(string UserID)
     {
-        RedisKey key = UserID + _tokenKey;
-        var redisLock = new RedisLock<Int32>(_redisConn, key);
+        string key = UserID + _tokenKey;
+        var redisLock = new RedisLock<string>(_redisConn, key);
 
-        return await redisLock.TakeAsync(1, _lockTime);
+        return await redisLock.TakeAsync("LockValue", _lockTime);
     }
 
     public async Task<bool> UnLockAsync(string UserID)
     {
-        RedisKey key = UserID + _tokenKey;
-        var redisLock = new RedisLock<Int32>(_redisConn, key);
+        string key = UserID + _tokenKey;
+        var redisLock = new RedisLock<string>(_redisConn, key);
 
-        return await redisLock.ReleaseAsync(1);
+        return await redisLock.ReleaseAsync("LockValue");
     }
 }

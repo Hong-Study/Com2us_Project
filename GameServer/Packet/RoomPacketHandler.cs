@@ -40,13 +40,6 @@ public partial class PacketHandler
             return;
         }
 
-        var roomState = GetRoomStateFunc(packet.RoomNumber);
-        if(roomState != RoomState.Mathcing)
-        {
-            // 매칭 안된 방 입장할려고 함.
-            return;
-        }
-
         var room = GetRoomFunc(packet.RoomNumber);
         if (room == null)
         {

@@ -8,11 +8,11 @@ namespace GameServer;
 public class MatchPubSubManager
 {
     Func<Int32, bool> SetRoomStateEmptyFunc = null!;
-    Func<Int32, bool> SetRoomStateWatingFunc = null!;
+    // Func<Int32, bool> SetRoomStateWatingFunc = null!;
     Func<Int32, bool> SetRoomStateMathcingFunc = null!;
 
     Func<UsingRoomInfo?> GetEmptyRoomFunc = null!;
-    
+
     SuperSocket.SocketBase.Logging.ILog Logger = null!;
 
     RedisConnector _redisConnector = null!;
@@ -25,6 +25,8 @@ public class MatchPubSubManager
 
     string _serverAddress = "";
     Int32 _serverPort = 0;
+
+    List<UsingRoomInfo> _usingRoomInfos = new List<UsingRoomInfo>();
 
     public MatchPubSubManager(ref readonly ServerOption option)
     {
@@ -45,11 +47,11 @@ public class MatchPubSubManager
 
     public void SetRoomDelegate(ref readonly RoomManager roomManager)
     {
-        SetRoomStateEmptyFunc = roomManager.SetRoomStateEmpty;
-        SetRoomStateMathcingFunc = roomManager.SetRoomStateMathcing;
-        SetRoomStateWatingFunc = roomManager.SetRoomStateWaiting;
+        // SetRoomStateEmptyFunc = roomManager.SetRoomStateEmpty;
+        // SetRoomStateMathcingFunc = roomManager.SetRoomStateMathcing;
+        // SetRoomStateWatingFunc = roomManager.SetRoomStateWaiting;
 
-        GetEmptyRoomFunc = roomManager.GetEmptyRoom;
+        // GetEmptyRoomFunc = roomManager.GetEmptyRoom;
     }
 
     public void Start()
@@ -74,11 +76,6 @@ public class MatchPubSubManager
 
     void OnSubscribe(RedisChannel channel, RedisValue message)
     {
-        if (RoomManager.IsExistEmptyRoom == false)
-        {
-            return;
-        }
-
         if (message.HasValue == false)
         {
             return;
@@ -114,7 +111,8 @@ public class MatchPubSubManager
             return;
         }
 
-        bool isSuccess = SetRoomStateWatingFunc(roomInfo.RoomID);
+        // bool isSuccess = SetRoomStateWatingFunc(roomInfo.RoomID);
+        // bool isSuccess = true;
 
         // 매칭 성공 메시지 전송
         var completeMatchingData = new CompleteMatchingData();

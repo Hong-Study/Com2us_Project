@@ -5,12 +5,16 @@ namespace GameServer;
 public class Room
 {
     public Int32 RoomID { get; private set; }
+    public RoomState State { get; private set; }
 
     SuperSocket.SocketBase.Logging.ILog Logger = null!;
 
     List<RoomUser> _users = new List<RoomUser>();
+    List<string> _matchingUsers = new List<string>();
     Func<string, byte[], bool> SendFunc = null!;
     Func<string, User?> GetUserInfoFunc = null!;
+
+    Action<ServerPacketData> SendInnerFunc = null!;
 
     OmokGame _game;
 
@@ -21,6 +25,14 @@ public class Room
     {
         RoomID = roomId;
         _game = new OmokGame();
+        State = RoomState.Empty;
+    }
+
+    public void SetGameMatching(string firstUserID, string secondUserID)
+    {
+        State = RoomState.Mathcing;
+        _matchingUsers.Add(firstUserID);
+        _matchingUsers.Add(secondUserID);
     }
 
     public void InitDefaultSetting(Int32 turnTimeoutSecond, Int32 timeoutCount, Int32 MaxGameTimeMinute)
@@ -36,11 +48,13 @@ public class Room
         _game.InitLogger(logger);
     }
 
-    public void SetDelegate(Func<string, byte[], bool> SendFunc, Func<string, User?> GetUserInfoFunc
-                            , Action<ServerPacketData> databaseSendFunc)
+    public void SetDelegate(Func<string, byte[], bool> sendFunc, Func<string, User?> getUserInfoFunc
+                            , Action<ServerPacketData> databaseSendFunc
+                            , Action<ServerPacketData> sendInnerFunc)
     {
-        this.SendFunc = SendFunc;
-        this.GetUserInfoFunc = GetUserInfoFunc;
+        SendFunc = sendFunc;
+        GetUserInfoFunc = getUserInfoFunc;
+        SendInnerFunc = sendInnerFunc;
 
         _game.SendFunc = SendFunc;
         _game.DatabaseSendFunc = databaseSendFunc;
@@ -51,9 +65,15 @@ public class Room
 
     public void EnterRoom(User user)
     {
-        if (_users.Count >= 2)
+        if (State != RoomState.Mathcing)
         {
-            SendFailedResponse<SRoomEnterRes>(user.SessionID, ErrorCode.FULL_ROOM_COUNT, PacketType.RES_S_ROOM_ENTER);
+            SendFailedResponse<SRoomEnterRes>(user.SessionID, ErrorCode.NOT_MATCHING_ROOM, PacketType.RES_S_ROOM_ENTER);
+            return;
+        }
+
+        if (_matchingUsers.Contains(user.UserID) == false)
+        {
+            SendFailedResponse<SRoomEnterRes>(user.SessionID, ErrorCode.NOT_MATCHING_USER, PacketType.RES_S_ROOM_ENTER);
             return;
         }
 
@@ -106,7 +126,6 @@ public class Room
     public void LeaveRoom(string sessionID)
     {
         // 매칭 후 성공하여 방으로 들어왔지만, 레디를 하지 않고 나가는 상황에 따른 처리로 변경해야됨.
-
         var user = GetRoomUser(sessionID);
         if (user == null)
         {
@@ -140,6 +159,8 @@ public class Room
             byte[] bytes = PacketManager.PacketSerialized(req, PacketType.REQ_S_USER_LEAVE);
             BroadCast(bytes, sessionID);
         }
+
+        DisconnectRoomUser(user);
     }
 
     public void SendChat(string sessionID, string message)
@@ -264,9 +285,13 @@ public class Room
         }
     }
 
-    public bool IsUsing()
+    void DisconnectRoomUser(RoomUser user)
     {
-        return _users.Count > 0;
+        NTFUserDisconnectedReq ntf = new NTFUserDisconnectedReq();
+        ntf.SessionID = user.SessionID;
+
+        ServerPacketData packet = PacketManager.MakeInnerPacket(user.SessionID, ntf, InnerPacketType.NTF_USER_DISCONNECTED);
+        SendInnerFunc(packet);
     }
 
     void RoomClear()
@@ -278,10 +303,15 @@ public class Room
             {
                 continue;
             }
+
             userInfo.LeaveRoom();
+            DisconnectRoomUser(user);
         }
 
+        State = RoomState.Empty;
+
         _users.Clear();
+        _matchingUsers.Clear();
         _game.GameClear();
     }
 
