@@ -1,9 +1,6 @@
-using System.Text.Json;
+using System.Collections.Concurrent;
 using System.Threading.Tasks.Dataflow;
-using CloudStructures.Structures;
-using Common;
 using MemoryPack;
-using StackExchange.Redis;
 
 namespace GameServer;
 
@@ -15,7 +12,7 @@ public class MatchManager
 
     Task _logicTask = null!;
 
-    BufferBlock<ServerPacketData> _msgBuffer = new BufferBlock<ServerPacketData>();
+    ConcurrentQueue<ServerPacketData> _msgQueue = new ConcurrentQueue<ServerPacketData>();
 
     public MatchManager(ref readonly ServerOption option)
     {
@@ -41,7 +38,7 @@ public class MatchManager
 
     public void Distribute(ServerPacketData message)
     {
-        _msgBuffer.Post(message);
+        _msgQueue.Enqueue(message);
     }
 
     public void Start()
@@ -64,7 +61,11 @@ public class MatchManager
             {
                 await _matchRedisRepository.Process();
 
-                ServerPacketData message = _msgBuffer.Receive(timeout);
+                if (_msgQueue.TryDequeue(out var message) == false)
+                {
+                    continue;
+                }
+                
                 if (message.PacketType == (Int16)MatchInnerType.MAKE_EMPTY_ROOM)
                 {
                     var data = MemoryPackSerializer.Deserialize<MakeEmptyRoomReq>(message.Body);

@@ -63,6 +63,8 @@ public class MatchRedisRepository
 
     public async Task Process()
     {
+        // 빈 방이 있을 경우 매칭을 진행한다.
+
         var matchMessage = await _matchList.RightPopAsync();
         if (matchMessage.HasValue == true)
         {
