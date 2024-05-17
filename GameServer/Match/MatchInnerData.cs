@@ -15,5 +15,5 @@ public enum MatchInnerType
 [MemoryPackable]
 public partial class MakeEmptyRoomReq : IMessage
 {
-    public Int32 RoomID { get; set; }
+    public Int32 RoomNumber { get; set; }
 }

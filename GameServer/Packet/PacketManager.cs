@@ -89,7 +89,8 @@ public class PacketManager
 
     public void SetRoomDelegate(ref readonly RoomManager roomManager)
     {
-        _handler.GetRoomFunc = roomManager.GetRoom;
+        _handler.GetRoombyIDFunc = roomManager.GetRoomID;
+        _handler.GetRoombyNumberFunc = roomManager.GetRoomNumber;
         _handler.RoomCheckFunc = roomManager.RoomsCheck;
     }
 
@@ -129,22 +130,15 @@ public class PacketManager
     {
         while (MainServer.IsRunning)
         {
-            try
+            ServerPacketData data = _msgBuffer.Receive();
+
+            if (_onRecv.TryGetValue(data.PacketType, out var action))
             {
-                TimeSpan timeOut = TimeSpan.FromSeconds(1);
-                ServerPacketData data = _msgBuffer.Receive(timeOut);
-                
-                if (_onRecv.TryGetValue(data.PacketType, out var action))
-                {
-                    action(data);
-                }
-                else
-                {
-                    Logger.Error($"Not found handler : {data.PacketType}");
-                }
+                action(data);
             }
-            catch (TimeoutException)
+            else
             {
+                Logger.Error($"Not found handler : {data.PacketType}");
             }
         }
     }
@@ -160,7 +154,7 @@ public class PacketManager
             bodyDataSize = (Int16)bodyData.Length;
         }
 
-        var packetSize = (Int16)(bodyDataSize + PacketDef.PACKET_HEADER_SIZE);  
+        var packetSize = (Int16)(bodyDataSize + PacketDef.PACKET_HEADER_SIZE);
 
         var dataSource = new byte[packetSize];
 

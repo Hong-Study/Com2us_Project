@@ -1,10 +1,13 @@
 using Common;
+using MemoryPack;
 
 namespace GameServer;
 
 public class Room
 {
     public Int32 RoomID { get; private set; }
+    public Int32 RoomNumber { get; private set; }
+
     public RoomState State { get; private set; }
 
     SuperSocket.SocketBase.Logging.ILog Logger = null!;
@@ -15,7 +18,7 @@ public class Room
     Func<string, User?> GetUserInfoFunc = null!;
 
     Action<ServerPacketData> SendInnerFunc = null!;
-    Action<ServerPacketData> MatchInnerFunc = null!;
+    Action<byte[]> MatchInnerFunc = null!;
 
     OmokGame _game;
 
@@ -25,9 +28,10 @@ public class Room
     TimeSpan _maxGameTime;
     TimeSpan _maxMatchingWaitingTime;
 
-    public Room(Int32 roomId)
+    public Room(Int32 roomId, Int32 roomNumber)
     {
         RoomID = roomId;
+        RoomNumber = roomNumber;
         _game = new OmokGame();
         State = RoomState.Empty;
     }
@@ -58,7 +62,7 @@ public class Room
     public void SetDelegate(Func<string, byte[], bool> sendFunc, Func<string, User?> getUserInfoFunc
                             , Action<ServerPacketData> databaseSendFunc
                             , Action<ServerPacketData> sendInnerFunc
-                            , Action<ServerPacketData> matchInnerFunc)
+                            , Action<byte[]> matchInnerFunc)
     {
         SendFunc = sendFunc;
         GetUserInfoFunc = getUserInfoFunc;
@@ -123,7 +127,7 @@ public class Room
                 SendFunc(user.SessionID, bytes);
             }
 
-            user.RoomID = RoomID;
+            user.EnterRoom(RoomID, RoomNumber);
         }
         catch (Exception e)
         {
@@ -135,6 +139,7 @@ public class Room
     public void LeaveRoom(string sessionID)
     {
         // 매칭 후 성공하여 방으로 들어왔지만, 레디를 하지 않고 나가는 상황에 따른 처리로 변경해야됨.
+        System.Console.WriteLine("LeaveRoom" + sessionID);
         var user = GetRoomUser(sessionID);
         if (user == null)
         {
@@ -332,12 +337,12 @@ public class Room
     void SetEmptyRoom()
     {
         State = RoomState.Empty;
-        
-        MakeEmptyRoomReq req = new MakeEmptyRoomReq();
-        req.RoomID = RoomID;
 
-        var packet = MatchManager.MakeInnerPacket(MatchInnerType.MAKE_EMPTY_ROOM, req);
-        MatchInnerFunc(packet);
+        MakeEmptyRoomReq req = new MakeEmptyRoomReq();
+        req.RoomNumber = RoomNumber;
+
+        var bytes = MemoryPackSerializer.Serialize(req);
+        MatchInnerFunc(bytes);
     }
 
     void SendFailedResponse<T>(string sessionID, ErrorCode errorCode, PacketType packetType) where T : IResMessage, new()
