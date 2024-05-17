@@ -9,6 +9,8 @@ public class UserManager
     Func<string, byte[], bool> SendFunc = null!;
     Func<string, ClientSession> GetSessionFunc = null!;
 
+    Action<ServerPacketData> _redisSendFunc = null!;
+
     TimeSpan _heartBeatTimeMillisecond;
     TimeSpan _sessionTimeOutMillisecond;
 
@@ -49,6 +51,8 @@ public class UserManager
     {
         SendFunc = mainServer.SendData;
         GetSessionFunc = mainServer.GetSessionByID;
+
+        _redisSendFunc = mainServer.PacketRedisSend;
     }
 
     public void AddUser(string sessionID)
@@ -107,7 +111,10 @@ public class UserManager
             return;
         }
 
-        user.Clear();
+        SendSetUserState(user.UserID, UserState.LOBBY);
+
+        user.SessionDisconnect();
+
         SendResponse<SLogOutRes>(sessionID, ErrorCode.NONE, PacketType.RES_S_LOGOUT);
 
         _nowUserCount -= 1;
@@ -149,19 +156,8 @@ public class UserManager
             SessionDisconnect(sessionID);
             SendResponse<SLoginRes>(sessionID, ErrorCode.EXCEPTION_LOGIN_USER, PacketType.RES_S_LOGIN);
         }
-    }
 
-    public void LogoutUser(string sessionID)
-    {
-        var user = GetUserInfo(sessionID);
-        if (user == null)
-        {
-            SendResponse<SLogOutRes>(sessionID, ErrorCode.NOT_EXIST_USER, PacketType.RES_S_LOGOUT);
-            return;
-        }
-
-        user.Logouted();
-        SendResponse<SLogOutRes>(sessionID, ErrorCode.NONE, PacketType.RES_S_LOGOUT);
+        SendSetUserState(data.UserID, UserState.GAME);
     }
 
     public User? GetUserInfo(string sessionID)
@@ -306,5 +302,15 @@ public class UserManager
 
         byte[] bytes = PacketManager.PacketSerialized(res, packetType);
         SendFunc(sessionID, bytes);
+    }
+
+    void SendSetUserState(string userId, string state)
+    {
+        RDUserStateSet packet = new RDUserStateSet();
+        packet.UserID = userId;
+        packet.State = state;
+
+        var serverPacketData = RedisManager.MakeRedisPacket("", packet, RedisType.SET_RD_USER_STATE);
+        _redisSendFunc(serverPacketData);
     }
 }

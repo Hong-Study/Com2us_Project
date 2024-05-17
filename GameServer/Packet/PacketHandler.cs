@@ -14,7 +14,8 @@ public partial class PacketHandler
     public Action HeartHeatCheckFunc = null!;
     public Action<string> ReceivePongFunc = null!;
 
-    public Func<Int32, Room?> GetRoomFunc = null!;
+    public Func<Int32, Room?> GetRoombyIDFunc = null!;
+    public Func<Int32, Room?> GetRoombyNumberFunc = null!;
     public Action RoomCheckFunc = null!;
 
     public Func<string, byte[], bool> SendFunc = null!;
@@ -97,7 +98,7 @@ public partial class PacketHandler
             return null;
         }
 
-        var room = GetRoomFunc(user.RoomID);
+        var room = GetRoombyIDFunc(user.RoomID);
         if (room == null)
         {
             Logger.Error($"GetRoom({user.UserID}) : Room({user.RoomID}) is not exist");

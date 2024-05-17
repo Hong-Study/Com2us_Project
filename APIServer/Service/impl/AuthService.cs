@@ -55,8 +55,8 @@ public class AuthService : IAuthService
                 return FailedLogin(ErrorCode.FAILED_VERIFY_LOGIN);
             }
 
-            bool IsSuccess = await _memoryRepo.SetAccessToken(id.ToString(), token);
-            if (!IsSuccess)
+            bool isSuccess = await _memoryRepo.SetAccessToken(id.ToString(), token);
+            if (!isSuccess)
             {
                 return FailedLogin(ErrorCode.FAILED_SET_TOKEN);
             }
@@ -68,10 +68,11 @@ public class AuthService : IAuthService
                 return FailedLogin(ErrorCode.ERROR_USER_GAME_DATA);
             }
 
-            return new LoginResult(ErrorCode.NONE, gameData, _socketConfig.IP, _socketConfig.Port);
+            _ = await _memoryRepo.SetUserState(id, UserState.LOBBY);
 
+            return new LoginResult(ErrorCode.NONE, gameData, _socketConfig.IP, _socketConfig.Port);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             System.Console.WriteLine($"Failed Hive Connect {e.Message}");
             return FailedLogin(ErrorCode.FAILED_HIVE_CONNECT);
@@ -89,7 +90,7 @@ public class AuthService : IAuthService
         bool isExist = await _authRepo.CheckUserAsync(id);
         if (!isExist)
         {
-            if(await CreateUserGameData(id) == false)
+            if (await CreateUserGameData(id) == false)
             {
                 System.Console.WriteLine("Create User Game Data Failed");
                 return null;

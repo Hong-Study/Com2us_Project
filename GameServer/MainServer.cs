@@ -307,11 +307,8 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         }
     }
 
-    public void PacketMatchSend(ServerPacketData data)
+    public void PacketMatchSend(byte[] data)
     {
-        if (data.PacketType > (Int16)MatchInnerType.MATCH_PACKET_START && data.PacketType < (Int16)MatchInnerType.MATCH_PACKET_END)
-        {
-            _matchManager.Distribute(data);
-        }
+        _matchManager.Distribute(data);
     }
 }

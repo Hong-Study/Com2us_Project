@@ -53,7 +53,7 @@ public partial class NTFUserWinLoseUpdateRes : IResMessage
 [MemoryPackable]
 public partial class NTFMatchingReq : IMessage
 {
-    public Int32 RoomID { get; set; }
+    public Int32 RoomNumber { get; set; }
     public string FirstUserID { get; set; } = null!;
     public string SecondUserID { get; set; } = null!;
 }

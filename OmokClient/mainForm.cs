@@ -239,13 +239,13 @@ namespace GameClient
             var res = await ApiRequestMatch(apiServerUrl, userID, authToken);
             if (res == null)
             {
-                DevLog.Write("매칭 실패");
+                DevLog.Write("매칭 요청 실패");
                 return;
             }
 
             if (res.ErrorCode != ErrorCode.NONE)
             {
-                DevLog.Write("매칭 실패");
+                DevLog.Write($"매칭 요청 실패 {res.ErrorCode.ToString()}");
                 return;
             }
 
@@ -276,7 +276,7 @@ namespace GameClient
 
             if (res.ErrorCode != ErrorCode.NONE)
             {
-                DevLog.Write("매칭 취소 실패");
+                DevLog.Write($"매칭 취소 실패 {res.ErrorCode.ToString()}");
                 return;
             }
             DevLog.Write("매칭 취소 성공");
@@ -324,13 +324,13 @@ namespace GameClient
             var res = await ApiCheckMatch(apiServerUrl, userID, authToken);
             if (res == null)
             {
-                DevLog.Write("매칭 중");
+                DevLog.Write("매칭 체크 요청 실패");
                 return;
             }
 
             if (res.ErrorCode == ErrorCode.NONE)
             {
-                DevLog.Write("매칭 성공");
+                DevLog.Write("매칭 요청 성공");
                 _isMatchingSuccess = true;
 
                 textBoxSocketIP.Text = res.ServerAddress;
@@ -342,7 +342,7 @@ namespace GameClient
             }
             else
             {
-                DevLog.Write("매칭 실패");
+                DevLog.Write($"매칭 진행 중");
                 _isMatchingSuccess = false;
                 _timer.Start();
             }
