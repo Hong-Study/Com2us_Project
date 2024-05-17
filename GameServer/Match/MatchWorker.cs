@@ -3,7 +3,7 @@ using CloudStructures.Structures;
 
 namespace GameServer;
 
-public class MatchRedisRepository
+public class MatchWorker
 {
     RedisConnector _redisMatchConnection = null!;
     RedisConnector _redisCompleteConnection = null!;
@@ -20,7 +20,7 @@ public class MatchRedisRepository
 
     List<UsingRoomInfo> _usingRoomInfos = new List<UsingRoomInfo>();
 
-    public MatchRedisRepository(string serverAddress, Int32 serverPort, string connectionString, string matchKey, string completeKey)
+    public MatchWorker(string serverAddress, Int32 serverPort, string connectionString, string matchKey, string completeKey)
     {
         _serverAddress = serverAddress;
         _serverPort = serverPort;
@@ -49,9 +49,9 @@ public class MatchRedisRepository
         roomManager.InitUsingRoomList(ref _usingRoomInfos);
     }
 
-    public void SetEmptyRoom(Int32 roomID)
+    public void SetEmptyRoom(Int32 roomNumber)
     {
-        var emptyRoomInfo = _usingRoomInfos.Find(x => x.RoomID == roomID);
+        var emptyRoomInfo = _usingRoomInfos.Find(x => x.RoomNumber == roomNumber);
         if (emptyRoomInfo == null)
         {
             Logger.Error("EmptyRoomInfo is null");
@@ -61,18 +61,26 @@ public class MatchRedisRepository
         emptyRoomInfo.RoomState = RoomState.Empty;
     }
 
-    public async Task Process()
+    public void Process()
     {
-        // 빈 방이 있을 경우 매칭을 진행한다.
+        if (!IsEmptyRoom())
+        {
+            Thread.Sleep(1);
+            return;
+        }
 
-        var matchMessage = await _matchList.RightPopAsync();
+        var matchMessage = _matchList.RightPopAsync().Result;
         if (matchMessage.HasValue == true)
         {
-            await OnMatchingHandle(matchMessage.Value);
+            OnMatchingHandle(matchMessage.Value);
+        }
+        else
+        {
+            Thread.Sleep(1);
         }
     }
 
-    async Task OnMatchingHandle(string result)
+    void OnMatchingHandle(string result)
     {        
         var matchingData = JsonSerializer.Deserialize<MatchingData>(result);
         if (matchingData == null)
@@ -82,19 +90,13 @@ public class MatchRedisRepository
         }
 
         var emptyRoomInfo = GetEmptyRoom();
-        if (emptyRoomInfo == null)
-        {
-            // TODO
-            Logger.Error("EmptyRoomInfo is null");
-            return;
-        }
 
-        Logger.Info($"Matching Success RoomID : {emptyRoomInfo.RoomID}");
+        Logger.Info($"Matching Success RoomID : {emptyRoomInfo.RoomNumber}");
 
         emptyRoomInfo.RoomState = RoomState.Waiting;
 
         NTFMatchingReq req = new NTFMatchingReq();
-        req.RoomID = emptyRoomInfo.RoomID;
+        req.RoomNumber = emptyRoomInfo.RoomNumber;
         req.FirstUserID = matchingData.FirstUserID;
         req.SecondUserID = matchingData.SecondUserID;
 
@@ -109,14 +111,23 @@ public class MatchRedisRepository
         {
             ServerAddress = _serverAddress,
             Port = _serverPort,
-            RoomNumber = emptyRoomInfo.RoomID
+            RoomNumber = emptyRoomInfo.RoomNumber
         };
 
-        await _completeList.LeftPushAsync(JsonSerializer.Serialize(completeMatchingData));
+        var pushResult = _completeList.LeftPushAsync(JsonSerializer.Serialize(completeMatchingData)).Result;
+        if (pushResult == 0)
+        {
+            Logger.Error("CompleteList LeftPush Fail");
+        }
     }
 
-    UsingRoomInfo? GetEmptyRoom()
+    bool IsEmptyRoom()
     {
-        return _usingRoomInfos.Find(x => x.RoomState == RoomState.Empty);
+        return _usingRoomInfos.Exists(x => x.RoomState == RoomState.Empty);
+    }
+
+    UsingRoomInfo GetEmptyRoom()
+    {
+        return _usingRoomInfos.Find(x => x.RoomState == RoomState.Empty)!;
     }
 }

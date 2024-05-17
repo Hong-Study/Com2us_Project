@@ -5,6 +5,7 @@ namespace GameServer;
 public class RedisHandler
 {
     public Func<string, string, RedisConnector, ErrorCode> ValidataeTokenFunc = null!;
+    public Action<string, string, RedisConnector> SetUserStateFunc = null!;
 
     public Action<ServerPacketData> InnerSendFunc = null!;
     public Action<ServerPacketData> DatabaseSendFunc = null!;
@@ -43,5 +44,18 @@ public class RedisHandler
             var serverPacketData = DatabaseManager.MakeDatabasePacket(sessionID, req, DatabaseType.REQ_DB_USER_LOGIN);
             DatabaseSendFunc(serverPacketData);
         }
+    }
+
+    public void Handle_RD_SetUserState(string sessionID, IMessage message, RedisConnector connector)
+    {
+
+        
+        var packet = message as RDUserStateSet;
+        if (packet == null)
+        {
+            return;
+        }
+
+        SetUserStateFunc(packet.UserID, packet.State, connector);
     }
 }

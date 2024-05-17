@@ -59,7 +59,7 @@ public partial class PacketHandler
         var user = GetUserFunc(packet.SessionID);
         if (user != null)
         {
-            var room = GetRoomFunc(user.RoomID);
+            var room = GetRoombyIDFunc(user.RoomID);
             if (room != null)
             {
                 room.LeaveRoom(sessionID);
@@ -97,7 +97,7 @@ public partial class PacketHandler
             return;
         }
 
-        var room = GetRoomFunc(packet.RoomID);
+        var room = GetRoombyNumberFunc(packet.RoomNumber);
         if (room == null)
         {
             return;

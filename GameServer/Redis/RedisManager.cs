@@ -13,6 +13,7 @@ public class RedisManager
 
     Dictionary<Int16, Action<ServerPacketData, RedisConnector>> _onRecv = new Dictionary<Int16, Action<ServerPacketData, RedisConnector>>();
     Dictionary<Int16, Action<string, IMessage, RedisConnector>> _onHandler = new Dictionary<Int16, Action<string, IMessage, RedisConnector>>();
+
     List<Thread> _logicThreads = new List<Thread>();
     BufferBlock<ServerPacketData> _msgBuffer = new BufferBlock<ServerPacketData>();
 
@@ -41,6 +42,9 @@ public class RedisManager
     {
         _onRecv.Add((Int16)RedisType.REQ_RD_USER_LOGIN, Make<RDUserLoginReq>);
         _onHandler.Add((Int16)RedisType.REQ_RD_USER_LOGIN, _handler.Handle_RD_UserLogin);
+
+        _onRecv.Add((Int16)RedisType.SET_RD_USER_STATE, Make<RDUserStateSet>);
+        _onHandler.Add((Int16)RedisType.SET_RD_USER_STATE, _handler.Handle_RD_SetUserState);
     }
 
     public void SetMainServerDelegate(ref readonly MainServer mainServer)
@@ -52,6 +56,7 @@ public class RedisManager
     void SetDelegate()
     {
         _handler.ValidataeTokenFunc = _redis.ValidateToken;
+        _handler.SetUserStateFunc = _redis.SetUserState;
     }
 
     public void Start(Int32 threadCount = 1)
@@ -83,24 +88,15 @@ public class RedisManager
 
         while (MainServer.IsRunning)
         {
-            // 멈출 때, Blocking 처리를 어떻게 할 지 고민해야 함.
-            try
-            {
-                TimeSpan timeOut = TimeSpan.FromSeconds(1);
-                ServerPacketData data = _msgBuffer.Receive(timeOut);
+            ServerPacketData data = _msgBuffer.Receive();
 
-                if (_onRecv.TryGetValue(data.PacketType, out var action))
-                {
-                    action(data, redisConnector);
-                }
-                else
-                {
-                    Logger.Error($"Not found handler : {data.PacketType}");
-                }
+            if (_onRecv.TryGetValue(data.PacketType, out var action))
+            {
+                action(data, redisConnector);
             }
-            catch(TimeoutException)
+            else
             {
-
+                Logger.Error($"Not found handler : {data.PacketType}");
             }
         }
     }

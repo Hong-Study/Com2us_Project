@@ -23,7 +23,7 @@ public partial class PacketHandler
             return;
         }
 
-        if (user.RoomID != 0)
+        if (user.RoomNumber != 0)
         {
             Logger.Error($"GetUser : User{sessionID} is already in room");
 
@@ -32,7 +32,7 @@ public partial class PacketHandler
             return;
         }
 
-        var room = GetRoomFunc(packet.RoomNumber);
+        var room = GetRoombyNumberFunc(packet.RoomNumber);
         if (room == null)
         {
             Logger.Error($"GetRoom : Room({user.UserID}) is not exist");

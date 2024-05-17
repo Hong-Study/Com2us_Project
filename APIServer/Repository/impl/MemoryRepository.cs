@@ -4,7 +4,8 @@ using CloudStructures.Structures;
 public class MemoryRepository : IMemoryRepository
 {
     public RedisConnection _redisConn;
-    public string _tokenKey = "_token";
+    public string _tokenKey = "token_";
+    public string _userStateKey = "_state";
     public MemoryRepository(IConfiguration config)
     {
         string? connectionString = config.GetConnectionString("Redis");
@@ -25,7 +26,7 @@ public class MemoryRepository : IMemoryRepository
             RedisString<string> redis = new(_redisConn, key, TimeSpanUtils.LoginTimeSpan());
             bool IsSuccess = await redis.DeleteAsync();
 
-            
+
             return IsSuccess;
         }
         catch (Exception e)
@@ -66,6 +67,21 @@ public class MemoryRepository : IMemoryRepository
         {
             RedisString<string> redis = new(_redisConn, key, TimeSpanUtils.NxKeyTimeSpan());
             return await redis.SetAsync(token);
+        }
+        catch (Exception e)
+        {
+            System.Console.WriteLine(e.Message);
+            return false;
+        }
+    }
+
+    public async Task<bool> SetUserState(string userID, string state)
+    {
+        string key = userID + _userStateKey;
+        try
+        {
+            RedisString<string> redis = new(_redisConn, key, TimeSpanUtils.NxKeyTimeSpan());
+            return await redis.SetAsync(state);
         }
         catch (Exception e)
         {

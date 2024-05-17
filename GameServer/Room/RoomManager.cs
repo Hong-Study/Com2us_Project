@@ -23,7 +23,7 @@ public class RoomManager
 
         for (Int32 i = 0; i < _maxRoomCount; i++)
         {
-            _roomPool.Add(new Room(i + _roomStartNumber));
+            _roomPool.Add(new Room(i, _roomStartNumber + i));
         }
     }
 
@@ -32,7 +32,7 @@ public class RoomManager
         foreach (var room in _roomPool)
         {
             UsingRoomInfo usingRoomInfo = new UsingRoomInfo();
-            usingRoomInfo.RoomID = room.RoomID;
+            usingRoomInfo.RoomNumber = room.RoomNumber;
             usingRoomInfo.RoomState = RoomState.Empty;
 
             usingRoomInfos.Add(usingRoomInfo);
@@ -48,20 +48,30 @@ public class RoomManager
         }
     }
 
-    public Room? GetRoom(Int32 roomID)
+    public Room? GetRoomID(Int32 roomID)
     {
-        if (roomID < _roomStartNumber || roomID >= _maxRoomCount + _roomStartNumber)
+        if (roomID < 0 || roomID > _maxRoomCount)
         {
             return null;
         }
 
-        return _roomPool.Find(r => r.RoomID == roomID);
+        return _roomPool[roomID];
+    }
+
+    public Room? GetRoomNumber(Int32 roomNumber)
+    {
+        if (roomNumber < _roomStartNumber || roomNumber >= _roomStartNumber + _maxRoomCount)
+        {
+            return null;
+        }
+
+        return _roomPool.Find(r => r.RoomNumber == roomNumber);
     }
 
     public void SetDelegate(Func<string, byte[], bool> SendFunc, Func<string, User?> GetUserInfoFunc
                             , Action<ServerPacketData> databaseSendFunc
                             , Action<ServerPacketData> sendInnerFunc
-                            , Action<ServerPacketData> matchInnerFunc)
+                            , Action<byte[]> matchInnerFunc)
     {
         foreach (var room in _roomPool)
         {
