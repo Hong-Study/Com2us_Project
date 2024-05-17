@@ -87,6 +87,7 @@ public partial class SRoomLeaveRes : IResMessage
 {
     public ErrorCode ErrorCode { get; set; }
 }
+
 [MemoryPackable]
 public partial class SUserLeaveReq : IMessage
 {

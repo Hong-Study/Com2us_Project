@@ -8,7 +8,8 @@ public class User
     public bool IsConnect { get; set; } = false;
 
     public bool IsLogin { get; set; } = false;
-    public Int32 RoomID { get; set; } = 0;
+    public Int32 RoomID { get; set; } = -1;
+    public Int32 RoomNumber { get; set; } = 0;
 
     public string UserID { get => Data.UserID; set => Data.UserID = value; }
     public Int32 Level { get => Data.Level; set => Data.Level = value; }
@@ -24,11 +25,8 @@ public class User
 
     public void Clear()
     {
-        Logouted();
-
-        SessionID = "";
-        RoomID = 0;
-        IsConnect = false;
+        LeaveRoom();
+        SessionDisconnect();
     }
 
     public void Logined(UserData data)
@@ -40,39 +38,44 @@ public class User
         Gold = data.Gold;
         Win = data.Win;
         Lose = data.Lose;
-        
-        this.IsLogin = true;
+
+        IsLogin = true;
 
         PingTime = DateTime.Now;
     }
 
-    public void Logouted()
-    {
-        this.UserID = "";
-        this.IsLogin = false;
-    }
-
     public bool IsConfirm(string sessionID)
     {
-        return this.SessionID == sessionID;
+        return SessionID == sessionID;
     }
 
-    public void EnterRoom(Int32 roomId)
+    public void EnterRoom(Int32 roomID, Int32 roomNumber)
     {
-        this.RoomID = roomId;
+        RoomID = roomID;
+        RoomNumber = roomNumber;
     }
 
     public void LeaveRoom()
     {
-        this.RoomID = 0;
+        RoomID = 0;
+        RoomNumber = 0;
     }
 
     public void SessionConnected(string sessionID)
     {
-        this.IsConnect = true;
-        this.IsLogin = false;
+        IsConnect = true;
 
-        this.ConnectTime = DateTime.Now;
-        this.SessionID = sessionID;
+        ConnectTime = DateTime.Now;
+        SessionID = sessionID;
+    }
+
+    public void SessionDisconnect()
+    {
+        IsConnect = false;
+        IsLogin = false;
+
+        ConnectTime = DateTime.MinValue;
+        UserID = "";
+        SessionID = "";
     }
 }

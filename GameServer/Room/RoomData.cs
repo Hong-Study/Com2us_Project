@@ -18,7 +18,7 @@ public enum BoardType : Int16
 
 public class UsingRoomInfo
 {
-    public Int32 RoomID { get; set; }
+    public Int32 RoomNumber { get; set; }
     public RoomState RoomState { get; set; } = RoomState.Empty;
 }
 

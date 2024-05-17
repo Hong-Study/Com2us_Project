@@ -88,22 +88,15 @@ public class DatabaseManager
 
         while (MainServer.IsRunning)
         {
-            try
-            {
-                TimeSpan timeOut = TimeSpan.FromSeconds(1);
-                ServerPacketData data = _msgBuffer.Receive(timeOut);
+            ServerPacketData data = _msgBuffer.Receive();
 
-                if (_onRecv.TryGetValue(data.PacketType, out var action))
-                {
-                    action(data, connector);
-                }
-                else
-                {
-                    Logger.Error($"Not found handler : {data.PacketType}");
-                }
-            }
-            catch (TimeoutException)
+            if (_onRecv.TryGetValue(data.PacketType, out var action))
             {
+                action(data, connector);
+            }
+            else
+            {
+                Logger.Error($"Not found handler : {data.PacketType}");
             }
         }
     }
