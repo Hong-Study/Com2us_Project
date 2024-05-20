@@ -5,7 +5,7 @@ VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatchMackingServer", "MatchMackingServer.csproj", "{DFA43A12-699A-4122-A8DB-70D9FF6E9AFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Defines", "..\thirdparty\GameCommon\Defines.csproj", "{A370DB6A-D16E-4E24-B75D-4A91366DDD2A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameCommon", "..\thirdparty\GameCommon\GameCommon.csproj", "{A370DB6A-D16E-4E24-B75D-4A91366DDD2A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
