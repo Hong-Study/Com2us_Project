@@ -4,7 +4,7 @@ namespace GameServer;
 
 public partial class PacketHandler
 {
-    public void Handle_NTF_CheckSessionLogin(string sessionID, IMessage message)
+    public void HandleNTFCheckSessionLogin(string sessionID, IMessage message)
     {
         NTFCheckSessionLoginReq? packet = message as NTFCheckSessionLoginReq;
         if (packet == null)
@@ -15,7 +15,7 @@ public partial class PacketHandler
         SessionLoginTimeoutCheckFunc();
     }
 
-    public void Handle_NTF_HeartBeat(string sessionID, IMessage message)
+    public void HandleNTFHeartBeat(string sessionID, IMessage message)
     {
         NTFHeartBeatReq? packet = message as NTFHeartBeatReq;
         if (packet == null)
@@ -26,7 +26,7 @@ public partial class PacketHandler
         HeartHeatCheckFunc();
     }
 
-    public void Handle_NTF_RoomsCheck(string sessionID, IMessage message)
+    public void HandleNTFRoomsCheck(string sessionID, IMessage message)
     {
         NTFRoomsCheckReq? packet = message as NTFRoomsCheckReq;
         if (packet == null)
@@ -37,7 +37,7 @@ public partial class PacketHandler
         RoomCheckFunc();
     }
 
-    public void Handle_NTF_SessionConnected(string sessionID, IMessage message)
+    public void HandleNTFSessionConnected(string sessionID, IMessage message)
     {
         NTFSessionConnectedReq? packet = message as NTFSessionConnectedReq;
         if (packet == null)
@@ -48,7 +48,7 @@ public partial class PacketHandler
         AddUserFunc(packet.SessionID);
     }
 
-    public void Handle_NTF_SessionDisconnected(string sessionID, IMessage message)
+    public void HandleNTFSessionDisconnected(string sessionID, IMessage message)
     {
         NTFSessionDisconnectedReq? packet = message as NTFSessionDisconnectedReq;
         if (packet == null)
@@ -69,7 +69,7 @@ public partial class PacketHandler
         RemoveUserFunc(packet.SessionID);
     }
 
-    public void Handle_NTF_UserLogin(string sessionID, IMessage message)
+    public void HandleNTFUserLogin(string sessionID, IMessage message)
     {
         NTFUserLoginRes? packet = message as NTFUserLoginRes;
         if (packet == null)
@@ -80,7 +80,7 @@ public partial class PacketHandler
         LoginUserFunc(sessionID, packet.ErrorCode, packet.UserData);
     }
 
-    public void Handle_NTF_UpdateWinLoseCount(string sessionID, IMessage message)
+    public void HandleNTFUpdateWinLoseCount(string sessionID, IMessage message)
     {
         NTFUserWinLoseUpdateRes? packet = message as NTFUserWinLoseUpdateRes;
         if (packet == null)
@@ -89,7 +89,7 @@ public partial class PacketHandler
         }
     }
 
-    public void Handle_NTF_MatchingRoom(string sessionID, IMessage message)
+    public void HandleNTFMatchingRoom(string sessionID, IMessage message)
     {
         NTFMatchingReq? packet = message as NTFMatchingReq;
         if (packet == null)
@@ -106,7 +106,7 @@ public partial class PacketHandler
         room.SetGameMatching(packet.FirstUserID, packet.SecondUserID);
     }
 
-    public void Handle_NTF_UserDisconnected(string sessionID, IMessage message)
+    public void HandleNTFUserDisconnected(string sessionID, IMessage message)
     {
         var session = GetSessionFunc(sessionID);
         if(session == null)
