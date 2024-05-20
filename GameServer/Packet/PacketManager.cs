@@ -28,52 +28,52 @@ public class PacketManager
     public void InitHandler()
     {
         _onRecv.Add((Int16)PacketType.RES_C_PONG, Make<CPongRes>);
-        _onHandler.Add((Int16)PacketType.RES_C_PONG, _handler.Handle_C_Pong);
+        _onHandler.Add((Int16)PacketType.RES_C_PONG, _handler.HandleCPong);
 
         _onRecv.Add((Int16)PacketType.REQ_C_LOGIN, Make<CLoginReq>);
-        _onHandler.Add((Int16)PacketType.REQ_C_LOGIN, _handler.Handle_C_Login);
+        _onHandler.Add((Int16)PacketType.REQ_C_LOGIN, _handler.HandleCLogin);
         _onRecv.Add((Int16)PacketType.REQ_C_LOGOUT, Make<CLogOutReq>);
-        _onHandler.Add((Int16)PacketType.REQ_C_LOGOUT, _handler.Handle_C_Logout);
+        _onHandler.Add((Int16)PacketType.REQ_C_LOGOUT, _handler.HandleCLogout);
 
         _onRecv.Add((Int16)PacketType.REQ_C_ROOM_ENTER, Make<CRoomEnterReq>);
-        _onHandler.Add((Int16)PacketType.REQ_C_ROOM_ENTER, _handler.Handle_C_RoomEnter);
+        _onHandler.Add((Int16)PacketType.REQ_C_ROOM_ENTER, _handler.HandleCRoomEnter);
         _onRecv.Add((Int16)PacketType.REQ_C_ROOM_LEAVE, Make<CRoomLeaveReq>);
-        _onHandler.Add((Int16)PacketType.REQ_C_ROOM_LEAVE, _handler.Handle_C_RoomLeave);
+        _onHandler.Add((Int16)PacketType.REQ_C_ROOM_LEAVE, _handler.HandleCRoomLeave);
         _onRecv.Add((Int16)PacketType.REQ_C_ROOM_CHAT, Make<CRoomChatReq>);
-        _onHandler.Add((Int16)PacketType.REQ_C_ROOM_CHAT, _handler.Handle_C_RoomChat);
+        _onHandler.Add((Int16)PacketType.REQ_C_ROOM_CHAT, _handler.HandleCRoomChat);
 
         _onRecv.Add((Int16)PacketType.REQ_C_GAME_READY, Make<CGameReadyReq>);
-        _onHandler.Add((Int16)PacketType.REQ_C_GAME_READY, _handler.Handle_C_GameReady);
+        _onHandler.Add((Int16)PacketType.REQ_C_GAME_READY, _handler.HandleCGameReady);
         _onRecv.Add((Int16)PacketType.RES_C_GAME_START, Make<CGameStartRes>);
-        _onHandler.Add((Int16)PacketType.RES_S_GAME_READY, _handler.Handle_C_GameStart);
+        _onHandler.Add((Int16)PacketType.RES_S_GAME_READY, _handler.HandleCGameStart);
         _onRecv.Add((Int16)PacketType.REQ_C_GAME_PUT, Make<CGamePutReq>);
-        _onHandler.Add((Int16)PacketType.REQ_C_GAME_PUT, _handler.Handle_C_GamePut);
+        _onHandler.Add((Int16)PacketType.REQ_C_GAME_PUT, _handler.HandleCGamePut);
         _onRecv.Add((Int16)PacketType.RES_C_TURN_CHANGE, Make<CTurnChangeRes>);
-        _onHandler.Add((Int16)PacketType.RES_C_TURN_CHANGE, _handler.Handle_C_TurnChange);
+        _onHandler.Add((Int16)PacketType.RES_C_TURN_CHANGE, _handler.HandleCTurnChange);
         _onRecv.Add((Int16)PacketType.RES_C_GAME_END, Make<CGameEndRes>);
-        _onHandler.Add((Int16)PacketType.RES_C_GAME_END, _handler.Handle_C_GameEnd);
+        _onHandler.Add((Int16)PacketType.RES_C_GAME_END, _handler.HandleCGameEnd);
         _onRecv.Add((Int16)PacketType.RES_C_GAME_CANCLE, Make<CGameCancleRes>);
-        _onHandler.Add((Int16)PacketType.RES_C_GAME_CANCLE, _handler.Handle_C_GameCancle);
+        _onHandler.Add((Int16)PacketType.RES_C_GAME_CANCLE, _handler.HandleCGameCancle);
 
         _onRecv.Add((Int16)InnerPacketType.NTF_SESSION_CONNECTED, Make<NTFSessionConnectedReq>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_SESSION_CONNECTED, _handler.Handle_NTF_SessionConnected);
+        _onHandler.Add((Int16)InnerPacketType.NTF_SESSION_CONNECTED, _handler.HandleNTFSessionConnected);
         _onRecv.Add((Int16)InnerPacketType.NTF_SESSION_DISCONNECTED, Make<NTFSessionDisconnectedReq>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_SESSION_DISCONNECTED, _handler.Handle_NTF_SessionDisconnected);
+        _onHandler.Add((Int16)InnerPacketType.NTF_SESSION_DISCONNECTED, _handler.HandleNTFSessionDisconnected);
         _onRecv.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, Make<NTFCheckSessionLoginReq>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, _handler.Handle_NTF_CheckSessionLogin);
+        _onHandler.Add((Int16)InnerPacketType.NTF_CHECK_SESSION_LOGIN, _handler.HandleNTFCheckSessionLogin);
         _onRecv.Add((Int16)InnerPacketType.NTF_HEART_BEAT, Make<NTFHeartBeatReq>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_HEART_BEAT, _handler.Handle_NTF_HeartBeat);
+        _onHandler.Add((Int16)InnerPacketType.NTF_HEART_BEAT, _handler.HandleNTFHeartBeat);
         _onRecv.Add((Int16)InnerPacketType.NTF_ROOMS_CHECK, Make<NTFRoomsCheckReq>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_ROOMS_CHECK, _handler.Handle_NTF_RoomsCheck);
+        _onHandler.Add((Int16)InnerPacketType.NTF_ROOMS_CHECK, _handler.HandleNTFRoomsCheck);
         _onRecv.Add((Int16)InnerPacketType.NTF_RES_USER_LOGIN, Make<NTFUserLoginRes>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_RES_USER_LOGIN, _handler.Handle_NTF_UserLogin);
+        _onHandler.Add((Int16)InnerPacketType.NTF_RES_USER_LOGIN, _handler.HandleNTFUserLogin);
         _onRecv.Add((Int16)InnerPacketType.NTF_RES_UPDATE_WIN_LOSE_COUNT, Make<NTFUserWinLoseUpdateRes>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_RES_UPDATE_WIN_LOSE_COUNT, _handler.Handle_NTF_UpdateWinLoseCount);
+        _onHandler.Add((Int16)InnerPacketType.NTF_RES_UPDATE_WIN_LOSE_COUNT, _handler.HandleNTFUpdateWinLoseCount);
 
         _onRecv.Add((Int16)InnerPacketType.NTF_REQ_MATCHING_ROOM, Make<NTFMatchingReq>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_REQ_MATCHING_ROOM, _handler.Handle_NTF_MatchingRoom);
+        _onHandler.Add((Int16)InnerPacketType.NTF_REQ_MATCHING_ROOM, _handler.HandleNTFMatchingRoom);
         _onRecv.Add((Int16)InnerPacketType.NTF_USER_DISCONNECTED, Make<NTFUserDisconnectedReq>);
-        _onHandler.Add((Int16)InnerPacketType.NTF_USER_DISCONNECTED, _handler.Handle_NTF_UserDisconnected);
+        _onHandler.Add((Int16)InnerPacketType.NTF_USER_DISCONNECTED, _handler.HandleNTFUserDisconnected);
     }
 
     public void SetUserDelegate(ref readonly UserManager userManager)

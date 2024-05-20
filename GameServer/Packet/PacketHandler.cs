@@ -30,7 +30,7 @@ public partial class PacketHandler
         Logger = logger;
     }
 
-    public void Handle_C_Login(string sessionID, IMessage message)
+    public void HandleCLogin(string sessionID, IMessage message)
     {
         var packet = message as CLoginReq;
         if (packet == null)
@@ -47,7 +47,7 @@ public partial class PacketHandler
         RedisSendFunc(serverPacketData);
     }
 
-    public void Handle_C_Logout(string sessionID, IMessage message)
+    public void HandleCLogout(string sessionID, IMessage message)
     {
         var packet = message as CLogOutReq;
         if (packet == null)
@@ -58,7 +58,7 @@ public partial class PacketHandler
         RemoveUserFunc(sessionID);
     }
 
-    public void Handle_C_Pong(string sessionID, IMessage message)
+    public void HandleCPong(string sessionID, IMessage message)
     {
         var packet = message as CPongRes;
         if (packet == null)
