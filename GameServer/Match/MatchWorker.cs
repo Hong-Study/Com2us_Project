@@ -8,8 +8,8 @@ public class MatchWorker
     RedisConnector _redisMatchConnection = null!;
     RedisConnector _redisCompleteConnection = null!;
 
-    RedisList<string> _matchList;
-    RedisList<string> _completeList;
+    RedisList<MatchingData> _matchList;
+    RedisList<CompleteMatchingData> _completeList;
 
     SuperSocket.SocketBase.Logging.ILog Logger = null!;
 
@@ -30,8 +30,8 @@ public class MatchWorker
 
         TimeSpan timeout = TimeSpan.MaxValue;
 
-        _matchList = new RedisList<string>(_redisMatchConnection.RedisCon, matchKey, timeout);
-        _completeList = new RedisList<string>(_redisCompleteConnection.RedisCon, completeKey, timeout);
+        _matchList = new(_redisMatchConnection.RedisCon, matchKey, timeout);
+        _completeList = new(_redisCompleteConnection.RedisCon, completeKey, timeout);
     }
 
     public void InitLogger(SuperSocket.SocketBase.Logging.ILog logger)
@@ -80,15 +80,8 @@ public class MatchWorker
         }
     }
 
-    void OnMatchingHandle(string result)
-    {        
-        var matchingData = JsonSerializer.Deserialize<MatchingData>(result);
-        if (matchingData == null)
-        {
-            Logger.Error("MatchingData is null");
-            return;
-        }
-
+    void OnMatchingHandle(MatchingData matchingData)
+    {
         var emptyRoomInfo = GetEmptyRoom();
 
         Logger.Info($"Matching Success RoomID : {emptyRoomInfo.RoomNumber}");
@@ -114,7 +107,7 @@ public class MatchWorker
             RoomNumber = emptyRoomInfo.RoomNumber
         };
 
-        var pushResult = _completeList.LeftPushAsync(JsonSerializer.Serialize(completeMatchingData)).Result;
+        var pushResult = _completeList.LeftPushAsync(completeMatchingData).Result;
         if (pushResult == 0)
         {
             Logger.Error("CompleteList LeftPush Fail");
