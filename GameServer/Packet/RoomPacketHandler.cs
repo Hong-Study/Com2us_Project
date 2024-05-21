@@ -5,7 +5,7 @@ namespace GameServer;
 
 public partial class PacketHandler
 {
-    public void Handle_C_RoomEnter(string sessionID, IMessage message)
+    public void HandleCRoomEnter(string sessionID, IMessage message)
     {
         CRoomEnterReq? packet = message as CRoomEnterReq;
         if (packet == null)
@@ -45,7 +45,7 @@ public partial class PacketHandler
         room.EnterRoom(user);
     }
 
-    public void Handle_C_RoomLeave(string sessionID, IMessage message)
+    public void HandleCRoomLeave(string sessionID, IMessage message)
     {
         CRoomLeaveReq? packet = message as CRoomLeaveReq;
         if (packet == null)
@@ -60,7 +60,7 @@ public partial class PacketHandler
         }
     }
 
-    public void Handle_C_RoomChat(string sessionID, IMessage message)
+    public void HandleCRoomChat(string sessionID, IMessage message)
     {
         CRoomChatReq? packet = message as CRoomChatReq;
         if (packet == null)
