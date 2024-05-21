@@ -48,8 +48,6 @@ public class RedisHandler
 
     public void Handle_RD_SetUserState(string sessionID, IMessage message, RedisConnector connector)
     {
-
-        
         var packet = message as RDUserStateSet;
         if (packet == null)
         {
