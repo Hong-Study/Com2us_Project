@@ -5,7 +5,7 @@ VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameServer", "GameServer.csproj", "{F7D9F2F6-C56D-416A-ABA6-93049DFA5EA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Defines", "..\thirdparty\GameCommon\Defines.csproj", "{55A05928-6316-48A8-919E-454EF17FFA88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameCommon", "..\thirdparty\GameCommon\GameCommon.csproj", "{55A05928-6316-48A8-919E-454EF17FFA88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

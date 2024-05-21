@@ -141,7 +141,7 @@ public class MatchWoker : IMatchWoker
             {
                 if (_reqList.Count < 2)
                 {
-                    System.Threading.Thread.Sleep(100);
+                    System.Threading.Thread.Sleep(250);
                     continue;
                 }
 
