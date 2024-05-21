@@ -31,10 +31,10 @@ public class MatchWoker : IMatchWoker
     RedisConnection _redisUserStateConnection = null!;
 
     RedisConnection _redisCompleteConnection = null!;
-    RedisList<string> _redisCompleteList;
+    RedisList<CompleteMatchingData> _redisCompleteList;
 
     RedisConnection _redisMatchConnection = null!;
-    RedisList<string> _redisMatchList;
+    RedisList<MatchingData> _redisMatchList;
 
     string _redisAddress = "";
 
@@ -180,7 +180,7 @@ public class MatchWoker : IMatchWoker
                     SecondUserID = user2
                 };
 
-                var result = _redisMatchList.LeftPushAsync(JsonSerializer.Serialize(matchingData)).Result;
+                var result = _redisMatchList.LeftPushAsync(matchingData).Result;
             }
             catch (Exception e)
             {
@@ -201,7 +201,7 @@ public class MatchWoker : IMatchWoker
                     continue;
                 }
 
-                var data = JsonSerializer.Deserialize<CompleteMatchingData>(result.Value);
+                var data = result.Value;
                 if (data == null)
                     return;
 
