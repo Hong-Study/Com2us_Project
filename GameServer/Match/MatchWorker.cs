@@ -65,7 +65,7 @@ public class MatchWorker
     {
         if (!IsEmptyRoom())
         {
-            Thread.Sleep(1);
+            Thread.Sleep(1000);
             return;
         }
 
@@ -76,7 +76,7 @@ public class MatchWorker
         }
         else
         {
-            Thread.Sleep(1);
+            Thread.Sleep(250);
         }
     }
 
