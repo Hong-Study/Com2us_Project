@@ -63,3 +63,31 @@
 - 기타 라이브러리들을 모아놓은 폴더입니다.
 - GameCommon의 경우, 클라이언트와 소켓 서버가 함께 사용하는 데이터들을 모아놓은 라이브러리입니다.
 - [GameCommon 폴더](./thirdparty/GameCommon/)
+
+## 추후 해볼것들
+- 해당 내용들은 캠퍼스 실장님께서 추천해주신 내용들입니다.
+### C#
+- **매칭 서버**
+  - 매칭 요청자 중에서 서로 비슷하 실력의 플레이어를 매칭 시키기
+- **오목 게임 서버**
+  - 재접속
+  - 게임 아이템 사용하기
+  - 관전자 허용
+- **더미 테스트**
+  - nGrinder 혹은 자체 더미 클라이언트로 성능, 안전 테스트 하기
+- **서버 모니터링**
+  - 프로메테우스 & 그라파나 모니터링
+- **API 서버**
+  - 서비스 중인 모바일 게임에서 구현된 기능들 구현
+- **개인적으로 해볼 것**
+  - C# 네트워크 라이브러리를 직접 구현하여 연동하기
+### C++ 
+- C#으로 만들었던 온라인 오목 게임을 거의 그대로 Socket 서버만 C++로 만든다.
+- 데이터 통신은 Protocol buffer을 사용해보기
+- C++ ADO를 사용하는 라이브러리이다.
+  - https://github.com/jacking75/AsyncAdodb
+- Boost 라이브러리를 사용하여 MySQL 프로그래밍이 가능하다.
+  - https://www.boost.org/doc/libs/1_85_0/libs/mysql/doc/html/index.html 
+- Boost 라이브러리를 사용하여 Redis 프로그래밍이 가능하다.
+  - https://www.boost.org/doc/libs/1_85_0/libs/redis/doc/html/index.html
+
