@@ -19,5 +19,3 @@
 ## 5. Filter
 - Filter에 대한 내용
 - [Filter Link](Filter.md)
-  
-## 6. Logging
