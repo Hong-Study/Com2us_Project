@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30406.217
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmokClient", "OmokClient.csproj", "{9E4B5E72-4E76-4E22-90B0-E53275A99018}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Defines", "..\thirdparty\GameCommon\Defines.csproj", "{F842A46E-6606-4B5E-B205-2D46C8FA3F08}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameCommon", "..\thirdparty\GameCommon\GameCommon.csproj", "{F842A46E-6606-4B5E-B205-2D46C8FA3F08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

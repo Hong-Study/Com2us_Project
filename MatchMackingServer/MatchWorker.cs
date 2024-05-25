@@ -123,7 +123,6 @@ public class MatchWoker : IMatchWoker
 
     public (bool, MatchingServerInfo?) GetCompleteMatching(string userID)
     {
-        // 유저가 오랫동안 체크 안하는 경우도 있을 수 있다.
         if (_completeDic.TryGetValue(userID, out MatchingServerInfo? data))
         {
             _completeDic.Remove(userID, out _);
@@ -156,7 +155,6 @@ public class MatchWoker : IMatchWoker
                     continue;
                 }
 
-                // 강제 종료한 유저일 수도 있다. 이건 어떻게 판별할 것인가? 말까?
                 {
                     string key = user1 + _userStateKey;
 

@@ -8,11 +8,11 @@
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>..\00_bin_omok_client\</OutputPath>
+    <OutputPath>.\00_bin_omok_client\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>..\00_bin_omok_client\</OutputPath>
+    <OutputPath>.\00_bin_omok_client\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CloudStructures">
@@ -27,7 +27,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="8.0.0"/>
     <PackageReference Include="MemoryPack" Version="1.21.1"/>
-    <ProjectReference Include="..\thirdparty\GameCommon\Defines.csproj"/>
+    <ProjectReference Include="..\thirdparty\GameCommon\GameCommon.csproj"/>
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="CSErrorCode.cs"/>
