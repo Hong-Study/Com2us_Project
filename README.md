@@ -12,10 +12,13 @@
   
 ## 전체 아키텍처
 ![alt text](resource/아키텍처.png)
+![alt text](resource/전체%20흐름도.png)
 
 ### 기술 스택
 - **Language**
-  - C# ASP.NET Core 8
+  - C#
+- **Framework**
+  - ASP.NET Core 8
 - **Database**
   - MySQL
   - Redis
@@ -23,10 +26,13 @@
   - Docker
   - AWS
 - **Library**
-  - SqlKata (MYSQL)
+  - MySqlConnector (MySQL)
+  - SqlKata (MySQL)
   - CloudStructures (Redis)
-  - SuperSocketLite (Socket)
-  - MemoryPack 
+  - SuperSocketLite (Socket Library)
+  - MemoryPack (Binary)
+  - ZLogger
+  - NLog
 
 # 폴더 설명
 

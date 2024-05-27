@@ -8,7 +8,14 @@
 ## 설명
 - Game API 서버로써, ASP.NET Core 8로 제작되었습니다.
 - Redis의 SendNX 기능을 사용하여, 유저당 하나의 요청만 처리하도록 구현하였습니다.
-[SendNX 코드](./Middleware/RequestOneCheckMiddleware.cs)
+- [SendNX 코드](./Middleware/RequestOneCheckMiddleware.cs)
+
+| 종류          | 라이브러리                  |
+| ------------- | --------------------------- |
+| **Framework** | `ASP.NET Core 8`            |
+| **Database**  | `MySqlConnector`, `SqlKata` |
+| **Redis**     | `CloudStructures`           |
+| **Logger**    | `ZLogger`                   |
 
 ## 서버 기능
 ### 유저 관련
