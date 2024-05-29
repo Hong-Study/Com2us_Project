@@ -1,8 +1,6 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
-WORKDIR /app
 EXPOSE 5122
-
-ENV ASPNETCORE_URLS=http://*:5122
+WORKDIR /app
 
 RUN chmod 777 /var
 
