@@ -45,11 +45,11 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         SessionClosed += new SessionHandler<ClientSession, CloseReason>(OnDisconnected);
         NewRequestReceived += new RequestHandler<ClientSession, PacketRequestInfo>(OnReceived);
 
-        _roomManager = new RoomManager(ref _serverOption);
-        _userManager = new UserManager(ref _serverOption);
-        _databaseManager = new DatabaseManager(ref _serverOption);
-        _redisManager = new RedisManager(ref _serverOption);
-        _matchManager = new MatchManager(ref _serverOption);
+        _roomManager = new RoomManager(_serverOption);
+        _userManager = new UserManager(_serverOption);
+        _databaseManager = new DatabaseManager(_serverOption);
+        _redisManager = new RedisManager(_serverOption);
+        _matchManager = new MatchManager(_serverOption);
         _packetManager = new PacketManager();
     }
 
@@ -178,14 +178,14 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
         _redisManager.InitLogger(MainLogger);
         _matchManager.InitLogger(MainLogger);
 
-        _packetManager.SetUserDelegate(ref _userManager);
-        _packetManager.SetRoomDelegate(ref _roomManager);
-
         MainServer mainServer = this;
-        _packetManager.SetMainDelegate(ref mainServer);
 
-        _matchManager.InitUsingRoomList(ref _roomManager);
-        _matchManager.SetMainDelegate(ref mainServer);
+        _packetManager.SetUserDelegate(_userManager);
+        _packetManager.SetRoomDelegate(_roomManager);
+        _packetManager.SetMainDelegate(mainServer);
+
+        _matchManager.InitUsingRoomList(_roomManager);
+        _matchManager.SetMainDelegate(mainServer);
 
         _roomManager.SetDelegate(SendData, _userManager.GetUserInfo
                                 , PacketDatabaseSend, PacketInnerSend, PacketMatchSend);
@@ -196,8 +196,8 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
         _userManager.SetMainServerDelegate(this);
 
-        _databaseManager.SetMainServerDelegate(ref mainServer);
-        _redisManager.SetMainServerDelegate(ref mainServer);
+        _databaseManager.SetMainServerDelegate(mainServer);
+        _redisManager.SetMainServerDelegate(mainServer);
 
         _packetManager.Start(1);
         _databaseManager.Start(1);
