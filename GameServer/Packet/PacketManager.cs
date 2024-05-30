@@ -76,7 +76,7 @@ public class PacketManager
         _onHandler.Add((Int16)InnerPacketType.NTF_USER_DISCONNECTED, _handler.HandleNTFUserDisconnected);
     }
 
-    public void SetUserDelegate(ref readonly UserManager userManager)
+    public void SetUserDelegate(in UserManager userManager)
     {
         _handler.AddUserFunc = userManager.AddUser;
         _handler.RemoveUserFunc = userManager.RemoveUser;
@@ -87,14 +87,14 @@ public class PacketManager
         _handler.ReceivePongFunc = userManager.ReceivePong;
     }
 
-    public void SetRoomDelegate(ref readonly RoomManager roomManager)
+    public void SetRoomDelegate(in RoomManager roomManager)
     {
         _handler.GetRoombyIDFunc = roomManager.GetRoomID;
         _handler.GetRoombyNumberFunc = roomManager.GetRoomNumber;
         _handler.RoomCheckFunc = roomManager.RoomsCheck;
     }
 
-    public void SetMainDelegate(ref readonly MainServer server)
+    public void SetMainDelegate(in MainServer server)
     {
         _handler.SendFunc = server.SendData;
         _handler.InnerSendFunc = server.PacketInnerSend;

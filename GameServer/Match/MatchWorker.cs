@@ -44,9 +44,9 @@ public class MatchWorker
         _sendInnerFunc = sendInnerFunc;
     }
 
-    public void InitUsingRoomList(ref readonly RoomManager roomManager)
+    public void InitUsingRoomList(RoomManager roomManager)
     {
-        roomManager.InitUsingRoomList(ref _usingRoomInfos);
+        roomManager.InitUsingRoomList(_usingRoomInfos);
     }
 
     public void SetEmptyRoom(Int32 roomNumber)

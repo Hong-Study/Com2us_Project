@@ -13,7 +13,7 @@ public class MatchManager
 
     ConcurrentQueue<byte[]> _msgQueue = new ConcurrentQueue<byte[]>();
 
-    public MatchManager(ref readonly ServerOption option)
+    public MatchManager(ServerOption option)
     {
         _matchWorker = new MatchWorker("127.0.0.1", option.Port, option.RedisConnectionString
                                                         , option.RedisSubKey, option.RedisPubKey);
@@ -25,14 +25,14 @@ public class MatchManager
         _matchWorker.InitLogger(logger);
     }
 
-    public void SetMainDelegate(ref readonly MainServer mainServer)
+    public void SetMainDelegate(MainServer mainServer)
     {
         _matchWorker.SetInnerFunc(mainServer.PacketInnerSend);
     }
 
-    public void InitUsingRoomList(ref readonly RoomManager roomManager)
+    public void InitUsingRoomList(RoomManager roomManager)
     {
-        _matchWorker.InitUsingRoomList(in roomManager);
+        _matchWorker.InitUsingRoomList(roomManager);
     }
 
     public void Distribute(byte[] message)
