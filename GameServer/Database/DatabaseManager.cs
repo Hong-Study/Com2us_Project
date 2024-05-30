@@ -21,7 +21,7 @@ public class DatabaseManager
 
     SuperSocket.SocketBase.Logging.ILog Logger = null!;
 
-    public DatabaseManager(ref readonly ServerOption option)
+    public DatabaseManager(ServerOption option)
     {
         _connectionString = option.DatabaseConnectionString;
 
@@ -71,7 +71,7 @@ public class DatabaseManager
         }
     }
 
-    public void SetMainServerDelegate(ref readonly MainServer mainServer)
+    public void SetMainServerDelegate(MainServer mainServer)
     {
         _handler.InnerSendFunc = mainServer.PacketInnerSend;
     }

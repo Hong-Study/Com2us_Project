@@ -13,9 +13,8 @@ public class RoomManager
 
     SuperSocket.SocketBase.Logging.ILog Logger = null!;
 
-    object _lock = new object();
-
-    public RoomManager(ref readonly ServerOption option)
+    public int Test { get; set; }
+    public RoomManager(ServerOption option)
     {
         _maxRoomCount = option.MaxRoomCount;
         _maxRoomCheckCount = option.MaxRoomCheckCount;
@@ -27,7 +26,7 @@ public class RoomManager
         }
     }
 
-    public void InitUsingRoomList(ref List<UsingRoomInfo> usingRoomInfos)
+    public void InitUsingRoomList(List<UsingRoomInfo> usingRoomInfos)
     {
         foreach (var room in _roomPool)
         {
