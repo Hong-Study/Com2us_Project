@@ -27,7 +27,7 @@ public class UserManager
 
     SuperSocket.SocketBase.Logging.ILog Logger = null!;
 
-    public UserManager(ref readonly ServerOption option)
+    public UserManager(ServerOption option)
     {
         _maxUserCount = option.MaxUserCount;
         _maxHeartBeatCheckCount = option.MaxHeartBeatCheckCount;

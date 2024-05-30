@@ -26,7 +26,7 @@ public class RedisManager
         _redis.InitLogger(logger);
     }
 
-    public RedisManager(ref readonly ServerOption option)
+    public RedisManager(ServerOption option)
     {
         _connectionString = option.RedisConnectionString;
 
@@ -47,7 +47,7 @@ public class RedisManager
         _onHandler.Add((Int16)RedisType.SET_RD_USER_STATE, _handler.Handle_RD_SetUserState);
     }
 
-    public void SetMainServerDelegate(ref readonly MainServer mainServer)
+    public void SetMainServerDelegate(MainServer mainServer)
     {
         _handler.InnerSendFunc = mainServer.PacketInnerSend;
         _handler.DatabaseSendFunc = mainServer.PacketDatabaseSend;
