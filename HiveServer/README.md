@@ -11,13 +11,13 @@
 | **Logger**    | `ZLogger`                   |
 
 ## 서버 기능
-|    **기능**    |          **완료 여부**          |
-| :------------: | :-----------------------------: |
-|  로그인 체크   | <input type="checkbox" checked> |
-| 유저 회원가입  | <input type="checkbox" checked> |
-|  유저  로그인  | <input type="checkbox" checked> |
-| 유저 로그 아웃 |     <input type="checkbox">     |
-| 유저 계정 삭제 |     <input type="checkbox">     |
+|    **기능**    | **완료 여부** |
+| :------------: | :-----------: |
+|  로그인 체크   |     완료      |
+| 유저 회원가입  |     완료      |
+|  유저  로그인  |     완료      |
+| 유저 로그 아웃 |               |
+| 유저 계정 삭제 |               |
 
 ## ERD
 ![alt text](../resource/HiveERD.png)
