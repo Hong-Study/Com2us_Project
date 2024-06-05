@@ -7,8 +7,8 @@
 
 ## 설명
 - Game API 서버로써, ASP.NET Core 8로 제작되었습니다.
-- Redis의 SetNX 기능을 사용하여, 유저당 하나의 요청만 처리하도록 구현하였습니다.
-- [SetNX 코드](./Middleware/RequestOneCheckMiddleware.cs)
+- Redis의 SETNX 기능을 사용하여, 유저당 하나의 요청만 처리하도록 구현하였습니다.
+- [SETNX 코드](./Middleware/RequestOneCheckMiddleware.cs)
 
 | 종류          | 라이브러리                  |
 | ------------- | --------------------------- |
