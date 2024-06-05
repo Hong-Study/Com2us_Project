@@ -13,9 +13,9 @@ CREATE TABLE user_game_data(
 );
 
 CREATE TABLE user_attendance_data(
+    id SERIAL PRIMARY KEY,
     user_id VARCHAR(50) NOT NULL,
     attendance_date DATE NOT NULL,
-    is_success BOOLEAN NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES user_game_data(user_id)
 );

@@ -189,12 +189,12 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
 
         _roomManager.SetDelegate(SendData, _userManager.GetUserInfo
                                 , PacketDatabaseSend, PacketInnerSend, PacketMatchSend);
-        _roomManager.SetDefaultSetting(option.OmokGameTurnTimeoutSeconds
+        _roomManager.SetRoomDefaultSetting(option.OmokGameTurnTimeoutSeconds
                                     , option.OmokGameTurnTimeoutCount
                                     , option.OmokGameMaxGameTimeMinute
                                     , option.MaxMatchingWaitingTimeSeconds);
 
-        _userManager.SetMainServerDelegate(this);
+        _userManager.SetMainServerDelegate(mainServer);
 
         _databaseManager.SetMainServerDelegate(mainServer);
         _redisManager.SetMainServerDelegate(mainServer);
