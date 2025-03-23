@@ -221,6 +221,7 @@ public class MainServer : AppServer<ClientSession, PacketRequestInfo>, IHostedSe
             var data = PacketManager.MakeInnerPacket("", checkSessionReq, InnerPacketType.NTF_HEART_BEAT);
             PacketInnerSend(data);
         };
+        
 
         TimeSpan period = TimeSpan.FromMilliseconds(_serverOption.HeartBeatTimerMilliSeconds);
         _heartBeatTimer = new Timer(sessionTimeoutCallback, null, period, period);
